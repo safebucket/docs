@@ -17,11 +17,28 @@ function HomepageHeader() {
           {siteConfig.title}
         </Heading>
         <p className="hero__subtitle">{siteConfig.tagline}</p>
+        <div className="text--center margin-vert--lg">
+          <img
+            src="/img/homepage.png"
+            alt="SafeBucket Interface"
+            style={{
+              maxWidth: '100%',
+              height: 'auto',
+              borderRadius: '8px',
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+            }}
+          />
+        </div>
         <div className={styles.buttons}>
           <Link
             className="button button--secondary button--lg"
             to="/docs/intro">
-            Docusaurus Tutorial - 5min ⏱️
+            Get Started - 2min ⚡
+          </Link>
+          <Link
+            className="button button--outline button--lg margin-left--md"
+            to="/docs/getting-started/local-deployment">
+            Try Local Deploy 🐳
           </Link>
         </div>
       </div>
