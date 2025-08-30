@@ -4,13 +4,14 @@ sidebar_position: 1
 
 # Local Deployment
 
-Get SafeBucket running locally in minutes using Docker Compose. This guide will walk you through setting up a complete development environment.
+Get SafeBucket running locally in minutes using Docker Compose. This guide will walk you through setting up a complete
+development environment.
 
 ## Prerequisites
 
 - [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
 - Git for cloning the repository
-- At least 4GB RAM available for containers
+- At least 1GB RAM available for containers
 
 ## Quick Start
 
@@ -22,50 +23,52 @@ Get SafeBucket running locally in minutes using Docker Compose. This guide will 
 
 2. **Start the services:**
    ```bash
-   docker-compose up -d
+   docker compose up -d
    ```
 
 3. **Verify the deployment:**
    ```bash
-   docker-compose ps
+   docker compose ps
    ```
 
 ## Services Overview
 
 The local deployment includes the following services:
 
-| Service | Port | Purpose | Health Check |
-|---------|------|---------|--------------|
-| **SafeBucket API** | 1323 | Main application API | http://localhost:1323/health |
-| **SafeBucket Web** | 3001 | React frontend | http://localhost:3001 |
-| **PostgreSQL** | 5442 | Main database | `docker-compose exec db pg_isready` |
-| **MinIO** | 9000, 9001 | Object storage | http://localhost:9001 |
-| **Redis** | 6379 | Caching layer | `docker-compose exec redis redis-cli ping` |
-| **NATS** | 4222 | Event streaming | telnet localhost 4222 |
-| **Loki** | 3100 | Activity logging | http://localhost:3100/ready |
-| **Mailpit** | 8025, 1025 | Email testing | http://localhost:8025 |
-| **Grafana** | 3200 | Logs visualization | http://localhost:3200 |
+| Service            | Port       | Purpose              | Health Check                               |
+|--------------------|------------|----------------------|--------------------------------------------|
+| **SafeBucket API** | 1323       | Main application API | http://localhost:1323/health               |
+| **SafeBucket Web** | 3001       | React frontend       | http://localhost:3001                      |
+| **PostgreSQL**     | 5442       | Main database        | `docker-compose exec db pg_isready`        |
+| **MinIO**          | 9000, 9001 | Object storage       | http://localhost:9001                      |
+| **Redis**          | 6379       | Caching layer        | `docker-compose exec redis redis-cli ping` |
+| **NATS**           | 4222       | Event streaming      | telnet localhost 4222                      |
+| **Loki**           | 3100       | Activity logging     | http://localhost:3100/ready                |
+| **Mailpit**        | 8025, 1025 | Email testing        | http://localhost:8025                      |
+| **Grafana**        | 3200       | Logs visualization   | http://localhost:3200                      |
 
 ## Default Credentials
 
 ### Application
+
 - **Admin Email**: admin@safebucket.io
 - **Admin Password**: ChangeMePlease
 
 ### Infrastructure
+
 - **MinIO Console**: http://localhost:9001
-  - **Username**: minio-root-user
-  - **Password**: minio-root-password
+    - **Username**: minio-root-user
+    - **Password**: minio-root-password
 
 - **Database**:
-  - **Host**: localhost:5442
-  - **Username**: root
-  - **Password**: root
-  - **Database**: safebucket
+    - **Host**: localhost:5442
+    - **Username**: root
+    - **Password**: root
+    - **Database**: safebucket
 
 - **Redis**:
-  - **Host**: localhost:6379
-  - **Password**: root
+    - **Host**: localhost:6379
+    - **Password**: root
 
 ## Configuration Files
 

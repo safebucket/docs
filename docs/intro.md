@@ -4,73 +4,47 @@ sidebar_position: 1
 
 # Overview
 
-Welcome to SafeBucket, an open-source secure file sharing platform designed for easy and secure file collaboration across multiple cloud providers.
+Welcome to SafeBucket, an open-source secure file sharing platform designed for easy and secure file collaboration
+across multiple cloud providers.
 
-## What is SafeBucket?
+## What is Safebucket?
 
 ![SafeBucket Homepage](./../static/img/homepage.png)
 
-SafeBucket is a highly scalable secure file sharing platform that integrates with different cloud providers including AWS S3, Google Cloud Storage, and MinIO. Built for individuals and organizations that need to collaborate on files with robust security, flexible access controls, and seamless multi-cloud support.
+SafeBucket is a highly scalable secure file sharing platform that integrates with different cloud providers including
+AWS S3, Google Cloud Storage, and MinIO. Built for individuals and organizations that need to collaborate on files with
+robust security, flexible access controls, and seamless multi-cloud support.
 
-## Key Features
+## 🎯 Why Safebucket?
 
-- **🔐 Secure File Sharing**: Share files and folders with colleagues, customers, and teams through secure bucket-based collaboration
-- **☁️ Multi-Provider Integration**: Store and share files across AWS S3, GCP Cloud Storage, or MinIO without vendor lock-in
-- **🔒 OIDC integration**: Integrate with any OIDC provider and manage their access
-- **👥 Role-Based Access Control**: Granular sharing permissions with owner, contributor, and viewer roles
-- **📧 User Invitation System**: Invite collaborators via email with secure role-based access to shared buckets
-- **📊 Real-Time Activity Tracking**: Monitor file sharing activity with comprehensive audit trails via Loki integration
-- **🎨 Modern Sharing Interface**: Intuitive React-based dashboard with drag-and-drop uploads, file previews, and activity monitoring
-- **🚀 Developer-Friendly**: RESTful API for building custom file sharing integrations
+Safebucket eliminates the complexity of secure file sharing by providing a lightweight, stateless solution that
+integrates seamlessly with your existing infrastructure.
+Plug in your preferred auth providers and eliminate the need for local logins - your users can share files using their
+existing corporate identities.
+
+## ✨ Features
+
+- 🔒 **Secure File Sharing**: Create a bucket to start sharing files and folders with colleagues, customers, and teams
+- 👥 **Role-Based Access Control**: Fine grained sharing permissions with owner, contributor, and viewer roles
+- 🔐 **SSO Integration**: Single sign-on with any/multiple auth providers and manage their sharing capabilities
+- 📧 **User Invitation System**: Invite external collaborators via email
+- 📊 **Real-Time Activity Tracking**: Monitor file sharing activity with comprehensive audit trails
+- ☁️ **Multi-Storage Integration**: Store and share files across AWS S3, GCP Cloud Storage, or MinIO
+- 🚀 **Highly Scalable**: Event-driven and cloud native architecture for high-performance operations
 
 ## Architecture Overview
 
-SafeBucket follows a microservices-inspired architecture with clear separation of concerns:
+![Safebucket architecture](./../static/img/architecture.png)
 
 ### Core Components
 
-- **API Server**: Go-based REST API with Chi router
-- **Web Interface**: React-based frontend for file management
-- **Authentication**: JWT-based auth with OAuth providers support
-- **Storage Layer**: Abstracted storage supporting multiple providers
+- **API**: Go-based REST API with Chi router
+- **Web Interface**: React-based frontend
+- **Storage**: S3 storage with multiple providers support (MinIO, S3, GCP)
 - **Event System**: Real-time notifications via NATS JetStream, GCP Pub/Sub, or AWS SQS
 - **Activity Logging**: Comprehensive audit trails via Loki
-- **Caching Layer**: Redis/Valkey for performance optimization
-
-### Architecture Diagram
-
-```
-                       ┌──────────────────┐
-                       │   React Web      │
-                       │   Frontend       │
-                       └─────────┬────────┘
-                                 │
-                                 │
-                                 │
-                    ┌────────────▼────────────┐
-                    │      Load Balancer      │
-                    │     (nginx/traefik)     │
-                    └────────────┬────────────┘
-                                 │
-                    ┌────────────▼────────────┐
-                    │     SafeBucket API      │
-                    │      (Go + Chi)         │
-                    └────────────┬────────────┘
-                                 │
-        ┌────────────────────────┼────────────────────────┐
-        │                        │                        │
-┌───────▼────────┐     ┌─────────▼────────┐     ┌─────────▼─────────┐
-│   PostgreSQL   │     │   Redis/Valkey   │     │   Storage Layer   │
-│   (Database)   │     │    (Caching)     │     │   (S3/GCS/MinIO)  │
-└────────────────┘     └──────────────────┘     └─────────┬─────────┘
-                                                          │
-        ┌────────────────────────┬────────────────────────┘
-        │                        │
-┌───────▼────────┐     ┌─────────▼────────┐
-│   Event Bus    │     │  Activity Logger │
-│ (NATS/GCP/AWS) │     │      (Loki)      │
-└────────────────┘     └──────────────────┘
-```
+- **Notifier**: Email notifications on events
+- **Caching Layer**: Redis/Valkey for performance optimization and rate limiting
 
 ## Quick Start
 
@@ -79,12 +53,13 @@ Get SafeBucket running locally in minutes with Docker Compose:
 ```bash
 git clone https://github.com/safebucket/safebucket
 cd safebucket/deployments/local
-docker-compose up -d
+docker compose up -d
 ```
 
 The application will be available at:
+
 - **API**: http://localhost:1323
-- **Web Interface**: http://localhost:3001
+- **Web Interface**: http://localhost:3000
 - **MinIO Console**: http://localhost:9001
 - **Mailpit (Email Testing)**: http://localhost:8025
 

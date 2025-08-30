@@ -13,36 +13,37 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
  Create as many sidebars as you want.
  */
 const sidebars: SidebarsConfig = {
-  // SafeBucket documentation sidebar
-  tutorialSidebar: [
-    'intro',
-    {
-      type: 'category',
-      label: 'Getting Started',
-      items: [
-        'getting-started/local-deployment',
-      ],
-      collapsed: false,
-    },
-    {
-      type: 'category',
-      label: 'Configuration',
-      items: [
-        'configuration/environment-variables',
-        'configuration/storage-providers',
-        'configuration/authentication',
-      ],
-      collapsed: false,
-    },
-    {
-      type: 'category',
-      label: 'API Reference',
-      items: [
-        'api/overview',
-      ],
-      collapsed: false,
-    },
-  ],
+    // SafeBucket documentation sidebar
+    tutorialSidebar: [
+        'intro',
+        {
+            type: 'category',
+            label: 'Getting Started',
+            items: [
+                'getting-started/local-deployment',
+                'getting-started/aws-deployment',
+            ],
+            collapsed: false,
+        },
+        {
+            type: 'category',
+            label: 'Configuration',
+            items: [
+                'configuration/environment-variables',
+                'configuration/storage-providers',
+                'configuration/authentication',
+            ],
+            collapsed: false,
+        },
+        {
+            type: 'category',
+            label: 'API Reference',
+            items: [
+                'api/overview',
+            ],
+            collapsed: false,
+        },
+    ],
 };
 
 export default sidebars;

@@ -355,9 +355,6 @@ gsutil ls gs://safebucket-gcp
 Enable debug logging to troubleshoot storage issues:
 
 ```bash
-# Enable debug logging
-ACTIVITY__LEVEL=debug
-
 # Check application logs
 docker-compose logs -f api
 ```

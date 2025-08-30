@@ -407,9 +407,6 @@ Users can choose their preferred authentication method on the login page.
 Enable debug logging for authentication issues:
 
 ```bash
-# Enable debug logging
-ACTIVITY__LEVEL=debug
-
 # Check application logs
 docker-compose logs -f api | grep -i auth
 ```
