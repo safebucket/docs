@@ -4,7 +4,8 @@ sidebar_position: 1
 
 # API Overview
 
-SafeBucket provides a comprehensive REST API for programmatic access to file sharing functionality. The API is built with Go using the Chi router and follows RESTful conventions.
+SafeBucket provides a comprehensive REST API for programmatic access to file sharing functionality. The API is built
+with Go using the Chi router and follows RESTful conventions.
 
 ## Base URL
 
@@ -32,6 +33,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -46,7 +48,8 @@ Content-Type: application/json
 
 #### OAuth Authentication
 
-OAuth authentication is handled through the web interface. Once authenticated, you can extract the JWT token from the session.
+OAuth authentication is handled through the web interface. Once authenticated, you can extract the JWT token from the
+session.
 
 ### Using the Token
 
@@ -60,46 +63,46 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ### Authentication (`/auth`)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/auth/login` | Local authentication |
-| `GET` | `/auth/providers` | List OAuth providers |
-| `GET` | `/auth/callback/{provider}` | OAuth callback |
-| `POST` | `/auth/logout` | Logout user |
+| Method | Endpoint                    | Description          |
+|--------|-----------------------------|----------------------|
+| `POST` | `/auth/login`               | Local authentication |
+| `GET`  | `/auth/providers`           | List OAuth providers |
+| `GET`  | `/auth/callback/{provider}` | OAuth callback       |
+| `POST` | `/auth/logout`              | Logout user          |
 
 ### Users (`/users`)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/users/me` | Get current user profile |
-| `PUT` | `/users/me` | Update user profile |
-| `GET` | `/users` | List users (admin only) |
-| `GET` | `/users/{id}` | Get user by ID |
+| Method | Endpoint      | Description              |
+|--------|---------------|--------------------------|
+| `GET`  | `/users/me`   | Get current user profile |
+| `PUT`  | `/users/me`   | Update user profile      |
+| `GET`  | `/users`      | List users (admin only)  |
+| `GET`  | `/users/{id}` | Get user by ID           |
 
 ### Buckets (`/buckets`)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/buckets` | List user's buckets |
-| `POST` | `/buckets` | Create new bucket |
-| `GET` | `/buckets/{id}` | Get bucket details |
-| `PUT` | `/buckets/{id}` | Update bucket |
-| `DELETE` | `/buckets/{id}` | Delete bucket |
-| `GET` | `/buckets/{id}/files` | List files in bucket |
-| `POST` | `/buckets/{id}/upload` | Upload file to bucket |
-| `GET` | `/buckets/{id}/files/{fileId}` | Download file |
-| `DELETE` | `/buckets/{id}/files/{fileId}` | Delete file |
+| Method   | Endpoint                       | Description           |
+|----------|--------------------------------|-----------------------|
+| `GET`    | `/buckets`                     | List user's buckets   |
+| `POST`   | `/buckets`                     | Create new bucket     |
+| `GET`    | `/buckets/{id}`                | Get bucket details    |
+| `PUT`    | `/buckets/{id}`                | Update bucket         |
+| `DELETE` | `/buckets/{id}`                | Delete bucket         |
+| `GET`    | `/buckets/{id}/files`          | List files in bucket  |
+| `POST`   | `/buckets/{id}/upload`         | Upload file to bucket |
+| `GET`    | `/buckets/{id}/files/{fileId}` | Download file         |
+| `DELETE` | `/buckets/{id}/files/{fileId}` | Delete file           |
 
 ### Invitations (`/invites`)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/invites` | Create bucket invitation |
-| `GET` | `/invites` | List sent invitations |
-| `GET` | `/invites/{id}` | Get invitation details |
-| `PUT` | `/invites/{id}/accept` | Accept invitation |
-| `PUT` | `/invites/{id}/decline` | Decline invitation |
-| `DELETE` | `/invites/{id}` | Cancel invitation |
+| Method   | Endpoint                | Description              |
+|----------|-------------------------|--------------------------|
+| `POST`   | `/invites`              | Create bucket invitation |
+| `GET`    | `/invites`              | List sent invitations    |
+| `GET`    | `/invites/{id}`         | Get invitation details   |
+| `PUT`    | `/invites/{id}/accept`  | Accept invitation        |
+| `PUT`    | `/invites/{id}/decline` | Decline invitation       |
+| `DELETE` | `/invites/{id}`         | Cancel invitation        |
 
 ## Request/Response Format
 
@@ -113,11 +116,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ```json
 {
-  "success": true,
-  "data": {
-    // Response data
-  },
-  "message": "Operation successful"
+  "data": []
 }
 ```
 
@@ -139,47 +138,17 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ## Common HTTP Status Codes
 
-| Code | Meaning | Description |
-|------|---------|-------------|
-| `200` | OK | Request successful |
-| `201` | Created | Resource created successfully |
-| `400` | Bad Request | Invalid request parameters |
-| `401` | Unauthorized | Authentication required |
-| `403` | Forbidden | Insufficient permissions |
-| `404` | Not Found | Resource not found |
-| `409` | Conflict | Resource already exists |
-| `422` | Unprocessable Entity | Validation error |
-| `500` | Internal Server Error | Server error |
-
-## Pagination
-
-List endpoints support pagination using query parameters:
-
-```bash
-GET /api/v1/buckets?page=1&limit=20&sort=created_at&order=desc
-```
-
-**Parameters:**
-- `page`: Page number (default: 1)
-- `limit`: Items per page (default: 20, max: 100)
-- `sort`: Sort field (varies by endpoint)
-- `order`: Sort order (`asc` or `desc`)
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "items": [...],
-    "pagination": {
-      "page": 1,
-      "limit": 20,
-      "total": 150,
-      "pages": 8
-    }
-  }
-}
-```
+| Code  | Meaning               | Description                   |
+|-------|-----------------------|-------------------------------|
+| `200` | OK                    | Request successful            |
+| `201` | Created               | Resource created successfully |
+| `400` | Bad Request           | Invalid request parameters    |
+| `401` | Unauthorized          | Authentication required       |
+| `403` | Forbidden             | Insufficient permissions      |
+| `404` | Not Found             | Resource not found            |
+| `409` | Conflict              | Resource already exists       |
+| `422` | Unprocessable Entity  | Validation error              |
+| `500` | Internal Server Error | Server error                  |
 
 ## File Uploads
 
@@ -194,6 +163,7 @@ file: [binary file data]
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -216,11 +186,12 @@ The API implements rate limiting to prevent abuse:
 
 - **Rate Limit**: 100 requests per minute per IP
 - **Headers**: Rate limit information in response headers
-  - `X-RateLimit-Limit`: Request limit
-  - `X-RateLimit-Remaining`: Remaining requests
-  - `X-RateLimit-Reset`: Reset timestamp
+    - `X-RateLimit-Limit`: Request limit
+    - `X-RateLimit-Remaining`: Remaining requests
+    - `X-RateLimit-Reset`: Reset timestamp
 
 When rate limit is exceeded:
+
 ```json
 {
   "success": false,
@@ -248,6 +219,7 @@ APP__ALLOWED_ORIGINS=*
 ### cURL Examples
 
 #### Login
+
 ```bash
 curl -X POST http://localhost:1323/api/v1/auth/login \
   -H "Content-Type: application/json" \
@@ -255,12 +227,14 @@ curl -X POST http://localhost:1323/api/v1/auth/login \
 ```
 
 #### List Buckets
+
 ```bash
 curl -X GET http://localhost:1323/api/v1/buckets \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 #### Create Bucket
+
 ```bash
 curl -X POST http://localhost:1323/api/v1/buckets \
   -H "Authorization: Bearer YOUR_TOKEN" \
@@ -269,6 +243,7 @@ curl -X POST http://localhost:1323/api/v1/buckets \
 ```
 
 #### Upload File
+
 ```bash
 curl -X POST http://localhost:1323/api/v1/buckets/BUCKET_ID/upload \
   -H "Authorization: Bearer YOUR_TOKEN" \
@@ -306,8 +281,8 @@ class SafeBucketAPI {
   async login(email, password) {
     const response = await fetch(`${this.baseURL}/api/v1/auth/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email, password}),
     });
     const data = await response.json();
     this.token = data.data.token;
@@ -320,7 +295,7 @@ class SafeBucketAPI {
   }
 
   async createBucket(name, description) {
-    return this.request('POST', '/buckets', { name, description });
+    return this.request('POST', '/buckets', {name, description});
   }
 
   async uploadFile(bucketId, file) {
@@ -329,7 +304,7 @@ class SafeBucketAPI {
 
     const response = await fetch(`${this.baseURL}/api/v1/buckets/${bucketId}/upload`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${this.token}` },
+      headers: {'Authorization': `Bearer ${this.token}`},
       body: formData,
     });
     return response.json();
@@ -347,6 +322,7 @@ const buckets = await api.getBuckets();
 ```python
 import requests
 import json
+
 
 class SafeBucketAPI:
     def __init__(self, base_url, token=None):
@@ -374,7 +350,7 @@ class SafeBucketAPI:
         data = {'name': name}
         if description:
             data['description'] = description
-        
+
         response = self.session.post(f'{self.base_url}/api/v1/buckets', json=data)
         return response.json()
 
@@ -387,24 +363,17 @@ class SafeBucketAPI:
             )
         return response.json()
 
+
 # Usage
 api = SafeBucketAPI('http://localhost:1323')
 api.login('admin@safebucket.io', 'ChangeMePlease')
 buckets = api.get_buckets()
 ```
 
-## Webhooks (Future)
-
-SafeBucket plans to support webhooks for real-time event notifications:
-
-- Bucket created/updated/deleted
-- File uploaded/downloaded/deleted
-- User invited/joined
-- Permission changes
-
 ## API Versioning
 
-The API uses URL versioning (`/api/v1/`). Future versions will maintain backward compatibility where possible, with breaking changes requiring a new version path.
+The API uses URL versioning (`/api/v1/`). Future versions will maintain backward compatibility where possible, with
+breaking changes requiring a new version path.
 
 ## Support
 
