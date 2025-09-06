@@ -5,7 +5,7 @@ on:
 
 jobs:
   test-deploy:
-    name: Test deployment
+    name: Test quality
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
