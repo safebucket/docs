@@ -11,7 +11,7 @@ with Go using the Chi router and follows RESTful conventions.
 
 The API is available at `/api/v1/` from your SafeBucket instance:
 
-- **Local Development**: `http://localhost:1323/api/v1/`
+- **Local Development**: `http://localhost:8080/api/v1/`
 - **Production**: `https://yourdomain.com/api/v1/`
 
 ## Authentication
@@ -46,9 +46,9 @@ Content-Type: application/json
 }
 ```
 
-#### OAuth Authentication
+#### OIDC Authentication
 
-OAuth authentication is handled through the web interface. Once authenticated, you can extract the JWT token from the
+OIDC authentication is handled through the web interface. Once authenticated, you can extract the JWT token from the
 session.
 
 ### Using the Token
@@ -66,8 +66,8 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 | Method | Endpoint                    | Description          |
 |--------|-----------------------------|----------------------|
 | `POST` | `/auth/login`               | Local authentication |
-| `GET`  | `/auth/providers`           | List OAuth providers |
-| `GET`  | `/auth/callback/{provider}` | OAuth callback       |
+| `GET`  | `/auth/providers`           | List OIDC providers  |
+| `GET`  | `/auth/callback/{provider}` | OIDC callback        |
 | `POST` | `/auth/logout`              | Logout user          |
 
 ### Users (`/users`)
