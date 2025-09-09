@@ -38,34 +38,29 @@ existing corporate identities.
 
 ### Core Components
 
-- **API**: Go-based REST API with Chi router
-- **Web Interface**: React-based frontend
-- **Storage**: S3 storage with multiple providers support (MinIO, S3, GCP)
-- **Event System**: Real-time notifications via NATS JetStream, GCP Pub/Sub, or AWS SQS
-- **Activity Logging**: Comprehensive audit trails via Loki
-- **Notifier**: Email notifications on events
-- **Caching Layer**: Redis/Valkey for performance optimization and rate limiting
+- **API**: Go-based REST API with Chi router providing HTTP endpoints for file operations, user management, and access
+  control
+- **Database**: PostgreSQL database storing users, file metadata, bucket configurations, access permissions, and
+  invitation records
+- **Web Interface**: React-based SPA with TypeScript for client-side file management and user interactions
+- **Storage**: S3-compatible object storage with pluggable provider support (MinIO, AWS S3, GCP Cloud Storage)
+- **Event System**: Asynchronous event processing via NATS JetStream, GCP Pub/Sub, or AWS SQS for decoupled operations
+- **Activity Logging**: Structured audit logging via Loki with indexed queries for compliance and monitoring
+- **Notifier**: Event-driven email notification service for invitation workflows and access notifications
+- **Caching Layer**: Redis/Valkey (more to come) distributed cache for session management, rate limiting, and query
+  result caching
 
-## Quick Start
+### Concepts
 
-Get SafeBucket running locally in minutes with Docker Compose:
+**File Upload Architecture**: File uploads bypass the application server entirely. The API generates presigned POST URLs from the configured storage provider (S3, GCP, MinIO), allowing clients to upload directly to cloud storage. This eliminates server bandwidth bottlenecks and provides linear scalability regardless of file size or concurrent upload volume.
 
-```bash
-git clone https://github.com/safebucket/safebucket
-cd safebucket/deployments/local
-docker compose up -d
-```
+**Bucket-Based Access Control**: File sharing operates through buckets - logical containers with defined access policies. Users must create a bucket and explicitly add members with specific roles (owner, contributor, viewer) to grant file access. There is no global file sharing - all access is bucket-scoped with role-based permissions enforced at the API layer.
 
-The application will be available at:
-
-- **API**: http://localhost:1323
-- **Web Interface**: http://localhost:3000
-- **MinIO Console**: http://localhost:9001
-- **Mailpit (Email Testing)**: http://localhost:8025
+**OIDC Authentication**: The platform supports multiple OIDC providers configured simultaneously. Each provider has domain-based access controls - users from specific email domains can be restricted or allowed per provider. This enables granular organizational control over which identity providers can authenticate users from which domains.
 
 ## What's Next?
 
-- [Get Started](./getting-started/local-deployment) - Set up SafeBucket locally
+- [Get Started](./getting-started/local-deployment) - Set up Safebucket locally
 - [Configuration](./configuration/environment-variables) - Configure your deployment
 - [Storage Providers](./configuration/storage-providers) - Set up cloud storage
-- [Authentication](./configuration/authentication) - Configure OAuth providers
+- [Authentication](./configuration/authentication) - Configure OIDC providers

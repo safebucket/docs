@@ -4,47 +4,22 @@ sidebar_position: 3
 
 # Authentication
 
-SafeBucket supports multiple authentication methods including local authentication and OAuth providers. This guide covers configuration for various authentication options.
+Safebucket supports multiple authentication methods including local authentication and OIDC providers. This guide covers
+configuration for various authentication options.
 
 ## Overview
 
-SafeBucket's authentication system provides:
+Safebucket's authentication system provides:
 
 - **Local Authentication**: Username/password with secure password hashing (Argon2id)
-- **OAuth Integration**: Support for popular OAuth providers (Google, GitHub, custom OIDC)
+- **OIDC Integration**: Support for popular OIDC providers (Google, GitHub, custom OIDC)
 - **Role-Based Access Control**: Granular permissions using Casbin RBAC
-- **JWT Tokens**: Stateless authentication with configurable expiration
 - **Admin Management**: Built-in admin user creation and management
+- **JWT Tokens**: Stateless authentication
 
 ## Authentication Flow
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant Frontend
-    participant API
-    participant OAuth Provider
-    participant Database
-
-    User->>Frontend: Login Request
-    
-    alt OAuth Login
-        Frontend->>API: OAuth Provider Request
-        API->>OAuth Provider: Redirect to OAuth
-        OAuth Provider->>User: Login Form
-        User->>OAuth Provider: Credentials
-        OAuth Provider->>API: Authorization Code
-        API->>OAuth Provider: Exchange for Token
-        OAuth Provider->>API: User Info
-        API->>Database: Store/Update User
-    else Local Login
-        Frontend->>API: Username/Password
-        API->>Database: Verify Credentials
-    end
-    
-    API->>Frontend: JWT Token
-    Frontend->>User: Authenticated Session
-```
+![Authentication Flow](./../../static/img/authentication_flow.png)
 
 ## Local Authentication
 
@@ -81,7 +56,7 @@ auth:
 
 ### Default Admin User
 
-SafeBucket automatically creates an admin user on startup:
+Safebucket automatically creates an admin user on startup:
 
 - **Email**: Configured via `APP__ADMIN_EMAIL`
 - **Password**: Configured via `APP__ADMIN_PASSWORD`
@@ -91,20 +66,13 @@ SafeBucket automatically creates an admin user on startup:
 **Always change the default admin password in production!**
 :::
 
-## OAuth Providers
+## OIDC Providers
 
-SafeBucket supports OAuth 2.0 / OpenID Connect providers for seamless user authentication.
-
-### Supported Providers
-
-- **Google**: Pre-configured Google OAuth
-- **GitHub**: Popular developer platform
-- **Microsoft Azure AD**: Enterprise authentication
-- **Custom OIDC**: Any OpenID Connect compatible provider
+Safebucket supports any OpenID Connect providers for seamless user authentication.
 
 ### Configuration Pattern
 
-OAuth providers follow this configuration pattern:
+OIDC providers follow this configuration pattern:
 
 #### Environment Variables
 
@@ -137,9 +105,9 @@ auth:
           - yourdomain.com
 ```
 
-## Google OAuth
+## Google
 
-Configure Google OAuth for easy user authentication.
+Configure Google for easy user authentication.
 
 ### Prerequisites
 
@@ -150,9 +118,9 @@ Configure Google OAuth for easy user authentication.
 ### Setup Steps
 
 1. **Create OAuth Application**:
-   - Go to [Google Cloud Console](https://console.cloud.google.com)
-   - Navigate to APIs & Services > Credentials
-   - Create OAuth 2.0 Client ID (Web application)
+    - Go to [Google Cloud Console](https://console.cloud.google.com)
+    - Navigate to APIs & Services > Credentials
+    - Create OAuth 2.0 Client ID (Web application)
 
 2. **Configure Redirect URIs**:
    ```
@@ -161,8 +129,8 @@ Configure Google OAuth for easy user authentication.
    ```
 
 3. **Get Credentials**:
-   - Client ID: `123456789-abcdef.apps.googleusercontent.com`
-   - Client Secret: `your-secret-key`
+    - Client ID: `123456789-abcdef.apps.googleusercontent.com`
+    - Client Secret: `your-secret-key`
 
 ### Configuration
 
@@ -192,24 +160,24 @@ auth:
         allowed: true
 ```
 
-## GitHub OAuth
+## GitHub
 
-Configure GitHub OAuth for developer-friendly authentication.
+Configure GitHub for developer-friendly authentication.
 
 ### Setup Steps
 
 1. **Create OAuth App**:
-   - Go to GitHub Settings > Developer settings > OAuth Apps
-   - Click "New OAuth App"
+    - Go to GitHub Settings > Developer settings > OAuth Apps
+    - Click "New OAuth App"
 
 2. **Configure Application**:
-   - **Application name**: SafeBucket
-   - **Homepage URL**: `https://yourdomain.com`
-   - **Authorization callback URL**: `https://yourdomain.com/auth/callback/github`
+    - **Application name**: Safebucket
+    - **Homepage URL**: `https://yourdomain.com`
+    - **Authorization callback URL**: `https://yourdomain.com/auth/callback/github`
 
 3. **Get Credentials**:
-   - Client ID: `your-github-client-id`
-   - Client Secret: `your-github-client-secret`
+    - Client ID: `your-github-client-id`
+    - Client Secret: `your-github-client-secret`
 
 ### Configuration
 
@@ -288,7 +256,7 @@ auth:
   providers:
     google:
       type: oidc
-      # ... oauth config ...
+      # ... oidc config ...
       sharing:
         allowed: true
         allowed_domains:
@@ -304,50 +272,14 @@ Completely disable sharing for a provider:
 auth:
   providers:
     provider_name:
-      # ... oauth config ...
+      # ... oidc config ...
       sharing:
         allowed: false
 ```
 
-## Role-Based Access Control (RBAC)
-
-SafeBucket uses Casbin for role-based access control with three built-in roles:
-
-### Built-in Roles
-
-1. **Guest**: Read-only access to shared resources
-2. **User**: Can create and share buckets, upload files
-3. **Admin**: Full system access, user management
-
-### Role Assignment
-
-- **Local Users**: Assigned "User" role by default
-- **OAuth Users**: Assigned "User" role by default  
-- **Admin User**: Assigned "Admin" role automatically
-
-### Custom Roles
-
-You can extend the RBAC system by modifying the Casbin model and policies. See the [API documentation](../api/overview) for details on role management endpoints.
-
-## JWT Configuration
-
-Customize JWT token behavior:
-
-```yaml
-app:
-  jwt_secret: your-256-bit-secret-key  # Must be 32+ characters
-  # Additional JWT settings would go here in future versions
-```
-
-### Security Best Practices
-
-1. **Secret Key**: Use a strong, randomly generated 256-bit key
-2. **Rotation**: Rotate JWT secrets periodically
-3. **Storage**: Store secrets securely (environment variables, secrets manager)
-
 ## Multiple Providers
 
-SafeBucket supports multiple authentication providers simultaneously:
+Safebucket supports multiple authentication providers simultaneously:
 
 ```bash
 # Enable multiple providers
@@ -372,77 +304,29 @@ AUTH__PROVIDERS__AUTHELIA__ISSUER=https://auth.company.com
 
 Users can choose their preferred authentication method on the login page.
 
-## Troubleshooting
+## Role-Based Access Control (RBAC)
 
-### Common Issues
+Safebucket uses Casbin for role-based access control with three built-in roles:
 
-#### OAuth Callback Errors
+### Built-in Roles
 
-**Problem**: "redirect_uri_mismatch" error
+1. **Guest**: Read-only access to shared resources
+2. **User**: Can create and share buckets, upload files
+3. **Admin**: Full system access, user management
 
-**Solution**: Ensure redirect URIs match exactly:
-- Development: `http://localhost:3001/auth/callback/{provider}`
-- Production: `https://yourdomain.com/auth/callback/{provider}`
+### Role Assignment
 
-#### Invalid JWT Secret
+- **Local Users**: Assigned "User" role by default
+- **OIDC Users**: Assigned "User" role by default
+- **Admin User**: Assigned "Admin" role automatically
 
-**Problem**: Authentication fails with JWT errors
+### Custom Roles
 
-**Solution**: Ensure JWT secret is:
-- At least 32 characters long
-- Properly base64 encoded if using special characters
-- Consistent across all application instances
+You can extend the RBAC system by modifying the Casbin model and policies. See the [API documentation](../api/overview)
+for details on role management endpoints.
 
-#### Provider Configuration Errors
+## Security Best Practices
 
-**Problem**: OAuth provider not appearing on login page
-
-**Solution**: Check:
-- Provider is listed in `AUTH__PROVIDERS__KEYS`
-- All required fields are configured
-- No typos in provider name/configuration keys
-
-### Debug Authentication
-
-Enable debug logging for authentication issues:
-
-```bash
-# Check application logs
-docker-compose logs -f api | grep -i auth
-```
-
-### Test OAuth Configuration
-
-Use these tools to test OAuth configuration:
-
-```bash
-# Test OIDC discovery endpoint
-curl https://accounts.google.com/.well-known/openid_configuration
-
-# Test custom OIDC provider
-curl https://your-provider.com/.well-known/openid_configuration
-```
-
-## Security Considerations
-
-1. **HTTPS Only**: Always use HTTPS in production
-2. **Secure Secrets**: Store client secrets securely
-3. **Domain Validation**: Use sharing domain restrictions
-4. **Token Expiration**: Configure appropriate JWT expiration
-5. **Rate Limiting**: Enable rate limiting for authentication endpoints
-6. **Audit Logging**: Monitor authentication events
-
-## Migration
-
-### From Local to OAuth
-
-1. **Add OAuth Provider**: Configure desired OAuth provider
-2. **User Migration**: Users can link OAuth accounts to existing local accounts
-3. **Disable Local**: Optionally disable local authentication
-
-### Between OAuth Providers
-
-1. **Add New Provider**: Configure new OAuth provider
-2. **User Re-authentication**: Users need to authenticate with new provider
-3. **Account Linking**: Implement account linking if needed
-4. **Remove Old Provider**: Remove old provider configuration
+1. **Secret Key**: Use a strong, randomly generated 256-bit key
+2. **Rotation**: Rotate JWT secrets periodically
+3. **Storage**: Store secrets securely (environment variables, secrets manager)

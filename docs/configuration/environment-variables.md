@@ -235,45 +235,7 @@ EVENTS__JETSTREAM__PORT=4222
 
 ## Authentication Configuration
 
-### OAuth Providers
-
-SafeBucket supports multiple OAuth providers. Configure them using the following pattern:
-
-#### Provider Keys
-
-| Variable                | Description                   | Default | Required |
-|-------------------------|-------------------------------|---------|----------|
-| `AUTH__PROVIDERS__KEYS` | Comma-separated provider keys | -       | ❌        |
-
-#### Individual Provider Configuration
-
-For each provider in `AUTH__PROVIDERS__KEYS`, configure:
-
-| Variable Pattern                             | Description         | Required |
-|----------------------------------------------|---------------------|----------|
-| `AUTH__PROVIDERS__{PROVIDER}__NAME`          | Display name        | ✅        |
-| `AUTH__PROVIDERS__{PROVIDER}__CLIENT_ID`     | OAuth client ID     | ✅        |
-| `AUTH__PROVIDERS__{PROVIDER}__CLIENT_SECRET` | OAuth client secret | ✅        |
-| `AUTH__PROVIDERS__{PROVIDER}__ISSUER`        | OIDC issuer URL     | ✅        |
-
-**Example:**
-
-```bash
-# Enable Google and Authelia providers
-AUTH__PROVIDERS__KEYS=google,authelia
-
-# Google OAuth
-AUTH__PROVIDERS__GOOGLE__NAME=Google
-AUTH__PROVIDERS__GOOGLE__CLIENT_ID=your-id.apps.googleusercontent.com
-AUTH__PROVIDERS__GOOGLE__CLIENT_SECRET=your-secret
-AUTH__PROVIDERS__GOOGLE__ISSUER=https://accounts.google.com
-
-# Authelia OIDC
-AUTH__PROVIDERS__AUTHELIA__NAME=Authelia
-AUTH__PROVIDERS__AUTHELIA__CLIENT_ID=safebucket
-AUTH__PROVIDERS__AUTHELIA__CLIENT_SECRET=your-secret
-AUTH__PROVIDERS__AUTHELIA__ISSUER=https://auth.yourdomain.com
-```
+For detailed authentication configuration including OIDC providers and domain restrictions, see the [Authentication Configuration](./authentication) page.
 
 ## Email Configuration
 
