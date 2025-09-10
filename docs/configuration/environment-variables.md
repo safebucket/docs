@@ -90,6 +90,16 @@ DATABASE__NAME=safebucket
 DATABASE__SSLMODE=disable
 ```
 
+## Authentication Configuration
+
+For detailed authentication configuration including OIDC providers and domain restrictions, see
+the [Authentication Configuration](./authentication) page.
+
+## Storage Configuration
+
+For detailed storage provider configuration including MinIO, AWS S3, and Google Cloud Storage setup, see
+the [Storage Providers](./storage-providers) page.
+
 ## Cache Configuration
 
 SafeBucket supports Redis and Valkey for caching.
@@ -115,82 +125,6 @@ SafeBucket supports Redis and Valkey for caching.
 CACHE__TYPE=redis
 CACHE__REDIS__HOSTS=localhost:6379
 CACHE__REDIS__PASSWORD=root
-```
-
-## Storage Configuration
-
-SafeBucket supports multiple storage providers: MinIO, AWS S3, and Google Cloud Storage.
-
-### MinIO
-
-| Variable                                | Description       | Default     | Required         |
-|-----------------------------------------|-------------------|-------------|------------------|
-| `STORAGE__TYPE`                         | Storage type      | -           | ✅                |
-| `STORAGE__MINIO__BUCKET_NAME`           | MinIO bucket name | -           | ✅ (if MinIO)     |
-| `STORAGE__MINIO__ENDPOINT`              | MinIO endpoint    | -           | ✅ (if MinIO)     |
-| `STORAGE__MINIO__CLIENT_ID`             | MinIO access key  | -           | ✅ (if MinIO)     |
-| `STORAGE__MINIO__CLIENT_SECRET`         | MinIO secret key  | -           | ✅ (if MinIO)     |
-| `STORAGE__MINIO__TYPE`                  | Event system type | `jetstream` | ❌                |
-| `STORAGE__MINIO__JETSTREAM__TOPIC_NAME` | JetStream topic   | -           | ✅ (if JetStream) |
-| `STORAGE__MINIO__JETSTREAM__HOST`       | JetStream host    | -           | ✅ (if JetStream) |
-| `STORAGE__MINIO__JETSTREAM__PORT`       | JetStream port    | -           | ✅ (if JetStream) |
-
-**Example:**
-
-```bash
-STORAGE__TYPE=minio
-STORAGE__MINIO__BUCKET_NAME=safebucket
-STORAGE__MINIO__ENDPOINT=localhost:9000
-STORAGE__MINIO__CLIENT_ID=minio-root-user
-STORAGE__MINIO__CLIENT_SECRET=minio-root-password
-STORAGE__MINIO__TYPE=jetstream
-STORAGE__MINIO__JETSTREAM__TOPIC_NAME=safebucket:notifications
-STORAGE__MINIO__JETSTREAM__HOST=localhost
-STORAGE__MINIO__JETSTREAM__PORT=4222
-```
-
-### AWS S3
-
-| Variable                    | Description    | Default | Required   |
-|-----------------------------|----------------|---------|------------|
-| `STORAGE__TYPE`             | Storage type   | -       | ✅          |
-| `STORAGE__AWS__BUCKET_NAME` | S3 bucket name | -       | ✅ (if AWS) |
-| `STORAGE__AWS__SQS_NAME`    | SQS queue name | -       | ✅ (if AWS) |
-| `AWS_ACCESS_KEY_ID`         | AWS access key | -       | ✅ (if AWS) |
-| `AWS_SECRET_ACCESS_KEY`     | AWS secret key | -       | ✅ (if AWS) |
-| `AWS_REGION`                | AWS region     | -       | ✅ (if AWS) |
-
-**Example:**
-
-```bash
-STORAGE__TYPE=aws
-STORAGE__AWS__BUCKET_NAME=safebucket
-STORAGE__AWS__SQS_NAME=safebucket-sqs
-AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
-AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
-AWS_REGION=us-east-1
-```
-
-### Google Cloud Storage
-
-| Variable                          | Description                  | Default | Required   |
-|-----------------------------------|------------------------------|---------|------------|
-| `STORAGE__TYPE`                   | Storage type                 | -       | ✅          |
-| `STORAGE__GCP__BUCKET_NAME`       | GCS bucket name              | -       | ✅ (if GCP) |
-| `STORAGE__GCP__PROJECT_ID`        | GCP project ID               | -       | ✅ (if GCP) |
-| `STORAGE__GCP__TOPIC_NAME`        | Pub/Sub topic                | -       | ✅ (if GCP) |
-| `STORAGE__GCP__SUBSCRIPTION_NAME` | Pub/Sub subscription         | -       | ✅ (if GCP) |
-| `GOOGLE_APPLICATION_CREDENTIALS`  | Path to service account JSON | -       | ✅ (if GCP) |
-
-**Example:**
-
-```bash
-STORAGE__TYPE=gcp
-STORAGE__GCP__BUCKET_NAME=safebucket-gcp
-STORAGE__GCP__PROJECT_ID=my-project-id
-STORAGE__GCP__TOPIC_NAME=safebucket-bucket-events
-STORAGE__GCP__SUBSCRIPTION_NAME=safebucket-bucket-events-sub
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/gcs.json
 ```
 
 ## Events Configuration
@@ -232,10 +166,6 @@ EVENTS__JETSTREAM__PORT=4222
 | `EVENTS__AWS__REGION`     | AWS region        | -       | ✅ (if AWS) |
 | `EVENTS__AWS__ACCOUNT_ID` | AWS account ID    | -       | ✅ (if AWS) |
 | `EVENTS__AWS__SQS_NAME`   | SQS queue name    | -       | ✅ (if AWS) |
-
-## Authentication Configuration
-
-For detailed authentication configuration including OIDC providers and domain restrictions, see the [Authentication Configuration](./authentication) page.
 
 ## Email Configuration
 

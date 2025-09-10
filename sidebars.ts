@@ -29,9 +29,9 @@ const sidebars: SidebarsConfig = {
             type: 'category',
             label: 'Configuration',
             items: [
-                'configuration/environment-variables',
-                'configuration/storage-providers',
                 'configuration/authentication',
+                'configuration/storage-providers',
+                'configuration/environment-variables',
             ],
             collapsed: false,
         },
