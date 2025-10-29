@@ -4,12 +4,12 @@ sidebar_position: 1
 
 # Environment Variables
 
-SafeBucket uses environment variables for configuration. This page documents all available environment variables
+Safebucket uses environment variables for configuration. This page documents all available environment variables
 organized by category.
 
 ## Configuration Methods
 
-SafeBucket supports multiple configuration methods in order of precedence:
+Safebucket supports multiple configuration methods in order of precedence:
 
 1. **Environment Variables** (highest precedence)
 2. **Configuration File** (YAML format)
@@ -97,12 +97,52 @@ the [Authentication Configuration](./authentication) page.
 
 ## Storage Configuration
 
+### Basic Storage Settings
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `STORAGE__TYPE` | Storage provider type (`minio`, `aws`, `gcp`) | - | ✅ |
+
+### MinIO Configuration
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `STORAGE__MINIO__BUCKET_NAME` | MinIO bucket name | - | ✅ (if MinIO) |
+| `STORAGE__MINIO__ENDPOINT` | Internal MinIO endpoint (Docker network) | - | ✅ (if MinIO) |
+| `STORAGE__MINIO__EXTERNAL_ENDPOINT` | External MinIO endpoint (browser-accessible URLs) | Same as ENDPOINT | ❌ |
+| `STORAGE__MINIO__CLIENT_ID` | MinIO access key | - | ✅ (if MinIO) |
+| `STORAGE__MINIO__CLIENT_SECRET` | MinIO secret key | - | ✅ (if MinIO) |
+
+**Understanding MinIO Endpoints:**
+
+Safebucket uses two different endpoints when working with MinIO:
+
+- **`STORAGE__MINIO__ENDPOINT`**: Internal endpoint used by the Safebucket backend for storage operations. When running in Docker, this is typically a Docker service name like `bucket:9000`.
+
+- **`STORAGE__MINIO__EXTERNAL_ENDPOINT`**: External endpoint used for generating presigned URLs that browsers can access. This is typically `localhost:9000` for local deployments or a public domain for production.
+
+**Example for Docker deployment:**
+```bash
+# Backend uses Docker network hostname
+STORAGE__MINIO__ENDPOINT=bucket:9000
+
+# Browsers use localhost
+STORAGE__MINIO__EXTERNAL_ENDPOINT=localhost:9000
+```
+
+**Example for local development** (running app outside Docker):
+```bash
+# Both can be the same
+STORAGE__MINIO__ENDPOINT=localhost:9000
+STORAGE__MINIO__EXTERNAL_ENDPOINT=localhost:9000
+```
+
 For detailed storage provider configuration including MinIO, AWS S3, and Google Cloud Storage setup, see
 the [Storage Providers](./storage-providers) page.
 
 ## Cache Configuration
 
-SafeBucket supports Redis and Valkey for caching.
+Safebucket supports Redis and Valkey for caching.
 
 ### Redis
 
@@ -129,24 +169,37 @@ CACHE__REDIS__PASSWORD=root
 
 ## Events Configuration
 
-SafeBucket supports multiple event systems for real-time notifications.
+Safebucket supports multiple event systems for real-time notifications. Events are configured separately from storage and use a queue-based architecture for different event types.
 
 ### NATS JetStream
 
 | Variable                        | Description       | Default | Required         |
 |---------------------------------|-------------------|---------|------------------|
 | `EVENTS__TYPE`                  | Event system type | -       | ✅                |
-| `EVENTS__JETSTREAM__TOPIC_NAME` | JetStream topic   | -       | ✅ (if JetStream) |
 | `EVENTS__JETSTREAM__HOST`       | NATS host         | -       | ✅ (if JetStream) |
 | `EVENTS__JETSTREAM__PORT`       | NATS port         | -       | ✅ (if JetStream) |
+
+### Queue Configuration
+
+Safebucket uses multiple queues for different event types:
+
+| Variable                                | Description                    | Required         |
+|-----------------------------------------|--------------------------------|------------------|
+| `EVENTS__QUEUES__NOTIFICATIONS__NAME`   | User notification events queue | ✅ (if JetStream) |
+| `EVENTS__QUEUES__BUCKET_EVENTS__NAME`   | Bucket event notifications     | ✅ (if JetStream) |
+| `EVENTS__QUEUES__OBJECT_DELETION__NAME` | Object deletion events queue   | ✅ (if JetStream) |
 
 **Example:**
 
 ```bash
 EVENTS__TYPE=jetstream
-EVENTS__JETSTREAM__TOPIC_NAME=safebucket:notifications
 EVENTS__JETSTREAM__HOST=localhost
 EVENTS__JETSTREAM__PORT=4222
+
+# Queue names
+EVENTS__QUEUES__NOTIFICATIONS__NAME=safebucket-notifications
+EVENTS__QUEUES__BUCKET_EVENTS__NAME=safebucket-bucket-events
+EVENTS__QUEUES__OBJECT_DELETION__NAME=safebucket-object-deletion
 ```
 
 ### Google Cloud Pub/Sub
@@ -244,19 +297,18 @@ CACHE__REDIS__PASSWORD=root
 # Storage (MinIO)
 STORAGE__TYPE=minio
 STORAGE__MINIO__BUCKET_NAME=safebucket
-STORAGE__MINIO__ENDPOINT=localhost:9000
+STORAGE__MINIO__ENDPOINT=bucket:9000
+STORAGE__MINIO__EXTERNAL_ENDPOINT=localhost:9000
 STORAGE__MINIO__CLIENT_ID=minio-root-user
 STORAGE__MINIO__CLIENT_SECRET=minio-root-password
-STORAGE__MINIO__TYPE=jetstream
-STORAGE__MINIO__JETSTREAM__TOPIC_NAME=safebucket:notifications
-STORAGE__MINIO__JETSTREAM__HOST=localhost
-STORAGE__MINIO__JETSTREAM__PORT=4222
 
 # Events
 EVENTS__TYPE=jetstream
-EVENTS__JETSTREAM__TOPIC_NAME=safebucket:notifications
 EVENTS__JETSTREAM__HOST=localhost
 EVENTS__JETSTREAM__PORT=4222
+EVENTS__QUEUES__NOTIFICATIONS__NAME=safebucket-notifications
+EVENTS__QUEUES__BUCKET_EVENTS__NAME=safebucket-bucket-events
+EVENTS__QUEUES__OBJECT_DELETION__NAME=safebucket-object-deletion
 
 # Email
 NOTIFIER__TYPE=smtp
@@ -282,5 +334,5 @@ AUTH__PROVIDERS__GOOGLE__ISSUER=https://accounts.google.com
 
 ## Validation
 
-SafeBucket validates all configuration on startup. If required variables are missing or invalid, the application will
+Safebucket validates all configuration on startup. If required variables are missing or invalid, the application will
 exit with detailed error messages.

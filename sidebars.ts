@@ -13,13 +13,14 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
  Create as many sidebars as you want.
  */
 const sidebars: SidebarsConfig = {
-    // SafeBucket documentation sidebar
+    // Safebucket documentation sidebar
     tutorialSidebar: [
         'intro',
         {
             type: 'category',
             label: 'Getting Started',
             items: [
+                'getting-started/dev-deployment',
                 'getting-started/local-deployment',
                 'getting-started/aws-deployment',
             ],

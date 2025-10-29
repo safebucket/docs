@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Local Deployment
 
-Get SafeBucket running locally in minutes using Docker Compose. This guide will walk you through setting up a complete
+Get Safebucket running locally in minutes using Docker Compose. This guide will walk you through setting up a complete
 development environment.
 
 ## Prerequisites
@@ -35,17 +35,15 @@ development environment.
 
 The local deployment includes the following services:
 
-| Service            | Port       | Purpose              | 
+| Service            | Port       | Purpose              |
 |--------------------|------------|----------------------|
-| **SafeBucket API** | 8080       | Main application API |
-| **SafeBucket Web** | 3000       | React frontend       |
-| **PostgreSQL**     | 5442       | Main database        |
+| **Safebucket**     | 8080       | Main application (API + Web frontend) |
+| **PostgreSQL**     | 5432       | Main database        |
 | **MinIO**          | 9000, 9001 | Object storage       |
-| **Redis**          | 6379       | Caching layer        |
+| **Valkey**         | 6379       | Caching layer        |
 | **NATS**           | 4222       | Event streaming      |
 | **Loki**           | 3100       | Activity logging     |
 | **Mailpit**        | 8025, 1025 | Email testing        |
-| **Grafana**        | 3200       | Logs visualization   |
 
 ## Default Credentials
 
@@ -61,12 +59,12 @@ The local deployment includes the following services:
     - **Password**: minio-root-password
 
 - **Database**:
-    - **Host**: localhost:5442
-    - **Username**: root
-    - **Password**: root
+    - **Host**: localhost:5432
+    - **Username**: safebucket-user
+    - **Password**: safebucket-password
     - **Database**: safebucket
 
-- **Redis**:
+- **Valkey**:
     - **Host**: localhost:6379
     - **Password**: root
 
@@ -77,24 +75,6 @@ The local deployment uses these configuration files:
 - **`.env`**: Environment variables for Docker Compose
 - **`docker-compose.yml`**: Service definitions
 - **`config/loki.yaml`**: Loki configuration for logging
-
-## Development Workflow
-
-### Starting/Stopping Services
-
-```bash
-# Start all services
-docker-compose up -d
-
-# Start specific services
-docker-compose up -d db redis minio
-
-# Stop all services
-docker-compose down
-
-# Stop and remove volumes (⚠️ This will delete all data)
-docker-compose down -v
-```
 
 ## Next Steps
 

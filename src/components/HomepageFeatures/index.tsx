@@ -5,14 +5,12 @@ import styles from './styles.module.css';
 
 type FeatureItem = {
     title: string;
-    icon: string;
     description: ReactNode;
 };
 
 const FeatureList: FeatureItem[] = [
     {
         title: 'Secure File Sharing',
-        icon: '🔐',
         description: (
             <>
                 Share files and folders securely with colleagues, customers, and teams through
@@ -22,7 +20,6 @@ const FeatureList: FeatureItem[] = [
     },
     {
         title: 'Role-Based Access Control',
-        icon: '👥️',
         description: (
             <>
                 Fine grained sharing permissions with owner, contributor, and viewer roles.
@@ -31,7 +28,6 @@ const FeatureList: FeatureItem[] = [
     },
     {
         title: 'SSO Integration',
-        icon: '🔑',
         description: (
             <>
                 Single sign-on with any/multiple auth providers and manage their sharing capabilities.
@@ -41,14 +37,9 @@ const FeatureList: FeatureItem[] = [
     },
 ];
 
-function Feature({title, icon, description}: FeatureItem) {
+function Feature({title, description}: FeatureItem) {
     return (
         <div className={clsx('col col--4')}>
-            <div className="text--center">
-                <div className={styles.featureIcon}>
-                    {icon}
-                </div>
-            </div>
             <div className="text--center padding-horiz--md">
                 <Heading as="h3">{title}</Heading>
                 <p>{description}</p>

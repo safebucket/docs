@@ -4,15 +4,15 @@ sidebar_position: 2
 
 # Storage Providers
 
-SafeBucket supports multiple storage providers, allowing you to choose the best option for your needs. This guide covers configuration for MinIO, AWS S3, and Google Cloud Storage.
+Safebucket supports multiple storage providers, allowing you to choose the best option for your needs. This guide covers configuration for MinIO, AWS S3, and Google Cloud Storage.
 
 ## Overview
 
-SafeBucket's storage abstraction layer allows you to:
+Safebucket's storage abstraction layer allows you to:
 
 - **Switch between providers** without changing your application code
-- **Use local storage** (MinIO) for development and testing
-- **Scale to cloud storage** (AWS S3, GCP) for production workloads
+- **Use local storage** (MinIO) for complete privacy
+- **Use cloud storage** (AWS S3, GCP) for cloud infrastructures
 - **Maintain consistent APIs** across all storage backends
 
 ## MinIO (Self-Hosted)
@@ -26,14 +26,18 @@ MinIO is an S3-compatible object storage server that's perfect for local develop
 ```bash
 STORAGE__TYPE=minio
 STORAGE__MINIO__BUCKET_NAME=safebucket
-STORAGE__MINIO__ENDPOINT=localhost:9000
+STORAGE__MINIO__ENDPOINT=bucket:9000                # Internal Docker network endpoint
+STORAGE__MINIO__EXTERNAL_ENDPOINT=localhost:9000    # Browser-accessible endpoint
 STORAGE__MINIO__CLIENT_ID=minio-root-user
 STORAGE__MINIO__CLIENT_SECRET=minio-root-password
-STORAGE__MINIO__TYPE=jetstream
-STORAGE__MINIO__JETSTREAM__TOPIC_NAME=safebucket:notifications
-STORAGE__MINIO__JETSTREAM__HOST=localhost
-STORAGE__MINIO__JETSTREAM__PORT=4222
 ```
+
+**Note on Endpoints:**
+
+- `STORAGE__MINIO__ENDPOINT`: Used by Safebucket backend for internal storage operations
+- `STORAGE__MINIO__EXTERNAL_ENDPOINT`: Used for generating presigned URLs that browsers can access
+
+When running in Docker, these are typically different (Docker hostname vs localhost). When running outside Docker, they can be the same.
 
 #### YAML Configuration
 
@@ -42,35 +46,10 @@ storage:
   type: minio
   minio:
     bucket_name: safebucket
-    endpoint: localhost:9000
+    endpoint: bucket:9000
+    external_endpoint: localhost:9000
     client_id: minio-root-user
     client_secret: minio-root-password
-    type: jetstream
-    jetstream:
-      topic_name: safebucket:notifications
-      host: localhost
-      port: 4222
-```
-
-### Docker Compose Setup
-
-The local development environment includes a pre-configured MinIO instance:
-
-```yaml
-services:
-  bucket:
-    container_name: bucket
-    image: docker.io/bitnami/minio:2024.11.7
-    environment:
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
-      - MINIO_DISTRIBUTED_MODE_ENABLED=no
-      - MINIO_DEFAULT_BUCKETS=${MINIO_DEFAULT_BUCKETS}
-    ports:
-      - "9000:9000"  # API
-      - "9001:9001"  # Console
-    volumes:
-      - "minio_data:/bitnami/minio/data"
 ```
 
 ### Access MinIO Console
@@ -81,11 +60,29 @@ services:
 
 ### Event Notifications
 
-MinIO integrates with NATS JetStream for real-time file event notifications. This enables features like:
+MinIO integrates with NATS JetStream for real-time file event notifications. These are configured separately via the `EVENTS__*` environment variables, not as part of the storage configuration.
+
+Event notifications enable features like:
 
 - Real-time upload progress
-- Activity feed updates  
+- Activity feed updates
 - Bucket change notifications
+
+**Configuration:**
+
+```bash
+# Storage configuration
+STORAGE__TYPE=minio
+STORAGE__MINIO__ENDPOINT=bucket:9000
+
+# Events configuration (separate from storage)
+EVENTS__TYPE=jetstream
+EVENTS__JETSTREAM__HOST=nats
+EVENTS__JETSTREAM__PORT=4222
+EVENTS__QUEUES__BUCKET_EVENTS__NAME=safebucket-bucket-events
+```
+
+See the [Environment Variables](./environment-variables#events-configuration) documentation for complete events configuration.
 
 ## AWS S3
 
@@ -310,12 +307,12 @@ events:
 
 ## Switching Storage Providers
 
-SafeBucket's storage abstraction makes it easy to switch providers:
+Safebucket's storage abstraction makes it easy to switch providers:
 
 1. **Update Configuration**: Change storage type and provider-specific settings
 2. **Migrate Data**: Use provider migration tools if needed
 3. **Update Event Configuration**: Switch event system to match storage provider
-4. **Restart Application**: SafeBucket will use the new provider
+4. **Restart Application**: Safebucket will use the new provider
 
 ### Migration Considerations
 
