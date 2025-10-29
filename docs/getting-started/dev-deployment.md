@@ -207,4 +207,3 @@ Note: Infrastructure `.env` configures Docker services. App configuration should
 - [Learn about storage providers](../configuration/storage-providers)
 - [Explore environment variables](../configuration/environment-variables)
 - [Read the API documentation](../api/overview)
-- [Contributing guidelines](../../CONTRIBUTING.md) (if available)
