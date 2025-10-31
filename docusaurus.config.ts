@@ -74,7 +74,7 @@ const config: Config = {
     image: 'img/safebucket_banner.png',
     navbar: {
       logo: {
-        alt: 'SafeBucket Logo',
+        alt: 'Safebucket Logo',
         src: 'img/safebucket_banner.png',
       },
       items: [
@@ -114,7 +114,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} SafeBucket. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} Safebucket. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,

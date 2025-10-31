@@ -20,7 +20,7 @@ function HomepageHeader() {
         <div className="text--center margin-vert--lg">
           <img
             src="/img/homepage.png"
-            alt="SafeBucket Interface"
+            alt="Safebucket Interface"
             style={{
               maxWidth: '100%',
               height: 'auto',
@@ -38,7 +38,7 @@ function HomepageHeader() {
           <Link
             className="button button--outline button--lg"
             to="/docs/getting-started/local-deployment">
-            Try Local Deploy - 2min 🐳
+            Try Local Deploy - 2min
           </Link>
         </div>
       </div>

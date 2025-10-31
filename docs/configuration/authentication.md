@@ -13,7 +13,7 @@ Safebucket's authentication system provides:
 
 - **Local Authentication**: Username/password with secure password hashing (Argon2id)
 - **OIDC Integration**: Support for popular OIDC providers (Google, GitHub, custom OIDC)
-- **Role-Based Access Control**: Granular permissions using Casbin RBAC
+- **Role-Based Access Control**: Granular permissions with roles and groups
 - **Admin Management**: Built-in admin user creation and management
 - **JWT Tokens**: Stateless authentication
 
@@ -306,8 +306,6 @@ Users can choose their preferred authentication method on the login page.
 
 ## Role-Based Access Control (RBAC)
 
-Safebucket uses Casbin for role-based access control with three built-in roles:
-
 ### Built-in Roles
 
 1. **Guest**: Read-only access to shared resources
@@ -319,11 +317,6 @@ Safebucket uses Casbin for role-based access control with three built-in roles:
 - **Local Users**: Assigned "User" role by default
 - **OIDC Users**: Assigned "User" role by default
 - **Admin User**: Assigned "Admin" role automatically
-
-### Custom Roles
-
-You can extend the RBAC system by modifying the Casbin model and policies. See the [API documentation](../api/overview)
-for details on role management endpoints.
 
 ## Security Best Practices
 

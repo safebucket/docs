@@ -4,12 +4,12 @@ sidebar_position: 1
 
 # API Overview
 
-SafeBucket provides a comprehensive REST API for programmatic access to file sharing functionality. The API is built
+Safebucket provides a comprehensive REST API for programmatic access to file sharing functionality. The API is built
 with Go using the Chi router and follows RESTful conventions.
 
 ## Base URL
 
-The API is available at `/api/v1/` from your SafeBucket instance:
+The API is available at `/api/v1/` from your Safebucket instance:
 
 - **Local Development**: `http://localhost:8080/api/v1/`
 - **Production**: `https://yourdomain.com/api/v1/`

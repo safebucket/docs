@@ -4,25 +4,25 @@ sidebar_position: 1
 
 # Overview
 
-Welcome to SafeBucket, an open-source secure file sharing platform designed for easy and secure file collaboration
+Welcome to Safebucket, an open-source secure file sharing platform designed for easy and secure file collaboration
 across multiple cloud providers.
 
 ## What is Safebucket?
 
-![SafeBucket Homepage](./../static/img/homepage.png)
+![Safebucket Homepage](./../static/img/homepage.png)
 
-SafeBucket is a highly scalable secure file sharing platform that integrates with different cloud providers including
+Safebucket is a highly scalable secure file sharing platform that integrates with different cloud providers including
 AWS S3, Google Cloud Storage, and MinIO. Built for individuals and organizations that need to collaborate on files with
 robust security, flexible access controls, and seamless multi-cloud support.
 
-## 🎯 Why Safebucket?
+## Why Safebucket?
 
 Safebucket eliminates the complexity of secure file sharing by providing a lightweight, stateless solution that
 integrates seamlessly with your existing infrastructure.
 Plug in your preferred auth providers and eliminate the need for local logins - your users can share files using their
 existing corporate identities.
 
-## ✨ Features
+## Features
 
 - 🔒 **Secure File Sharing**: Create a bucket to start sharing files and folders with colleagues, customers, and teams
 - 👥 **Role-Based Access Control**: Fine grained sharing permissions with owner, contributor, and viewer roles

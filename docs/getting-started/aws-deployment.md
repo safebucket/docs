@@ -8,9 +8,9 @@ sidebar_position: 1
 
 ![Safebucket AWS architecture](./../../static/img/aws_architecture.png)
 
-# SafeBucket AWS Deployment Guide
+# Safebucket AWS Deployment Guide
 
-Complete AWS deployment documentation for SafeBucket, covering both basic infrastructure and ECS deployment options.
+Complete AWS deployment documentation for Safebucket, covering both basic infrastructure and ECS deployment options.
 
 ## Table of Contents
 
@@ -27,7 +27,7 @@ Complete AWS deployment documentation for SafeBucket, covering both basic infras
 
 ## Architecture Overview
 
-SafeBucket on AWS provides a complete cloud storage solution with two deployment options:
+Safebucket on AWS provides a complete cloud storage solution with two deployment options:
 
 ### Basic Infrastructure
 - **S3 Bucket** - Primary storage backend with event notifications
@@ -46,7 +46,7 @@ SafeBucket on AWS provides a complete cloud storage solution with two deployment
 - **VPC Endpoints** for secure AWS service communication
 
 ### Services (ECS Only)
-1. **SafeBucket** (512 CPU, 1024 MB) - Port 8080
+1. **Safebucket** (512 CPU, 1024 MB) - Port 8080
 2. **Loki** (512 CPU, 1024 MB) - Port 3100
 3. **Mailpit** (256 CPU, 512 MB) - Ports 8025, 1025
 
@@ -143,7 +143,7 @@ The ECS deployment extends the basic infrastructure with containerized services.
 
 All services run on **AWS Fargate** with automated health checks and logging to CloudWatch.
 
-#### SafeBucket Service
+#### Safebucket Service
 - **Resources**: 512 CPU, 1024 MB memory (configurable)
 - **Port**: 8080
 - **Health Check**: `GET /` (expects 200)
@@ -177,7 +177,7 @@ All services run on **AWS Fargate** with automated health checks and logging to 
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `safebucket_image` | Container image for SafeBucket | `your-account.dkr.ecr.region.amazonaws.com/safebucket:latest` |
+| `safebucket_image` | Container image for Safebucket | `your-account.dkr.ecr.region.amazonaws.com/safebucket:latest` |
 | `jwt_secret` | JWT signing secret (32+ chars) | `your-jwt-secret-32-chars-minimum-here` |
 | `admin_password` | Default admin user password | `your-admin-password-here-12342` |
 
@@ -222,9 +222,9 @@ All services run on **AWS Fargate** with automated health checks and logging to 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `enable_autoscaling` | `false` | Enable ECS auto-scaling |
-| `safebucket_max_capacity` | `3` | Maximum number of SafeBucket tasks |
-| `safebucket_cpu` | `512` | SafeBucket CPU units |
-| `safebucket_memory` | `1024` | SafeBucket memory (MB) |
+| `safebucket_max_capacity` | `3` | Maximum number of Safebucket tasks |
+| `safebucket_cpu` | `512` | Safebucket CPU units |
+| `safebucket_memory` | `1024` | Safebucket memory (MB) |
 | `loki_cpu` | `512` | Loki CPU units |
 | `loki_memory` | `1024` | Loki memory (MB) |
 | `mailpit_cpu` | `256` | Mailpit CPU units |
@@ -262,10 +262,10 @@ safebucket_memory = 2048
 
 ### Basic Infrastructure
 
-After deploying the infrastructure, configure SafeBucket with the output values:
+After deploying the infrastructure, configure Safebucket with the output values:
 
 ```bash
-# Set environment variables for SafeBucket
+# Set environment variables for Safebucket
 export AWS_REGION="eu-west-1"
 export AWS_S3_BUCKET_NAME=$(terraform output -raw s3_bucket_name)
 
@@ -295,7 +295,7 @@ After successful ECS deployment:
    terraform output alb_dns_name
    ```
 
-2. **Login to SafeBucket:**
+2. **Login to Safebucket:**
     - URL: `http://<alb-dns-name>`
     - Username: `admin@safebucket.io` (or your `admin_email`)
     - Password: Your `admin_password` from terraform.tfvars
@@ -316,7 +316,7 @@ After successful ECS deployment:
 
 ### Environment Variables (ECS Auto-configured)
 
-SafeBucket service receives these environment variables automatically:
+Safebucket service receives these environment variables automatically:
 
 #### Application Config
 - `APP__API_URL`, `APP__WEB_URL`: Load balancer DNS
@@ -403,7 +403,7 @@ The Terraform configuration provides these key outputs:
 ### CloudWatch Integration
 
 #### Logs (ECS Deployment)
-- **SafeBucket:** `/ecs/safebucket-{env}-safebucket`
+- **Safebucket:** `/ecs/safebucket-{env}-safebucket`
 - **Loki:** `/ecs/safebucket-{env}-loki`
 - **Mailpit:** `/ecs/safebucket-{env}-mailpit`
 
@@ -414,7 +414,7 @@ The Terraform configuration provides these key outputs:
 - SQS queue metrics and alarms available
 
 #### Health Checks (ECS)
-- **SafeBucket:** `GET /` (returns 200)
+- **Safebucket:** `GET /` (returns 200)
 - **Loki:** `GET /ready` (returns 200)
 - **Mailpit:** `GET /` (returns 200)
 
@@ -550,7 +550,7 @@ aws rds describe-db-instances --db-instance-identifier <db-identifier>
 
 ### ECS Exec (if enabled)
 ```bash
-# Connect to running SafeBucket container
+# Connect to running Safebucket container
 aws ecs execute-command --cluster safebucket-dev-cluster \
   --task <task-id> --container safebucket --interactive --command "/bin/sh"
 ```
