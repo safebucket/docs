@@ -6,7 +6,7 @@ sidebar_position: 1
 
 ## Architecture
 
-![Safebucket AWS architecture](./../../static/img/aws_architecture.png)
+![Safebucket AWS architecture](../../static/img/aws-architecture.png)
 
 # Safebucket AWS Deployment Guide
 
@@ -43,12 +43,13 @@ Safebucket on AWS provides a complete cloud storage solution with two deployment
 - **Application Load Balancer** for public access
 - **Internal Load Balancer** for service communication
 - **Secrets Manager** for sensitive data
+- **Service Discovery** for internal service communication
 - **VPC Endpoints** for secure AWS service communication
 
 ### Services (ECS Only)
-1. **Safebucket** (512 CPU, 1024 MB) - Port 8080
-2. **Loki** (512 CPU, 1024 MB) - Port 3100
-3. **Mailpit** (256 CPU, 512 MB) - Ports 8025, 1025
+1. **Safebucket** (256 CPU units / 0.25 vCPU, 512 MB) - Port 8080
+2. **Loki** (512 CPU units / 0.5 vCPU, 1024 MB) - Port 3100 (Internal only)
+3. **Mailpit** (256 CPU units / 0.25 vCPU, 512 MB) - Ports 8025, 1025
 
 ## Quick Start
 
@@ -136,27 +137,28 @@ The ECS deployment extends the basic infrastructure with containerized services.
 - **VPC**: Uses default VPC and subnets
 - **Security Groups**:
     - ECS tasks security group (ports 8080, 3100, 8025, 1025)
-    - ALB security group (ports 80, 443)
-    - Internal ALB security group (service-to-service communication)
+    - ALB security group (ports 80, 443, 8025)
+
 
 ### ECS Services Configuration
 
 All services run on **AWS Fargate** with automated health checks and logging to CloudWatch.
 
 #### Safebucket Service
-- **Resources**: 512 CPU, 1024 MB memory (configurable)
+- **Resources**: 256 CPU units (0.25 vCPU), 512 MB memory (configurable)
 - **Port**: 8080
 - **Health Check**: `GET /` (expects 200)
 - **Auto-scaling**: CPU/memory-based (optional)
 
 #### Loki Service
-- **Resources**: 512 CPU, 1024 MB memory (configurable)
+- **Resources**: 512 CPU units (0.5 vCPU), 1024 MB memory (configurable)
 - **Port**: 3100
 - **Health Check**: `GET /ready` (expects 200)
 - **Storage**: S3 bucket for log storage
+- **Access**: Internal only via Service Discovery
 
 #### Mailpit Service
-- **Resources**: 256 CPU, 512 MB memory (configurable)
+- **Resources**: 256 CPU units (0.25 vCPU), 512 MB memory (configurable)
 - **Ports**: 8025 (web UI), 1025 (SMTP)
 - **Health Check**: `GET /` (expects 200)
 - **Purpose**: SMTP testing and development emails
@@ -221,14 +223,38 @@ All services run on **AWS Fargate** with automated health checks and logging to 
 
 | Variable | Default | Description |
 |----------|---------|-------------|
+| `safebucket_image` | `docker.io/safebucket/safebucket:latest` | Container image for Safebucket |
+| `safebucket_architecture` | `ARM64` | Architecture (X86_64 or ARM64) |
+| `safebucket_cpu` | `256` | Safebucket CPU units |
+| `safebucket_memory` | `512` | Safebucket memory (MB) |
+| `safebucket_desired_count` | `1` | Desired number of tasks |
 | `enable_autoscaling` | `false` | Enable ECS auto-scaling |
-| `safebucket_max_capacity` | `3` | Maximum number of Safebucket tasks |
-| `safebucket_cpu` | `512` | Safebucket CPU units |
-| `safebucket_memory` | `1024` | Safebucket memory (MB) |
+| `safebucket_min_capacity` | `1` | Autoscaling min capacity |
+| `safebucket_max_capacity` | `3` | Autoscaling max capacity |
 | `loki_cpu` | `512` | Loki CPU units |
 | `loki_memory` | `1024` | Loki memory (MB) |
 | `mailpit_cpu` | `256` | Mailpit CPU units |
 | `mailpit_memory` | `512` | Mailpit memory (MB) |
+| `enable_ecs_exec` | `false` | Enable ECS Exec for debugging |
+| `redeployment_trigger` | `"1"` | Force redeployment on image update |
+
+#### Cost Optimization (Spot Instances)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `enable_spot_instances` | `false` | Enable Spot for Safebucket |
+| `spot_instance_percentage` | `100` | % Spot for Safebucket (0-100) |
+| `enable_loki_spot_instances` | `false` | Enable Spot for Loki |
+| `loki_spot_instance_percentage` | `100` | % Spot for Loki |
+| `enable_mailpit_spot_instances` | `false` | Enable Spot for Mailpit |
+| `mailpit_spot_instance_percentage` | `100` | % Spot for Mailpit |
+
+#### Email Configuration
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `smtp_sender` | `notifications@safebucket.io` | SMTP sender address |
+| `admin_email` | `admin@safebucket.io` | Admin email address |
 
 ### Environment-Specific Examples
 
@@ -300,19 +326,10 @@ After successful ECS deployment:
     - Username: `admin@safebucket.io` (or your `admin_email`)
     - Password: Your `admin_password` from terraform.tfvars
 
-3. **Access internal services:**
-   ```bash
-   # Get internal ALB DNS
-   terraform output internal_alb_dns_name
-
-   # Loki: http://<internal-alb-dns>:3100
-   # Mailpit: http://<internal-alb-dns>:8025
-   ```
-
-4. **Access URLs:**
-    - **Application:** `http://<alb-dns-name>`
-    - **Loki:** `http://<internal-alb-dns-name>:3100`
-    - **Mailpit:** `http://<internal-alb-dns-name>:8025`
+3. **Access Services:**
+    - **Safebucket:** `http://<alb-dns-name>`
+    - **Mailpit:** `http://<alb-dns-name>:8025`
+    - **Loki:** Internal only (access via checking logs in S3 or ECS Exec if needed)
 
 ### Environment Variables (ECS Auto-configured)
 
@@ -346,7 +363,8 @@ Safebucket service receives these environment variables automatically:
 - `EVENTS__TYPE`: aws
 - `EVENTS__AWS__SQS_NAME`: S3 events queue
 - `NOTIFIER__TYPE`: smtp (via Mailpit)
-- `NOTIFIER__SMTP__HOST`: Internal ALB DNS
+- `NOTIFIER__TYPE`: smtp (via Mailpit)
+- `NOTIFIER__SMTP__HOST`: `safebucket-dev-mailpit` (Service Discovery hostname)
 
 #### Activity Logging
 - `ACTIVITY__TYPE`: loki
@@ -393,7 +411,6 @@ The Terraform configuration provides these key outputs:
 
 #### ECS-Specific Outputs
 - `alb_dns_name` - Public application load balancer DNS
-- `internal_alb_dns_name` - Internal load balancer DNS
 - `ecs_cluster_name` - ECS cluster name
 - `ecs_service_names` - List of ECS service names
 
@@ -462,7 +479,7 @@ The Terraform configuration provides these key outputs:
 - SQS queue policies restrict access to specific resources
 
 ### ECS-Specific Security
-- **Network:** Services communicate via internal load balancer
+- **Network:** Services communicate via Service Discovery (Cloud Map) within VPC
 - **Encryption:** TLS for Redis, RDS, and S3
 - **Secrets:** All sensitive data in AWS Secrets Manager
 - **IAM:** Minimal required permissions for each service
