@@ -34,7 +34,7 @@ existing corporate identities.
 
 ## Architecture Overview
 
-![Safebucket architecture](./../static/img/architecture.png)
+![Safebucket architecture](./../static/img/hld.png)
 
 ### Core Components
 
