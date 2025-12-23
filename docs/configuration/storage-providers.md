@@ -4,20 +4,110 @@ sidebar_position: 2
 
 # Storage Providers
 
-Safebucket supports multiple storage providers, allowing you to choose the best option for your needs. This guide covers configuration for MinIO, AWS S3, and Google Cloud Storage.
+Safebucket supports multiple storage providers, allowing you to choose the best option for your needs. This guide covers
+configuration for RustFS, MinIO, AWS S3, and Google Cloud Storage.
 
 ## Overview
 
 Safebucket's storage abstraction layer allows you to:
 
 - **Switch between providers** without changing your application code
-- **Use local storage** (MinIO) for complete privacy
+- **Use local storage** (RustFS, MinIO) for complete privacy and performance
 - **Use cloud storage** (AWS S3, GCP) for cloud infrastructures
 - **Maintain consistent APIs** across all storage backends
 
+## RustFS (Self-Hosted, High Performance)
+
+RustFS is a lightweight, high-performance S3-compatible object storage server written in Rust. It's optimized for speed
+and simplicity, making it an excellent choice for self-hosted deployments and production environments where performance
+is critical.
+
+### Key Features
+
+- **High Performance**: Written in Rust for maximum speed and efficiency
+- **S3 Compatible**: Works with standard S3 client libraries
+- **Low Resource Usage**: Minimal memory footprint compared to alternatives
+- **Event Notifications**: MQTT-based event system for real-time updates
+- **Simple Deployment**: Single binary with minimal configuration
+
+### Configuration
+
+#### Environment Variables
+
+```bash
+STORAGE__TYPE=rustfs
+STORAGE__RUSTFS__BUCKET_NAME=safebucket
+STORAGE__RUSTFS__ENDPOINT=bucket:9000                # Internal Docker network endpoint
+STORAGE__RUSTFS__EXTERNAL_ENDPOINT=http://localhost:9000    # Browser-accessible endpoint
+STORAGE__RUSTFS__ACCESS_KEY=rustfsadmin
+STORAGE__RUSTFS__SECRET_KEY=rustfsadmin
+```
+
+**Note on Endpoints:**
+
+- `STORAGE__RUSTFS__ENDPOINT`: Used by Safebucket backend for internal storage operations
+- `STORAGE__RUSTFS__EXTERNAL_ENDPOINT`: Used for generating presigned URLs that browsers can access
+
+When running in Docker, these are typically different (Docker hostname vs localhost). When running outside Docker, they
+can be the same.
+
+#### YAML Configuration
+
+```yaml
+storage:
+  type: rustfs
+  rustfs:
+    bucket_name: safebucket
+    endpoint: bucket:9000
+    external_endpoint: http://localhost:9000
+    access_key: rustfsadmin
+    secret_key: rustfsadmin
+```
+
+### Event Notifications
+
+RustFS integrates with NATS JetStream via MQTT for real-time file event notifications. Configure these on the RustFS
+container itself:
+
+**RustFS Container Environment Variables:**
+
+```bash
+RUSTFS_ACCESS_KEY=rustfsadmin
+RUSTFS_SECRET_KEY=rustfsadmin
+RUSTFS_NOTIFY_MQTT_ENABLE_PRIMARY=true
+RUSTFS_NOTIFY_MQTT_BROKER_PRIMARY=mqtt://nats:1883
+RUSTFS_NOTIFY_MQTT_TOPIC_PRIMARY=safebucket-bucket-events
+RUSTFS_NOTIFY_MQTT_QOS_PRIMARY=2
+RUSTFS_NOTIFY_MQTT_QUEUE_DIR_PRIMARY=/data/.rustfs/events
+```
+
+**Safebucket Events Configuration:**
+
+```bash
+# Storage configuration
+STORAGE__TYPE=rustfs
+STORAGE__RUSTFS__ENDPOINT=bucket:9000
+
+# Events configuration (separate from storage)
+EVENTS__TYPE=jetstream
+EVENTS__JETSTREAM__HOST=nats
+EVENTS__JETSTREAM__PORT=4222
+EVENTS__QUEUES__BUCKET_EVENTS__NAME=safebucket-bucket-events
+```
+
+Event notifications enable features like:
+
+- Real-time upload progress
+- Activity feed updates
+- Bucket change notifications
+
+See the [Environment Variables](./environment-variables#events-configuration) documentation for complete events
+configuration.
+
 ## MinIO (Self-Hosted)
 
-MinIO is an S3-compatible object storage server that's perfect for local development, testing, and self-hosted deployments.
+MinIO is an S3-compatible object storage server that's perfect for local development, testing, and self-hosted
+deployments.
 
 ### Configuration
 
@@ -37,7 +127,8 @@ STORAGE__MINIO__CLIENT_SECRET=minio-root-password
 - `STORAGE__MINIO__ENDPOINT`: Used by Safebucket backend for internal storage operations
 - `STORAGE__MINIO__EXTERNAL_ENDPOINT`: Used for generating presigned URLs that browsers can access
 
-When running in Docker, these are typically different (Docker hostname vs localhost). When running outside Docker, they can be the same.
+When running in Docker, these are typically different (Docker hostname vs localhost). When running outside Docker, they
+can be the same.
 
 #### YAML Configuration
 
@@ -60,7 +151,8 @@ storage:
 
 ### Event Notifications
 
-MinIO integrates with NATS JetStream for real-time file event notifications. These are configured separately via the `EVENTS__*` environment variables, not as part of the storage configuration.
+MinIO integrates with NATS JetStream for real-time file event notifications. These are configured separately via the
+`EVENTS__*` environment variables, not as part of the storage configuration.
 
 Event notifications enable features like:
 
@@ -82,7 +174,8 @@ EVENTS__JETSTREAM__PORT=4222
 EVENTS__QUEUES__BUCKET_EVENTS__NAME=safebucket-bucket-events
 ```
 
-See the [Environment Variables](./environment-variables#events-configuration) documentation for complete events configuration.
+See the [Environment Variables](./environment-variables#events-configuration) documentation for complete events
+configuration.
 
 ## AWS S3
 
@@ -176,9 +269,9 @@ events:
    ```
 
 2. **Configure S3 Event Notifications**:
-   - Go to S3 Console → Your Bucket → Properties → Event Notifications
-   - Create notification for "All object create events" and "All object delete events"
-   - Set destination to your SQS queue
+    - Go to S3 Console → Your Bucket → Properties → Event Notifications
+    - Create notification for "All object create events" and "All object delete events"
+    - Set destination to your SQS queue
 
 3. **Update Queue Policy** to allow S3 to send messages:
    ```json
@@ -296,14 +389,16 @@ events:
 
 ## Storage Provider Comparison
 
-| Feature | MinIO | AWS S3 | Google Cloud Storage |
-|---------|-------|--------|---------------------|
-| **Cost** | Free (self-hosted) | Pay per usage | Pay per usage |
-| **Setup Complexity** | Low | Medium | Medium |
-| **Scalability** | Limited by hardware | Unlimited | Unlimited |
-| **Global Availability** | Single region | Multi-region | Multi-region |
-| **Event Notifications** | NATS JetStream | SQS | Pub/Sub |
-| **Best For** | Development, self-hosted | Production, AWS ecosystem | Production, GCP ecosystem |
+| Feature                 | RustFS                                   | MinIO                    | AWS S3                    | Google Cloud Storage      |
+|-------------------------|------------------------------------------|--------------------------|---------------------------|---------------------------|
+| **Cost**                | Free (self-hosted)                       | Free (self-hosted)       | Pay per usage             | Pay per usage             |
+| **Setup Complexity**    | Low                                      | Low                      | Medium                    | Medium                    |
+| **Performance**         | Excellent (Rust)                         | Good (Go)                | Good                      | Good                      |
+| **Resource Usage**      | Very Low                                 | Low                      | N/A                       | N/A                       |
+| **Scalability**         | Limited by hardware                      | Limited by hardware      | Unlimited                 | Unlimited                 |
+| **Global Availability** | Single region                            | Single region            | Multi-region              | Multi-region              |
+| **Event Notifications** | MQTT/NATS                                | NATS JetStream           | SQS                       | Pub/Sub                   |
+| **Best For**            | Production self-hosted, high performance | Development, self-hosted | Production, AWS ecosystem | Production, GCP ecosystem |
 
 ## Switching Storage Providers
 
@@ -326,6 +421,7 @@ Safebucket's storage abstraction makes it easy to switch providers:
 ### Common Issues
 
 #### Connection Errors
+
 ```bash
 # Test MinIO connection
 docker-compose exec bucket mc ping minio
@@ -338,13 +434,15 @@ gsutil ls gs://safebucket-gcp
 ```
 
 #### Permission Issues
+
 - Verify IAM policies and service account permissions
 - Check bucket policies and access controls
 - Ensure credentials are correctly configured
 
 #### Event Notification Issues
+
 - Verify event notification configuration
-- Check queue/topic permissions  
+- Check queue/topic permissions
 - Monitor event logs for delivery failures
 
 ### Debugging
@@ -359,21 +457,21 @@ docker-compose logs -f api
 ## Best Practices
 
 1. **Security**:
-   - Use IAM roles instead of access keys when possible
-   - Rotate credentials regularly
-   - Apply principle of least privilege
+    - Use IAM roles instead of access keys when possible
+    - Rotate credentials regularly
+    - Apply principle of least privilege
 
 2. **Performance**:
-   - Choose storage regions close to your users
-   - Enable compression for large files
-   - Use CDN for frequently accessed content
+    - Choose storage regions close to your users
+    - Enable compression for large files
+    - Use CDN for frequently accessed content
 
 3. **Reliability**:
-   - Enable versioning where supported
-   - Set up cross-region replication for critical data
-   - Monitor storage health and usage
+    - Enable versioning where supported
+    - Set up cross-region replication for critical data
+    - Monitor storage health and usage
 
 4. **Cost Optimization**:
-   - Use lifecycle policies for data archival
-   - Monitor storage usage and costs
-   - Choose appropriate storage classes
+    - Use lifecycle policies for data archival
+    - Monitor storage usage and costs
+    - Choose appropriate storage classes

@@ -35,15 +35,15 @@ development environment.
 
 The local deployment includes the following services:
 
-| Service            | Port       | Purpose              |
-|--------------------|------------|----------------------|
-| **Safebucket**     | 8080       | Main application (API + Web frontend) |
-| **PostgreSQL**     | 5432       | Main database        |
-| **MinIO**          | 9000, 9001 | Object storage       |
-| **Valkey**         | 6379       | Caching layer        |
-| **NATS**           | 4222       | Event streaming      |
-| **Loki**           | 3100       | Activity logging     |
-| **Mailpit**        | 8025, 1025 | Email testing        |
+| Service           | Port       | Purpose                            |
+|-------------------|------------|------------------------------------|
+| **Safebucket**    | 8080       | Main application (API + Web)       |
+| **PostgreSQL**    | 5432       | Main database                      |
+| **RustFS API**    | 9000       | Object storage API                 |
+| **Valkey**        | 6379       | Caching layer                      |
+| **NATS**          | 4222       | Event streaming                    |
+| **Loki**          | 3100       | Activity logging                   |
+| **Mailpit Web**   | 8025, 1025 | Email testing (Web UI + SMTP)      |
 
 ## Default Credentials
 
@@ -54,9 +54,11 @@ The local deployment includes the following services:
 
 ### Infrastructure
 
-- **MinIO Console**: http://localhost:9001
-    - **Username**: minio-root-user
-    - **Password**: minio-root-password
+- **RustFS Storage**:
+    - **Endpoint**: http://localhost:9000
+    - **Access Key**: rustfsadmin
+    - **Secret Key**: rustfsadmin
+    - **Bucket**: safebucket
 
 - **Database**:
     - **Host**: localhost:5432
@@ -66,7 +68,44 @@ The local deployment includes the following services:
 
 - **Valkey**:
     - **Host**: localhost:6379
-    - **Password**: root
+    - **Password**: safebucket-password
+
+- **Mailpit** (Email Testing):
+    - **Web UI**: http://localhost:8025
+    - **SMTP**: localhost:1025 (no auth)
+
+## Accessing Services
+
+### RustFS Storage
+
+RustFS provides S3-compatible storage. To manage buckets and files directly, you can use:
+
+**AWS CLI:**
+```bash
+# Configure AWS CLI with RustFS credentials
+aws configure --profile rustfs
+# Access Key: rustfsadmin
+# Secret Key: rustfsadmin
+# Region: us-east-1
+# Output: json
+
+# List files in the safebucket bucket
+aws --profile rustfs --endpoint-url http://localhost:9000 s3 ls s3://safebucket
+
+# Upload a file
+aws --profile rustfs --endpoint-url http://localhost:9000 s3 cp myfile.txt s3://safebucket/
+```
+
+**S3 Browser Tools:**
+- Use any S3-compatible client (Cyberduck, S3 Browser, etc.)
+- Configure with endpoint `http://localhost:9000` and the credentials above
+
+### Mailpit (Email Testing)
+
+View all emails sent by Safebucket:
+1. Open http://localhost:8025 in your browser
+2. Perform actions that trigger emails (user invites, password resets, sharing notifications)
+3. View captured emails in the Mailpit web interface
 
 ## Configuration Files
 

@@ -14,7 +14,7 @@ contributors and developers actively working on the Safebucket codebase.
 This deployment includes all the infrastructure services Safebucket needs:
 
 - **PostgreSQL 18** - Main database
-- **MinIO** - S3-compatible object storage
+- **RustFS** - High-performance S3-compatible object storage
 - **Valkey 9** - Caching layer
 - **NATS JetStream** - Event streaming
 - **Loki** - Activity logging
@@ -64,17 +64,17 @@ This deployment includes all the infrastructure services Safebucket needs:
 
 ## Services Overview
 
-| Service           | Port | Purpose            |
-|-------------------|------|--------------------|
-| **PostgreSQL**    | 5432 | Main database      |
-| **MinIO API**     | 9000 | Object storage API |
-| **MinIO Console** | 9001 | MinIO web console  |
-| **Valkey**        | 6379 | Caching layer      |
-| **NATS**          | 4222 | Event streaming    |
-| **Loki**          | 3100 | Activity logging   |
-| **Mailpit Web**   | 8025 | Email testing UI   |
-| **Mailpit SMTP**  | 1025 | Email testing SMTP |
-| **Grafana***      | 3200 | Logs visualization |
+| Service            | Port | Purpose            |
+|--------------------|------|--------------------|
+| **PostgreSQL**     | 5432 | Main database      |
+| **RustFS API**     | 9000 | Object storage API |
+| **RustFS Console** | 9001 | RustFS web console |
+| **Valkey**         | 6379 | Caching layer      |
+| **NATS**           | 4222 | Event streaming    |
+| **Loki**           | 3100 | Activity logging   |
+| **Mailpit Web**    | 8025 | Email testing UI   |
+| **Mailpit SMTP**   | 1025 | Email testing SMTP |
+| **Grafana***       | 3200 | Logs visualization |
 
 \* Grafana only starts with `--profile debug`
 
@@ -134,16 +134,15 @@ Open http://localhost:3000 and log in with:
 
 When running Safebucket locally, use these connection strings:
 
-| Service       | Endpoint                | Credentials                                                     |
-|---------------|-------------------------|-----------------------------------------------------------------|
-| PostgreSQL    | `localhost:5432`        | User: `root`<br/>Pass: `root`<br/>DB: `safebucket`              |
-| MinIO API     | `localhost:9000`        | Access Key: `minio-root-user`<br/>Secret: `minio-root-password` |
-| MinIO Console | http://localhost:9001   | Same as API                                                     |
-| Valkey        | `localhost:6379`        | Password: `root`                                                |
-| NATS          | `localhost:4222`        | No auth                                                         |
-| Loki          | `http://localhost:3100` | No auth                                                         |
-| Mailpit Web   | http://localhost:8025   | No auth                                                         |
-| Mailpit SMTP  | `localhost:1025`        | No auth                                                         |
+| Service      | Endpoint                | Credentials                                                                  |
+|--------------|-------------------------|------------------------------------------------------------------------------|
+| PostgreSQL   | `localhost:5432`        | User: `safebucket-user`<br/>Pass: `safebucket-password`<br/>DB: `safebucket` |
+| RustFS API   | `localhost:9000`        | Access Key: `rustfsadmin`<br/>Secret: `rustfsadmin`                          |
+| Valkey       | `localhost:6379`        | Password: `safebucket-password`                                              |
+| NATS         | `localhost:4222`        | No auth                                                                      |
+| Loki         | `http://localhost:3100` | No auth                                                                      |
+| Mailpit Web  | http://localhost:8025   | No auth                                                                      |
+| Mailpit SMTP | `localhost:1025`        | No auth                                                                      |
 
 ### Running Tests
 
@@ -166,16 +165,22 @@ Mailpit captures all emails sent by Safebucket:
 2. Perform actions that send emails (user invites, password resets)
 3. View emails in Mailpit UI
 
-### Accessing MinIO Console
+### Accessing Storage
 
-Manage buckets and files directly:
+RustFS provides S3-compatible storage without a web console. To manage buckets and files, you can use:
 
-1. Open http://localhost:9001
-2. Login with:
-    - **Access Key**: minio-root-user
-    - **Secret Key**: minio-root-password
+- **AWS CLI**: Configure with RustFS credentials
+  ```bash
+  aws configure --profile rustfs
+  # Access Key: rustfsadmin
+  # Secret Key: rustfsadmin
+  # Region: us-east-1
+  # Output: json
 
-3. Browse the `safebucket` bucket
+  aws --profile rustfs --endpoint-url http://localhost:9000 s3 ls s3://safebucket
+  ```
+
+- **S3 Browser Tools**: Any S3-compatible client (e.g., Cyberduck, S3 Browser)
 
 ## Architecture Differences: Dev vs Local
 
