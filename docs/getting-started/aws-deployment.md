@@ -6,7 +6,7 @@ sidebar_position: 1
 
 ## Architecture
 
-![Safebucket AWS architecture](../../static/img/aws-architecture.png)
+![Safebucket AWS architecture](../../static/img/aws-architecture.svg)
 
 # Safebucket AWS Deployment Guide
 
