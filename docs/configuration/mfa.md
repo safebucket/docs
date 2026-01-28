@@ -4,7 +4,7 @@ sidebar_position: 4
 
 # Multi-Factor Authentication (MFA)
 
-Safebucket supports TOTP-based multi-factor authentication to add an extra layer of security to user accounts. Users can enroll authenticator apps such as Google Authenticator, Authy, or 1Password to generate time-based one-time passwords.
+Safebucket supports TOTP-based multi-factor authentication to add an extra layer of security to local accounts. Users can enroll authenticator apps such as Google Authenticator, Authy, or 1Password to generate time-based one-time passwords.
 
 ## Configuration
 
