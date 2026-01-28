@@ -31,6 +31,7 @@ const sidebars: SidebarsConfig = {
             label: 'Configuration',
             items: [
                 'configuration/authentication',
+                'configuration/mfa',
                 'configuration/storage-providers',
                 'configuration/environment-variables',
             ],
