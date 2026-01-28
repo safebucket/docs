@@ -38,7 +38,7 @@ app:
 
 ### Authentication Flow with MFA
 
-1. User logs in with email/password (or OIDC provider)
+1. User logs in with email/password
 2. If MFA is required (`mfa_required: true`) **or** the user has enrolled MFA devices, a restricted MFA token is issued instead of a full access token
 3. The user provides a 6-digit TOTP code from their authenticator app
 4. After successful verification, a full access token is issued
