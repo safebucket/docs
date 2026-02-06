@@ -112,10 +112,9 @@ the [Authentication Configuration](./authentication) page.
 
 | Variable        | Description                                             | Default | Required |
 |-----------------|---------------------------------------------------------|---------|----------|
-| `STORAGE__TYPE` | Storage provider type (`rustfs`, `minio`, `aws`, `gcp`) | -       | ✅        |
+| `STORAGE__TYPE` | Storage provider type (`rustfs`, `minio`, `aws`, `gcp`, `s3`) | -       | ✅        |
 
-For detailed storage provider configuration including RustFS, MinIO, AWS S3, and Google Cloud Storage setup, see
-the [Storage Providers](./storage-providers) page.
+For detailed storage provider configuration, see the [Storage Providers](./storage-providers) page.
 
 ## Cache Configuration
 
