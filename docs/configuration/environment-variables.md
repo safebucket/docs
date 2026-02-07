@@ -51,6 +51,11 @@ This hierarchical approach makes configuration organization clear and consistent
 | `APP__ADMIN_EMAIL`          | Admin user email                                        | -       | ✅        | Valid email                                        |
 | `APP__ADMIN_PASSWORD`       | Admin user password                                     | -       | ✅        | -                                                  |
 | `APP__TRASH_RETENTION_DAYS` | Days to retain files in trash before automatic deletion | `7`     | ❌        | `1-365`                                            |
+| `APP__MAX_UPLOAD_SIZE`      | Maximum file upload size in bytes                       | `53687091200` (50 GB) | ❌        | `≥ 1`                                        |
+
+### MFA Configuration
+
+For MFA environment variables and setup, see the [MFA Configuration](./mfa) page.
 
 ### CORS and Security
 
@@ -112,10 +117,9 @@ the [Authentication Configuration](./authentication) page.
 
 | Variable        | Description                                             | Default | Required |
 |-----------------|---------------------------------------------------------|---------|----------|
-| `STORAGE__TYPE` | Storage provider type (`rustfs`, `minio`, `aws`, `gcp`) | -       | ✅        |
+| `STORAGE__TYPE` | Storage provider type (`rustfs`, `minio`, `aws`, `gcp`, `s3`) | -       | ✅        |
 
-For detailed storage provider configuration including RustFS, MinIO, AWS S3, and Google Cloud Storage setup, see
-the [Storage Providers](./storage-providers) page.
+For detailed storage provider configuration, see the [Storage Providers](./storage-providers) page.
 
 ## Cache Configuration
 

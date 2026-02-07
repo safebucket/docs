@@ -14,13 +14,13 @@ When enabled, all local users must complete MFA verification after login before 
 
 #### Environment Variables
 
-```bash
-# Require MFA for all users (default: false)
-APP__MFA_REQUIRED=true
-
-# Encryption key for storing TOTP secrets (32 bytes, required when MFA is used)
-APP__MFA_ENCRYPTION_KEY=your-32-byte-encryption-key
-```
+| Variable                     | Description                                      | Default | Required | Valid Values |
+|------------------------------|--------------------------------------------------|---------|----------|--------------|
+| `APP__MFA_ENCRYPTION_KEY`    | 32-character encryption key for MFA secrets      | -       | ✅        | Exactly 32 characters |
+| `APP__MFA_REQUIRED`          | Require MFA for all users                        | `false` | ❌        | `true`, `false` |
+| `APP__MFA_TOKEN_EXPIRY`      | MFA token expiry in minutes                      | `5`     | ❌        | `1-30`       |
+| `APP__ACCESS_TOKEN_EXPIRY`   | Access token expiry in minutes                   | `60`    | ❌        | `1-1440`     |
+| `APP__REFRESH_TOKEN_EXPIRY`  | Refresh token expiry in minutes                  | `600`   | ❌        | `1-720`      |
 
 #### YAML Configuration
 
@@ -28,6 +28,9 @@ APP__MFA_ENCRYPTION_KEY=your-32-byte-encryption-key
 app:
   mfa_required: true
   mfa_encryption_key: your-32-byte-encryption-key
+  mfa_token_expiry: 5
+  access_token_expiry: 60
+  refresh_token_expiry: 600
 ```
 
 :::warning

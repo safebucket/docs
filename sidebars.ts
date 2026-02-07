@@ -32,16 +32,19 @@ const sidebars: SidebarsConfig = {
             items: [
                 'configuration/authentication',
                 'configuration/mfa',
-                'configuration/storage-providers',
+                {
+                    type: 'category',
+                    label: 'Storage Providers',
+                    link: { type: 'doc', id: 'configuration/storage-providers/index' },
+                    items: [
+                        'configuration/storage-providers/aws-s3',
+                        'configuration/storage-providers/google-cloud-storage',
+                        'configuration/storage-providers/minio',
+                        'configuration/storage-providers/rustfs',
+                        'configuration/storage-providers/generic-s3',
+                    ],
+                },
                 'configuration/environment-variables',
-            ],
-            collapsed: false,
-        },
-        {
-            type: 'category',
-            label: 'API Reference',
-            items: [
-                'api/overview',
             ],
             collapsed: false,
         },
