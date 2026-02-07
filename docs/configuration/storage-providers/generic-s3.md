@@ -10,15 +10,28 @@ Dedicated storage types (RustFS, MinIO, AWS S3, GCP) are **event-driven** — th
 
 | Provider | Presigned POST | Status |
 |---|---|---|
-| Hetzner Object Storage | Yes | Supported |
-| Storj | Yes | Supported |
-| MinIO | Yes | Supported |
-| Cloudflare R2 | No | Not supported |
-| OVH Object Storage | No | Not supported |
+| Hetzner Object Storage | Yes | Tested |
+| Storj | Yes | Tested |
+| Garage | Yes | Tested |
+| Cloudflare R2 | No | Incompatible |
+| OVH Object Storage | No | Incompatible |
 
 ## [Hetzner Object Storage](https://www.hetzner.com/storage/object-storage)
 
+Hetzner Object Storage is an affordable S3-compatible storage service hosted in Europe.
+
 ### Configuration
+
+```bash
+STORAGE__TYPE=s3
+STORAGE__S3__BUCKET_NAME=safebucket
+STORAGE__S3__ENDPOINT=hel1.your-objectstorage.com
+STORAGE__S3__EXTERNAL_ENDPOINT=https://hel1.your-objectstorage.com
+STORAGE__S3__USE_TLS=true
+STORAGE__S3__ACCESS_KEY=your-access-key
+STORAGE__S3__SECRET_KEY=your-secret-key
+STORAGE__S3__FORCE_PATH_STYLE=false
+```
 
 ```yaml
 storage:
@@ -84,6 +97,18 @@ encrypted, split into pieces, and distributed across a global network of nodes.
 
 ### Configuration
 
+```bash
+STORAGE__TYPE=s3
+STORAGE__S3__BUCKET_NAME=safebucket
+STORAGE__S3__ENDPOINT=gateway.storjshare.io
+STORAGE__S3__EXTERNAL_ENDPOINT=https://gateway.storjshare.io
+STORAGE__S3__USE_TLS=true
+STORAGE__S3__ACCESS_KEY=your-access-key
+STORAGE__S3__SECRET_KEY=your-secret-key
+STORAGE__S3__REGION=us-east-1
+STORAGE__S3__FORCE_PATH_STYLE=true
+```
+
 ```yaml
 storage:
   type: s3
@@ -128,6 +153,59 @@ aws s3api put-bucket-cors \
     "CORSRules": [
       {
         "AllowedOrigins": ["http://localhost:3000"],
+        "AllowedMethods": ["GET", "POST", "PUT", "HEAD"],
+        "AllowedHeaders": ["*"],
+        "ExposeHeaders": ["ETag"],
+        "MaxAgeSeconds": 3600
+      }
+    ]
+  }'
+```
+
+Replace `AllowedOrigins` with your actual app URL(s).
+
+## [Garage](https://garagehq.deuxfleurs.fr/)
+
+Garage is a lightweight, self-hosted S3-compatible distributed storage system designed for self-hosting.
+
+### Configuration
+
+```bash
+STORAGE__TYPE=s3
+STORAGE__S3__BUCKET_NAME=safebucket
+STORAGE__S3__ENDPOINT=localhost:3900
+STORAGE__S3__EXTERNAL_ENDPOINT=http://localhost:3900
+STORAGE__S3__USE_TLS=false
+STORAGE__S3__ACCESS_KEY=your-access-key
+STORAGE__S3__SECRET_KEY=your-secret-key
+STORAGE__S3__FORCE_PATH_STYLE=true
+```
+
+```yaml
+storage:
+  type: s3
+  s3:
+    bucket_name: safebucket
+    endpoint: localhost:3900
+    external_endpoint: http://localhost:3900
+    use_tls: false
+    access_key: your-access-key
+    secret_key: your-secret-key
+    force_path_style: true
+```
+
+### CORS
+
+Set up CORS using the AWS CLI:
+
+```bash
+aws s3api put-bucket-cors \
+  --bucket safebucket \
+  --endpoint-url http://localhost:3900 \
+  --cors-configuration '{
+    "CORSRules": [
+      {
+        "AllowedOrigins": ["http://localhost:8080"],
         "AllowedMethods": ["GET", "POST", "PUT", "HEAD"],
         "AllowedHeaders": ["*"],
         "ExposeHeaders": ["ETag"],

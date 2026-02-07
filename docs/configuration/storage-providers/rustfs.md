@@ -1,8 +1,6 @@
 # RustFS
 
-[RustFS](https://github.com/rustfs/rustfs) is a lightweight, high-performance S3-compatible object storage server written in Rust. It's optimized for speed
-and simplicity, making it an excellent choice for self-hosted deployments and production environments where performance
-is critical.
+[RustFS](https://github.com/rustfs/rustfs) is a lightweight, high-performance S3-compatible object storage server written in Rust.
 
 ## Configuration
 

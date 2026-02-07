@@ -51,6 +51,11 @@ This hierarchical approach makes configuration organization clear and consistent
 | `APP__ADMIN_EMAIL`          | Admin user email                                        | -       | ✅        | Valid email                                        |
 | `APP__ADMIN_PASSWORD`       | Admin user password                                     | -       | ✅        | -                                                  |
 | `APP__TRASH_RETENTION_DAYS` | Days to retain files in trash before automatic deletion | `7`     | ❌        | `1-365`                                            |
+| `APP__MAX_UPLOAD_SIZE`      | Maximum file upload size in bytes                       | `53687091200` (50 GB) | ❌        | `≥ 1`                                        |
+
+### MFA Configuration
+
+For MFA environment variables and setup, see the [MFA Configuration](./mfa) page.
 
 ### CORS and Security
 

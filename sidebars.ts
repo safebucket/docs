@@ -38,10 +38,10 @@ const sidebars: SidebarsConfig = {
                     link: { type: 'doc', id: 'configuration/storage-providers/index' },
                     items: [
                         'configuration/storage-providers/aws-s3',
-                        'configuration/storage-providers/generic-s3',
                         'configuration/storage-providers/google-cloud-storage',
                         'configuration/storage-providers/minio',
                         'configuration/storage-providers/rustfs',
+                        'configuration/storage-providers/generic-s3',
                     ],
                 },
                 'configuration/environment-variables',

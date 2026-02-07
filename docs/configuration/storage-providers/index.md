@@ -6,7 +6,7 @@ sidebar_position: 2
 
 Safebucket supports multiple storage providers. The storage provider is directly exposed to the user — files are uploaded and downloaded without passing through the API. Communication is secured via **signed URLs** delivered by the API.
 
-Dedicated providers are **event-driven** and fully optimized. You can also use  S3-compatible provider via the Generic S3 type, though with less efficient.
+Dedicated providers are **event-driven** and fully optimized. You can also use tested S3-compatible provider via the Generic S3 type, though with less efficient.
 
 :::tip Dedicated providers
 Dedicated providers receive real-time event notifications for uploads, deletions and enabling efficient trash management via lifecycle policies. Prefer a dedicated provider when one is available.
