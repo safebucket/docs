@@ -235,19 +235,27 @@ NOTIFIER__SMTP__SKIP_VERIFY_TLS=true
 
 ## Activity Logging
 
-### Loki Configuration
+| Variable                          | Description                            | Default | Required              |
+|-----------------------------------|----------------------------------------|---------|-----------------------|
+| `ACTIVITY__TYPE`                  | Activity provider type (`filesystem`, `loki`) | -       | ✅                     |
+| `ACTIVITY__FILESYSTEM__DIRECTORY` | Directory for storing activity index   | -       | ✅ (if filesystem)     |
+| `ACTIVITY__LOKI__ENDPOINT`        | Loki endpoint URL (must be valid HTTP) | -       | ✅ (if loki)           |
 
-| Variable                   | Description                            | Default | Required |
-|----------------------------|----------------------------------------|---------|----------|
-| `ACTIVITY__TYPE`           | Activity logger type                   | `loki`  | ✅        |
-| `ACTIVITY__LOKI__ENDPOINT` | Loki endpoint URL (must be valid HTTP) | -       | ✅        |
+**Example (Filesystem):**
 
-**Example:**
+```bash
+ACTIVITY__TYPE=filesystem
+ACTIVITY__FILESYSTEM__DIRECTORY=./data/activity
+```
+
+**Example (Loki):**
 
 ```bash
 ACTIVITY__TYPE=loki
 ACTIVITY__LOKI__ENDPOINT=http://localhost:3100
 ```
+
+For detailed provider configuration, see the [Activity Providers](./activity-providers) page.
 
 ## Complete Example
 
