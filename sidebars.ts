@@ -16,6 +16,7 @@ const sidebars: SidebarsConfig = {
     // Safebucket documentation sidebar
     tutorialSidebar: [
         'intro',
+        'features',
         {
             type: 'category',
             label: 'Getting Started',
