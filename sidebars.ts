@@ -54,6 +54,16 @@ const sidebars: SidebarsConfig = {
                         'configuration/activity-providers/loki',
                     ],
                 },
+                {
+                    type: 'category',
+                    label: 'Cache Providers',
+                    link: { type: 'doc', id: 'configuration/cache-providers/index' },
+                    items: [
+                        'configuration/cache-providers/memory',
+                        'configuration/cache-providers/redis',
+                        'configuration/cache-providers/valkey',
+                    ],
+                },
                 'configuration/environment-variables',
             ],
             collapsed: false,

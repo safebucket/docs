@@ -41,17 +41,17 @@ This hierarchical approach makes configuration organization clear and consistent
 
 ### Basic Application Configuration
 
-| Variable                    | Description                                             | Default | Required | Valid Values                                       |
-|-----------------------------|---------------------------------------------------------|---------|----------|----------------------------------------------------|
-| `APP__LOG_LEVEL`            | Logging level for the application                       | `info`  | ❌        | `debug`, `info`, `warn`, `error`, `fatal`, `panic` |
-| `APP__API_URL`              | API base URL                                            | -       | ✅        | -                                                  |
-| `APP__WEB_URL`              | Frontend web URL                                        | -       | ✅        | -                                                  |
-| `APP__PORT`                 | Server port (80-65535)                                  | `8080`  | ❌        | `80-65535`                                         |
-| `APP__JWT_SECRET`           | JWT signing secret                                      | -       | ✅        | -                                                  |
-| `APP__ADMIN_EMAIL`          | Admin user email                                        | -       | ✅        | Valid email                                        |
-| `APP__ADMIN_PASSWORD`       | Admin user password                                     | -       | ✅        | -                                                  |
-| `APP__TRASH_RETENTION_DAYS` | Days to retain files in trash before automatic deletion | `7`     | ❌        | `1-365`                                            |
-| `APP__MAX_UPLOAD_SIZE`      | Maximum file upload size in bytes                       | `53687091200` (50 GB) | ❌        | `≥ 1`                                        |
+| Variable                    | Description                                             | Default               | Required | Valid Values                                       |
+|-----------------------------|---------------------------------------------------------|-----------------------|----------|----------------------------------------------------|
+| `APP__LOG_LEVEL`            | Logging level for the application                       | `info`                | ❌        | `debug`, `info`, `warn`, `error`, `fatal`, `panic` |
+| `APP__API_URL`              | API base URL                                            | -                     | ✅        | -                                                  |
+| `APP__WEB_URL`              | Frontend web URL                                        | -                     | ✅        | -                                                  |
+| `APP__PORT`                 | Server port (80-65535)                                  | `8080`                | ❌        | `80-65535`                                         |
+| `APP__JWT_SECRET`           | JWT signing secret                                      | -                     | ✅        | -                                                  |
+| `APP__ADMIN_EMAIL`          | Admin user email                                        | -                     | ✅        | Valid email                                        |
+| `APP__ADMIN_PASSWORD`       | Admin user password                                     | -                     | ✅        | -                                                  |
+| `APP__TRASH_RETENTION_DAYS` | Days to retain files in trash before automatic deletion | `7`                   | ❌        | `1-365`                                            |
+| `APP__MAX_UPLOAD_SIZE`      | Maximum file upload size in bytes                       | `53687091200` (50 GB) | ❌        | `≥ 1`                                              |
 
 ### MFA Configuration
 
@@ -113,44 +113,19 @@ the [Authentication Configuration](./authentication) page.
 
 ## Storage Configuration
 
-### Basic Storage Settings
-
-| Variable        | Description                                             | Default | Required |
-|-----------------|---------------------------------------------------------|---------|----------|
+| Variable        | Description                                                   | Default | Required |
+|-----------------|---------------------------------------------------------------|---------|----------|
 | `STORAGE__TYPE` | Storage provider type (`rustfs`, `minio`, `aws`, `gcp`, `s3`) | -       | ✅        |
 
 For detailed storage provider configuration, see the [Storage Providers](./storage-providers) page.
 
 ## Cache Configuration
 
-Safebucket supports Redis and Valkey for caching.
+| Variable      | Description                                       | Default | Required |
+|---------------|---------------------------------------------------|---------|----------|
+| `CACHE__TYPE` | Cache provider type (`memory`, `redis`, `valkey`) | -       | ✅        |
 
-### Redis
-
-| Variable                        | Description                      | Default | Required     |
-|---------------------------------|----------------------------------|---------|--------------|
-| `CACHE__TYPE`                   | Cache type (`redis` or `valkey`) | -       | ✅            |
-| `CACHE__REDIS__HOSTS`           | Comma-separated Redis hosts      | -       | ✅ (if Redis) |
-| `CACHE__REDIS__PASSWORD`        | Redis password                   | -       | ❌            |
-| `CACHE__REDIS__TLS_ENABLED`     | Enable TLS for Redis connection  | `false` | ❌            |
-| `CACHE__REDIS__TLS_SERVER_NAME` | TLS server name for Redis        | -       | ❌            |
-
-### Valkey
-
-| Variable                         | Description                      | Default | Required      |
-|----------------------------------|----------------------------------|---------|---------------|
-| `CACHE__VALKEY__HOSTS`           | Comma-separated Valkey hosts     | -       | ✅ (if Valkey) |
-| `CACHE__VALKEY__PASSWORD`        | Valkey password                  | -       | ❌             |
-| `CACHE__VALKEY__TLS_ENABLED`     | Enable TLS for Valkey connection | `false` | ❌             |
-| `CACHE__VALKEY__TLS_SERVER_NAME` | TLS server name for Valkey       | -       | ❌             |
-
-**Example:**
-
-```bash
-CACHE__TYPE=redis
-CACHE__REDIS__HOSTS=localhost:6379
-CACHE__REDIS__PASSWORD=root
-```
+For detailed cache provider configuration, see the [Cache Providers](./cache-providers) page.
 
 ## Events Configuration
 
@@ -235,27 +210,11 @@ NOTIFIER__SMTP__SKIP_VERIFY_TLS=true
 
 ## Activity Logging
 
-| Variable                          | Description                            | Default | Required              |
-|-----------------------------------|----------------------------------------|---------|-----------------------|
-| `ACTIVITY__TYPE`                  | Activity provider type (`filesystem`, `loki`) | -       | ✅                     |
-| `ACTIVITY__FILESYSTEM__DIRECTORY` | Directory for storing activity index   | -       | ✅ (if filesystem)     |
-| `ACTIVITY__LOKI__ENDPOINT`        | Loki endpoint URL (must be valid HTTP) | -       | ✅ (if loki)           |
+| Variable         | Description                                   | Default | Required |
+|------------------|-----------------------------------------------|---------|----------|
+| `ACTIVITY__TYPE` | Activity provider type (`filesystem`, `loki`) | -       | ✅        |
 
-**Example (Filesystem):**
-
-```bash
-ACTIVITY__TYPE=filesystem
-ACTIVITY__FILESYSTEM__DIRECTORY=./data/activity
-```
-
-**Example (Loki):**
-
-```bash
-ACTIVITY__TYPE=loki
-ACTIVITY__LOKI__ENDPOINT=http://localhost:3100
-```
-
-For detailed provider configuration, see the [Activity Providers](./activity-providers) page.
+For detailed activity provider configuration, see the [Activity Providers](./activity-providers) page.
 
 ## Complete Example
 
