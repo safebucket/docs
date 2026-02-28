@@ -37,8 +37,8 @@ function HomepageHeader() {
           </Link>
           <Link
             className="button button--outline button--lg"
-            to="/docs/getting-started/local-deployment">
-            Try Local Deploy - 2min
+            to="/docs/getting-started/local-lite-deployment">
+            Try Lite Local Deploy - 1min
           </Link>
         </div>
       </div>

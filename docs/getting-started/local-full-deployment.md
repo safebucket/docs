@@ -2,10 +2,10 @@
 sidebar_position: 1
 ---
 
-# Local Deployment
+# Local Full Deployment
 
-Get Safebucket running locally in minutes using Docker Compose. This guide will walk you through setting up a complete
-development environment.
+Get Safebucket running locally with the full infrastructure stack using Docker Compose. This deployment includes all
+services (caching, event streaming, email testing, and activity logging) for a production-like environment.
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ development environment.
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/safebucket/safebucket
-   cd safebucket/deployments/local
+   cd safebucket/deployments/local/full
    ```
 
 2. **Start the services:**
@@ -73,39 +73,6 @@ The local deployment includes the following services:
 - **Mailpit** (Email Testing):
     - **Web UI**: http://localhost:8025
     - **SMTP**: localhost:1025 (no auth)
-
-## Accessing Services
-
-### RustFS Storage
-
-RustFS provides S3-compatible storage. To manage buckets and files directly, you can use:
-
-**AWS CLI:**
-```bash
-# Configure AWS CLI with RustFS credentials
-aws configure --profile rustfs
-# Access Key: rustfsadmin
-# Secret Key: rustfsadmin
-# Region: us-east-1
-# Output: json
-
-# List files in the safebucket bucket
-aws --profile rustfs --endpoint-url http://localhost:9000 s3 ls s3://safebucket
-
-# Upload a file
-aws --profile rustfs --endpoint-url http://localhost:9000 s3 cp myfile.txt s3://safebucket/
-```
-
-**S3 Browser Tools:**
-- Use any S3-compatible client (Cyberduck, S3 Browser, etc.)
-- Configure with endpoint `http://localhost:9000` and the credentials above
-
-### Mailpit (Email Testing)
-
-View all emails sent by Safebucket:
-1. Open http://localhost:8025 in your browser
-2. Perform actions that trigger emails (user invites, password resets, sharing notifications)
-3. View captured emails in the Mailpit web interface
 
 ## Configuration Files
 

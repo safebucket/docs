@@ -21,8 +21,9 @@ const sidebars: SidebarsConfig = {
             type: 'category',
             label: 'Getting Started',
             items: [
+                'getting-started/local-full-deployment',
+                'getting-started/local-lite-deployment',
                 'getting-started/dev-deployment',
-                'getting-started/local-deployment',
                 'getting-started/aws-deployment',
             ],
             collapsed: false,

@@ -144,4 +144,4 @@ cache, deployment) can be replaced with whatever fits your environment.
 - **dev**: Infrastructure services only, run Safebucket from source
 - **aws**: Terraform modules for ECS Fargate, RDS, ElastiCache, S3, SQS, and CloudWatch
 
-[Get started](./getting-started/local-deployment)
+[Get started](./getting-started/local-lite-deployment)
