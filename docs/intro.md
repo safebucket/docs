@@ -32,7 +32,7 @@ Uploads and downloads go directly to your storage backend via presigned URLs. Yo
 ## What's Next?
 
 - [Features](./features) - See everything Safebucket offers
-- [Get Started](./getting-started/local-deployment) - Set up Safebucket locally in 2 minutes
+- [Get Started](./getting-started/local-lite-deployment) - Set up Safebucket locally in 1 minute
 - [Configuration](./configuration/environment-variables) - Configure your deployment
 - [Storage Providers](./configuration/storage-providers) - Set up cloud storage
 - [Authentication](./configuration/authentication) - Configure OIDC providers

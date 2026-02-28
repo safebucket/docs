@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 3
 ---
 
 # Dev Deployment
@@ -164,37 +164,6 @@ Mailpit captures all emails sent by Safebucket:
 1. Open http://localhost:8025
 2. Perform actions that send emails (user invites, password resets)
 3. View emails in Mailpit UI
-
-### Accessing Storage
-
-RustFS provides S3-compatible storage without a web console. To manage buckets and files, you can use:
-
-- **AWS CLI**: Configure with RustFS credentials
-  ```bash
-  aws configure --profile rustfs
-  # Access Key: rustfsadmin
-  # Secret Key: rustfsadmin
-  # Region: us-east-1
-  # Output: json
-
-  aws --profile rustfs --endpoint-url http://localhost:9000 s3 ls s3://safebucket
-  ```
-
-- **S3 Browser Tools**: Any S3-compatible client (e.g., Cyberduck, S3 Browser)
-
-## Architecture Differences: Dev vs Local
-
-| Feature              | Dev Deployment                  | Local Deployment           |
-|----------------------|---------------------------------|----------------------------|
-| **Safebucket App**   | Run locally from source         | Dockerized container       |
-| **Purpose**          | Active development              | Testing, demos             |
-| **Iteration Speed**  | Fast (no rebuild)               | Slower (rebuild image)     |
-| **Debugging**        | Full IDE support                | Log-based                  |
-| **Hot Reload**       | Yes (with Air/CompileDaemon)    | No                         |
-| **Resource Usage**   | Lower (no app container)        | Higher                     |
-| **Container Images** | Official images                 | Same                       |
-| **Health Checks**    | Same infrastructure reliability | Same                       |
-| **Best For**         | Development, contributing       | Integration testing, demos |
 
 ## Configuration Files
 
