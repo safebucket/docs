@@ -5,7 +5,7 @@ sidebar_position: 1
 # Overview
 
 Safebucket is an open-source file sharing platform where files never touch your server.
-Uploads and downloads go directly to your storage backend via presigned URLs. You bring your own identity provider, your own storage, and your own infrastructure. Safebucket handles access control, audit logging, and collaboration on top.
+Uploads and downloads go directly to your storage backend via presigned URLs. You bring your own identity provider, your own storage, and your own infrastructure. Safebucket handles metadata, access control and audit logging.
 
 ![Safebucket Homepage](./../static/img/homepage.png)
 

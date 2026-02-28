@@ -139,8 +139,8 @@ cache, deployment) can be replaced with whatever fits your environment.
 
 **Deployment templates:**
 
-- **local-full**: Docker Compose with all services (Safebucket, PostgreSQL, RustFS, Valkey, NATS, Loki, Mailpit)
-- **local-lite**: Minimal Docker Compose for a lightweight setup
+- **local/full**: Docker Compose with all services (Safebucket, PostgreSQL, RustFS, Valkey, NATS, Loki, Mailpit)
+- **local/lite**: Minimal Docker Compose for a lightweight setup
 - **dev**: Infrastructure services only, run Safebucket from source
 - **aws**: Terraform modules for ECS Fargate, RDS, ElastiCache, S3, SQS, and CloudWatch
 
