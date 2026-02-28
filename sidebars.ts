@@ -44,6 +44,15 @@ const sidebars: SidebarsConfig = {
                         'configuration/storage-providers/generic-s3',
                     ],
                 },
+                {
+                    type: 'category',
+                    label: 'Activity Providers',
+                    link: { type: 'doc', id: 'configuration/activity-providers/index' },
+                    items: [
+                        'configuration/activity-providers/filesystem',
+                        'configuration/activity-providers/loki',
+                    ],
+                },
                 'configuration/environment-variables',
             ],
             collapsed: false,
