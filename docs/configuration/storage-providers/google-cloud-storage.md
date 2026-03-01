@@ -18,6 +18,16 @@ Create a service account with these roles:
 
 ## Configuration
 
+### GCP Credentials
+
+Safebucket uses [Application Default Credentials (ADC)](https://cloud.google.com/docs/authentication/application-default-credentials). You can authenticate using any supported method:
+
+- `GOOGLE_APPLICATION_CREDENTIALS` environment variable pointing to a service account key file
+- User credentials via `gcloud auth application-default login`
+- Attached service account (GKE, Cloud Run, Compute Engine)
+
+See the [ADC documentation](https://cloud.google.com/docs/authentication/application-default-credentials) for all supported methods.
+
 ### Environment Variables
 
 ```bash
@@ -28,7 +38,7 @@ STORAGE__GCP__PROJECT_ID=your-project-id
 STORAGE__GCP__TOPIC_NAME=safebucket-bucket-events
 STORAGE__GCP__SUBSCRIPTION_NAME=safebucket-bucket-events-sub
 
-# Service account credentials
+# GCP credentials (or use any ADC method above)
 GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
 
 # Events configuration

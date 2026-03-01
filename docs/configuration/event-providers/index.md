@@ -8,10 +8,10 @@ Safebucket uses event providers for asynchronous processing of notifications, fi
 
 ## Available Providers
 
-- [**NATS JetStream**](./jetstream) — Distributed messaging with work-queue retention and explicit acknowledgment.
-- [**Google Cloud Pub/Sub**](./gcp-pubsub) — GCP-native messaging service.
-- [**AWS SQS**](./aws-sqs) — AWS Simple Queue Service.
-- [**Memory**](./memory) — In-process event queue using Go channels. Single-instance only.
+- [**NATS JetStream**](./jetstream): Distributed messaging with work-queue retention and explicit acknowledgment.
+- [**Google Cloud Pub/Sub**](./gcp-pubsub): GCP-native messaging service.
+- [**AWS SQS**](./aws-sqs): AWS Simple Queue Service.
+- [**Memory**](./memory): In-process event queue using Go channels. Single-instance only.
 
 :::tip Which provider should I use?
 Use **Memory** for development and testing (single instance). Use **JetStream**, **GCP Pub/Sub**, or **AWS SQS** for

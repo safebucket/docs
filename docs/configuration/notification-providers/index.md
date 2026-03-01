@@ -9,8 +9,8 @@ enrollment, file activity).
 
 ## Available Providers
 
-- [**Filesystem**](./filesystem) — Writes notifications as JSON files to disk. No external mail server required.
-- [**SMTP**](./smtp) — Sends HTML emails via an SMTP server.
+- [**Filesystem**](./filesystem), Writes notifications as JSON files to disk. No external mail server required.
+- [**SMTP**](./smtp), Sends HTML emails via an SMTP server.
 
 :::tip Which provider should I use?
 Use the **Filesystem** provider for development and testing. Use **SMTP** for production deployments.
