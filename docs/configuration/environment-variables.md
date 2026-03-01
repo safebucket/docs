@@ -90,7 +90,7 @@ APP__TRUSTED_PROXIES=127.0.0.1,::1
 |------------------|---------------|------------|----------|
 | `DATABASE__TYPE` | Database type | `postgres` | ❌        |
 
-For detailed database configuration (PostgreSQL, SQLite), see the [Database](./database) page.
+For detailed database configuration (PostgreSQL, SQLite), see the [Database Providers](./database-providers) page.
 
 ## Authentication Configuration
 

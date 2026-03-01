@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 
-# Database
+# Database Providers
 
 Safebucket supports two database backends: **PostgreSQL** and **SQLite**. Choose the one that best fits your deployment needs.
 

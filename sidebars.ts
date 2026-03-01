@@ -34,11 +34,11 @@ const sidebars: SidebarsConfig = {
                 'configuration/mfa',
                 {
                     type: 'category',
-                    label: 'Database',
-                    link: { type: 'doc', id: 'configuration/database/index' },
+                    label: 'Database Providers',
+                    link: { type: 'doc', id: 'configuration/database-providers/index' },
                     items: [
-                        'configuration/database/postgres',
-                        'configuration/database/sqlite',
+                        'configuration/database-providers/postgres',
+                        'configuration/database-providers/sqlite',
                     ],
                 },
                 {
