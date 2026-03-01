@@ -86,25 +86,11 @@ APP__TRUSTED_PROXIES=127.0.0.1,::1
 
 ## Database Configuration
 
-| Variable             | Description       | Default   | Required |
-|----------------------|-------------------|-----------|----------|
-| `DATABASE__HOST`     | PostgreSQL host   | -         | ✅        |
-| `DATABASE__PORT`     | PostgreSQL port   | `5432`    | ❌        |
-| `DATABASE__USER`     | Database username | -         | ✅        |
-| `DATABASE__PASSWORD` | Database password | -         | ✅        |
-| `DATABASE__NAME`     | Database name     | -         | ✅        |
-| `DATABASE__SSLMODE`  | SSL mode          | `disable` | ❌        |
+| Variable         | Description   | Default    | Required |
+|------------------|---------------|------------|----------|
+| `DATABASE__TYPE` | Database type | `postgres` | ❌        |
 
-**Example:**
-
-```bash
-DATABASE__HOST=localhost
-DATABASE__PORT=5442
-DATABASE__USER=root
-DATABASE__PASSWORD=root
-DATABASE__NAME=safebucket
-DATABASE__SSLMODE=disable
-```
+For detailed database configuration (PostgreSQL, SQLite), see the [Database Providers](./database-providers) page.
 
 ## Authentication Configuration
 
@@ -216,12 +202,13 @@ APP__STATIC_FILES__ENABLED=true
 APP__STATIC_FILES__DIRECTORY=web/dist
 
 # Database
-DATABASE__HOST=localhost
-DATABASE__PORT=5432
-DATABASE__USER=safebucket-user
-DATABASE__PASSWORD=safebucket-password
-DATABASE__NAME=safebucket
-DATABASE__SSLMODE=disable
+DATABASE__TYPE=postgres
+DATABASE__POSTGRES__HOST=localhost
+DATABASE__POSTGRES__PORT=5432
+DATABASE__POSTGRES__USER=safebucket-user
+DATABASE__POSTGRES__PASSWORD=safebucket-password
+DATABASE__POSTGRES__NAME=safebucket
+DATABASE__POSTGRES__SSLMODE=disable
 
 # Cache (Valkey)
 CACHE__TYPE=valkey
