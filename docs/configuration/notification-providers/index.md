@@ -4,7 +4,8 @@ sidebar_position: 4
 
 # Notification Providers
 
-Safebucket supports multiple notification providers for delivering notifications (invitations, password resets, file activity).
+Safebucket supports multiple notification providers for delivering notifications (invitations, password resets, MFA
+enrollment, file activity).
 
 ## Available Providers
 
