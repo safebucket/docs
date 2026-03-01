@@ -180,33 +180,13 @@ EVENTS__QUEUES__OBJECT_DELETION__NAME=safebucket-object-deletion
 | `EVENTS__AWS__ACCOUNT_ID` | AWS account ID    | -       | ✅ (if AWS) |
 | `EVENTS__AWS__SQS_NAME`   | SQS queue name    | -       | ✅ (if AWS) |
 
-## Email Configuration
+## Notification Configuration
 
-### SMTP Settings
+| Variable         | Description                                       | Default | Required |
+|------------------|---------------------------------------------------|---------|----------|
+| `NOTIFIER__TYPE` | Notification provider type (`smtp`, `filesystem`) | -       | ✅        |
 
-| Variable                          | Description           | Default | Required |
-|-----------------------------------|-----------------------|---------|----------|
-| `NOTIFIER__TYPE`                  | Notification type     | `smtp`  | ✅        |
-| `NOTIFIER__SMTP__HOST`            | SMTP server host      | -       | ✅        |
-| `NOTIFIER__SMTP__PORT`            | SMTP server port      | -       | ✅        |
-| `NOTIFIER__SMTP__USERNAME`        | SMTP username         | -       | ❌        |
-| `NOTIFIER__SMTP__PASSWORD`        | SMTP password         | -       | ❌        |
-| `NOTIFIER__SMTP__SENDER`          | From email address    | -       | ✅        |
-| `NOTIFIER__SMTP__ENABLE_TLS`      | Enable TLS            | `true`  | ❌        |
-| `NOTIFIER__SMTP__SKIP_VERIFY_TLS` | Skip TLS verification | `false` | ❌        |
-
-**Example:**
-
-```bash
-NOTIFIER__TYPE=smtp
-NOTIFIER__SMTP__HOST=localhost
-NOTIFIER__SMTP__PORT=1025
-NOTIFIER__SMTP__USERNAME=root
-NOTIFIER__SMTP__PASSWORD=root
-NOTIFIER__SMTP__SENDER=notifications@safebucket.io
-NOTIFIER__SMTP__ENABLE_TLS=false
-NOTIFIER__SMTP__SKIP_VERIFY_TLS=true
-```
+For detailed notification provider configuration, see the [Notification Providers](./notification-providers) page.
 
 ## Activity Logging
 
