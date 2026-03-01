@@ -34,6 +34,15 @@ const sidebars: SidebarsConfig = {
                 'configuration/mfa',
                 {
                     type: 'category',
+                    label: 'Database',
+                    link: { type: 'doc', id: 'configuration/database/index' },
+                    items: [
+                        'configuration/database/postgres',
+                        'configuration/database/sqlite',
+                    ],
+                },
+                {
+                    type: 'category',
                     label: 'Storage Providers',
                     link: { type: 'doc', id: 'configuration/storage-providers/index' },
                     items: [
