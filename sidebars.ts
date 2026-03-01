@@ -65,6 +65,15 @@ const sidebars: SidebarsConfig = {
                         'configuration/cache-providers/valkey',
                     ],
                 },
+                {
+                    type: 'category',
+                    label: 'Notification Providers',
+                    link: { type: 'doc', id: 'configuration/notification-providers/index' },
+                    items: [
+                        'configuration/notification-providers/filesystem',
+                        'configuration/notification-providers/smtp',
+                    ],
+                },
                 'configuration/environment-variables',
             ],
             collapsed: false,
