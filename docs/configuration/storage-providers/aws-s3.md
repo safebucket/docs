@@ -45,6 +45,17 @@ Create an IAM policy with these permissions:
 
 ## Configuration
 
+### AWS Credentials
+
+Safebucket uses the [AWS SDK default credential chain](https://docs.aws.amazon.com/sdkref/latest/guide/standardized-credentials.html). You can authenticate using any supported method:
+
+- Environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`)
+- Shared credentials file (`~/.aws/credentials`)
+- IAM roles (EC2, ECS, Lambda)
+- AWS profiles
+
+See the [AWS configuration reference](https://docs.aws.amazon.com/sdkref/latest/guide/settings-reference.html) for all supported variables.
+
 ### Environment Variables
 
 ```bash
@@ -53,7 +64,7 @@ STORAGE__TYPE=aws
 STORAGE__AWS__BUCKET_NAME=your-safebucket
 STORAGE__AWS__SQS_NAME=safebucket-sqs
 
-# AWS credentials
+# AWS credentials (or use any method from the credential chain above)
 AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
 AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 AWS_REGION=us-east-1
