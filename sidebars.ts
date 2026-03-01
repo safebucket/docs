@@ -67,6 +67,17 @@ const sidebars: SidebarsConfig = {
                 },
                 {
                     type: 'category',
+                    label: 'Event Providers',
+                    link: { type: 'doc', id: 'configuration/event-providers/index' },
+                    items: [
+                        'configuration/event-providers/jetstream',
+                        'configuration/event-providers/gcp-pubsub',
+                        'configuration/event-providers/aws-sqs',
+                        'configuration/event-providers/memory',
+                    ],
+                },
+                {
+                    type: 'category',
                     label: 'Notification Providers',
                     link: { type: 'doc', id: 'configuration/notification-providers/index' },
                     items: [

@@ -129,56 +129,11 @@ For detailed cache provider configuration, see the [Cache Providers](./cache-pro
 
 ## Events Configuration
 
-Safebucket supports multiple event systems for real-time notifications. Events are configured separately from storage
-and use a queue-based architecture for different event types.
+| Variable       | Description                                               | Default | Required |
+|----------------|-----------------------------------------------------------|---------|----------|
+| `EVENTS__TYPE` | Event provider type (`jetstream`, `gcp`, `aws`, `memory`) | -       | ✅        |
 
-### NATS JetStream
-
-| Variable                  | Description       | Default | Required         |
-|---------------------------|-------------------|---------|------------------|
-| `EVENTS__TYPE`            | Event system type | -       | ✅                |
-| `EVENTS__JETSTREAM__HOST` | NATS host         | -       | ✅ (if JetStream) |
-| `EVENTS__JETSTREAM__PORT` | NATS port         | -       | ✅ (if JetStream) |
-
-### Queue Configuration
-
-Safebucket uses multiple queues for different event types:
-
-| Variable                                | Description                    | Required         |
-|-----------------------------------------|--------------------------------|------------------|
-| `EVENTS__QUEUES__NOTIFICATIONS__NAME`   | User notification events queue | ✅ (if JetStream) |
-| `EVENTS__QUEUES__BUCKET_EVENTS__NAME`   | Bucket event notifications     | ✅ (if JetStream) |
-| `EVENTS__QUEUES__OBJECT_DELETION__NAME` | Object deletion events queue   | ✅ (if JetStream) |
-
-**Example:**
-
-```bash
-EVENTS__TYPE=jetstream
-EVENTS__JETSTREAM__HOST=localhost
-EVENTS__JETSTREAM__PORT=4222
-
-# Queue names
-EVENTS__QUEUES__NOTIFICATIONS__NAME=safebucket-notifications
-EVENTS__QUEUES__BUCKET_EVENTS__NAME=safebucket-bucket-events
-EVENTS__QUEUES__OBJECT_DELETION__NAME=safebucket-object-deletion
-```
-
-### Google Cloud Pub/Sub
-
-| Variable                           | Description                     | Default | Required   |
-|------------------------------------|---------------------------------|---------|------------|
-| `EVENTS__TYPE`                     | Event system type               | -       | ✅          |
-| `EVENTS__GCP__PROJECT_ID`          | GCP project ID                  | -       | ✅ (if GCP) |
-| `EVENTS__GCP__SUBSCRIPTION_SUFFIX` | Suffix for PubSub subscriptions | `-sub`  | ❌          |
-
-### AWS SQS
-
-| Variable                  | Description       | Default | Required   |
-|---------------------------|-------------------|---------|------------|
-| `EVENTS__TYPE`            | Event system type | -       | ✅          |
-| `EVENTS__AWS__REGION`     | AWS region        | -       | ✅ (if AWS) |
-| `EVENTS__AWS__ACCOUNT_ID` | AWS account ID    | -       | ✅ (if AWS) |
-| `EVENTS__AWS__SQS_NAME`   | SQS queue name    | -       | ✅ (if AWS) |
+For detailed event provider configuration, see the [Event Providers](./event-providers) page.
 
 ## Notification Configuration
 
