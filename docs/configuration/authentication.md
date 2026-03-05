@@ -104,7 +104,7 @@ auth:
         issuer: https://provider-issuer-url
       sharing:
         allowed: true
-        allowed_domains:
+        domains:
           - yourdomain.com
 ```
 
@@ -117,7 +117,7 @@ Restrict sharing to specific email domains or disable it entirely per provider.
 ```bash
 # Enable sharing with domain restrictions
 AUTH__PROVIDERS__MYPROVIDER__SHARING__ALLOWED=true
-AUTH__PROVIDERS__MYPROVIDER__SHARING__ALLOWED_DOMAINS=company.com,partner.org
+AUTH__PROVIDERS__MYPROVIDER__SHARING__DOMAINS=company.com,partner.org
 
 # Or disable sharing entirely
 AUTH__PROVIDERS__MYPROVIDER__SHARING__ALLOWED=false
@@ -126,11 +126,14 @@ AUTH__PROVIDERS__MYPROVIDER__SHARING__ALLOWED=false
 #### YAML Configuration
 
 ```yaml
-sharing:
-  allowed: true
-  allowed_domains:
-    - company.com
-    - partner.org
+auth:
+  providers:
+    myprovider:
+      sharing:
+        allowed: true
+        domains:
+          - company.com
+          - partner.org
 ```
 
 ### Example with Pocket ID
