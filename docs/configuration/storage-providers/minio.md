@@ -1,6 +1,7 @@
 # MinIO
 
-[MinIO](https://min.io/docs/minio/linux/index.html) is an S3-compatible object storage server that's perfect for local development, testing, and self-hosted
+[MinIO](https://min.io/docs/minio/linux/index.html) is an S3-compatible object
+storage server that's perfect for local development, testing, and self-hosted
 deployments.
 
 ## Configuration
@@ -18,11 +19,13 @@ STORAGE__MINIO__CLIENT_SECRET=minio-root-password
 
 **Note on Endpoints:**
 
-- `STORAGE__MINIO__ENDPOINT`: Used by Safebucket backend for internal storage operations
-- `STORAGE__MINIO__EXTERNAL_ENDPOINT`: Used for generating presigned URLs that browsers can access
+- `STORAGE__MINIO__ENDPOINT`: Used by Safebucket backend for internal storage
+  operations
+- `STORAGE__MINIO__EXTERNAL_ENDPOINT`: Used for generating presigned URLs that
+  browsers can access
 
-When running in Docker, these are typically different (Docker hostname vs localhost). When running outside Docker, they
-can be the same.
+When running in Docker, these are typically different (Docker hostname vs
+localhost). When running outside Docker, they can be the same.
 
 ### YAML Configuration
 
@@ -45,8 +48,9 @@ storage:
 
 ## Event Notifications
 
-MinIO integrates with NATS JetStream for real-time file event notifications. These are configured separately via the
-`EVENTS__*` environment variables, not as part of the storage configuration.
+MinIO integrates with NATS JetStream for real-time file event notifications.
+These are configured separately via the `EVENTS__*` environment variables, not
+as part of the storage configuration.
 
 Event notifications enable features like:
 
@@ -68,5 +72,5 @@ EVENTS__JETSTREAM__PORT=4222
 EVENTS__QUEUES__BUCKET_EVENTS__NAME=safebucket-bucket-events
 ```
 
-See the [Environment Variables](../environment-variables#events-configuration) documentation for complete events
-configuration.
+See the [Environment Variables](../environment-variables#events-configuration)
+documentation for complete events configuration.

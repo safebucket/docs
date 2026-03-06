@@ -4,8 +4,9 @@ sidebar_position: 3
 
 # Dev Deployment
 
-The dev deployment provides a complete infrastructure stack without the Safebucket application container, designed for
-contributors and developers actively working on the Safebucket codebase.
+The dev deployment provides a complete infrastructure stack without the
+Safebucket application container, designed for contributors and developers
+actively working on the Safebucket codebase.
 
 ## Overview
 
@@ -23,7 +24,8 @@ This deployment includes all the infrastructure services Safebucket needs:
 
 ## Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/)
+- [Docker](https://docs.docker.com/get-docker/) and
+  [Docker Compose](https://docs.docker.com/compose/install/)
 - [Go 1.24.x](https://golang.org/dl/) installed locally
 - [Node.js 22.x](https://nodejs.org/) (if building the frontend)
 - Git for cloning the repository
@@ -32,22 +34,26 @@ This deployment includes all the infrastructure services Safebucket needs:
 ## Quick Start
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/safebucket/safebucket
    cd safebucket/deployments/dev
    ```
 
 2. **Start the infrastructure:**
+
    ```bash
    docker compose up -d
    ```
 
 3. **Verify services are running:**
+
    ```bash
    docker compose ps
    ```
 
 4. **Run Safebucket locally:**
+
    ```bash
    # Build the frontend
    cd web
@@ -59,13 +65,12 @@ This deployment includes all the infrastructure services Safebucket needs:
    go run main.go
    ```
 
-5. **Access Safebucket:**
-   Open http://localhost:3000 in your browser
+5. **Access Safebucket:** Open http://localhost:3000 in your browser
 
 ## Services Overview
 
 | Service            | Port | Purpose            |
-|--------------------|------|--------------------|
+| ------------------ | ---- | ------------------ |
 | **PostgreSQL**     | 5432 | Main database      |
 | **RustFS API**     | 9000 | Object storage API |
 | **RustFS Console** | 9001 | RustFS web console |
@@ -74,7 +79,7 @@ This deployment includes all the infrastructure services Safebucket needs:
 | **Loki**           | 3100 | Activity logging   |
 | **Mailpit Web**    | 8025 | Email testing UI   |
 | **Mailpit SMTP**   | 1025 | Email testing SMTP |
-| **Grafana***       | 3200 | Logs visualization |
+| **Grafana\***      | 3200 | Logs visualization |
 
 \* Grafana only starts with `--profile debug`
 
@@ -135,7 +140,7 @@ Open http://localhost:3000 and log in with:
 When running Safebucket locally, use these connection strings:
 
 | Service      | Endpoint                | Credentials                                                                  |
-|--------------|-------------------------|------------------------------------------------------------------------------|
+| ------------ | ----------------------- | ---------------------------------------------------------------------------- |
 | PostgreSQL   | `localhost:5432`        | User: `safebucket-user`<br/>Pass: `safebucket-password`<br/>DB: `safebucket` |
 | RustFS API   | `localhost:9000`        | Access Key: `rustfsadmin`<br/>Secret: `rustfsadmin`                          |
 | Valkey       | `localhost:6379`        | Password: `safebucket-password`                                              |
@@ -173,7 +178,8 @@ The dev deployment uses:
 - **`deployments/dev/.env`**: Infrastructure environment variables
 - **`config.yaml`** or app-level `.env`: Your local Safebucket configuration
 
-Note: Infrastructure `.env` configures Docker services. App configuration should be set separately when running locally.
+Note: Infrastructure `.env` configures Docker services. App configuration should
+be set separately when running locally.
 
 ## Next Steps
 

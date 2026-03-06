@@ -1,6 +1,8 @@
 # Redis
 
-[Redis](https://redis.io/) is an in-memory data store. The Redis provider connects using the [Rueidis](https://github.com/redis/rueidis) client and supports single-node and cluster topologies.
+[Redis](https://redis.io/) is an in-memory data store. The Redis provider
+connects using the [Rueidis](https://github.com/redis/rueidis) client and
+supports single-node and cluster topologies.
 
 ## Configuration
 
@@ -24,13 +26,13 @@ cache:
       - localhost:6379
     password: changeme
     tls_enabled: false
-    tls_server_name: ""
+    tls_server_name: ''
 ```
 
-| Variable                       | Description                                            | Default | Required |
-|--------------------------------|--------------------------------------------------------|---------|----------|
-| `CACHE__TYPE`                  | Cache provider type                                    | -       | ✅        |
-| `CACHE__REDIS__HOSTS`          | Comma-separated list of Redis host:port addresses      | -       | ✅        |
-| `CACHE__REDIS__PASSWORD`       | Redis password                                         | -       | ❌        |
-| `CACHE__REDIS__TLS_ENABLED`    | Enable TLS for the Redis connection                    | `false` | ❌        |
-| `CACHE__REDIS__TLS_SERVER_NAME`| TLS server name for certificate verification           | -       | ❌        |
+| Variable                        | Description                                       | Default | Required |
+| ------------------------------- | ------------------------------------------------- | ------- | -------- |
+| `CACHE__TYPE`                   | Cache provider type                               | -       | ✅       |
+| `CACHE__REDIS__HOSTS`           | Comma-separated list of Redis host:port addresses | -       | ✅       |
+| `CACHE__REDIS__PASSWORD`        | Redis password                                    | -       | ❌       |
+| `CACHE__REDIS__TLS_ENABLED`     | Enable TLS for the Redis connection               | `false` | ❌       |
+| `CACHE__REDIS__TLS_SERVER_NAME` | TLS server name for certificate verification      | -       | ❌       |

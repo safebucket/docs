@@ -1,6 +1,7 @@
 # SMTP
 
-The SMTP notification provider sends HTML emails via an SMTP server. Supports TLS and optional authentication.
+The SMTP notification provider sends HTML emails via an SMTP server. Supports
+TLS and optional authentication.
 
 ## Configuration
 

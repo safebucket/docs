@@ -4,14 +4,14 @@ sidebar_position: 3
 
 # Authentication
 
-Safebucket supports multiple authentication methods including local authentication and OIDC providers.
+Safebucket supports multiple authentication methods including local authentication and OIDC providers. This guide covers configuration for various authentication options.
 
 ## Overview
 
 Safebucket's authentication system provides:
 
 - **Local Authentication**: Username/password with secure password hashing (Argon2id)
-- **OIDC Integration**: Support for any OIDC provider (Pocket ID, Authelia, Keycloak, ...)
+- **OIDC Integration**: Support for any OIDC provider (Pocket ID, Authelia, Keycloak, Google, GitHub, custom OIDC)
 - **Role-Based Access Control**: Granular permissions with roles and groups
 - **Admin Management**: Built-in admin user creation and management
 - **Sharing Restrictions**: Control sharing permissions per provider with domain restrictions
@@ -67,6 +67,8 @@ Safebucket automatically creates an admin user on startup:
 :::
 
 ## OIDC Providers
+
+Safebucket supports any OpenID Connect providers for seamless user authentication.
 
 ### Configuration Pattern
 
@@ -136,7 +138,79 @@ auth:
           - partner.org
 ```
 
-### Example with Pocket ID
+## Provider Examples
+
+### Google
+
+Configure Google for easy user authentication.
+
+#### Prerequisites
+
+1. **Google Cloud Console** project
+2. **OAuth 2.0 Client ID** configured
+3. **Authorized redirect URIs** set
+
+#### Setup Steps
+
+1. **Create OAuth Application**:
+   - Go to [Google Cloud Console](https://console.cloud.google.com)
+   - Navigate to APIs & Services > Credentials
+   - Create OAuth 2.0 Client ID (Web application)
+
+2. **Configure Redirect URIs**:
+
+   ```text
+   http://localhost:3001/api/v1/auth/providers/google/callback  (development)
+   https://yourdomain.com/api/v1/auth/providers/google/callback (production)
+   ```
+
+3. **Get Credentials**:
+   - Client ID: `123456789-abcdef.apps.googleusercontent.com`
+   - Client Secret: `your-secret-key`
+
+#### Configuration
+
+```bash
+AUTH__PROVIDERS__KEYS=google
+AUTH__PROVIDERS__GOOGLE__NAME=Google
+AUTH__PROVIDERS__GOOGLE__TYPE=oidc
+AUTH__PROVIDERS__GOOGLE__OIDC__CLIENT_ID=your-google-client-id
+AUTH__PROVIDERS__GOOGLE__OIDC__CLIENT_SECRET=your-google-client-secret
+AUTH__PROVIDERS__GOOGLE__OIDC__ISSUER=https://accounts.google.com
+```
+
+### GitHub
+
+Configure GitHub for developer-friendly authentication.
+
+#### Setup Steps
+
+1. **Create OAuth App**:
+   - Go to GitHub Settings > Developer settings > OAuth Apps
+   - Click "New OAuth App"
+
+2. **Configure Application**:
+   - **Application name**: Safebucket
+   - **Homepage URL**: `https://yourdomain.com`
+   - **Authorization callback URL**:
+     `https://yourdomain.com/api/v1/auth/providers/github/callback`
+
+3. **Get Credentials**:
+   - Client ID: `your-github-client-id`
+   - Client Secret: `your-github-client-secret`
+
+#### Configuration
+
+```bash
+AUTH__PROVIDERS__KEYS=github
+AUTH__PROVIDERS__GITHUB__NAME=GitHub
+AUTH__PROVIDERS__GITHUB__TYPE=oidc
+AUTH__PROVIDERS__GITHUB__OIDC__CLIENT_ID=your-github-client-id
+AUTH__PROVIDERS__GITHUB__OIDC__CLIENT_SECRET=your-github-client-secret
+AUTH__PROVIDERS__GITHUB__OIDC__ISSUER=https://github.com
+```
+
+### Pocket ID
 
 [Pocket ID](https://pocket-id.org) is a simple, self-hosted OIDC provider with passkey support.
 
@@ -156,9 +230,7 @@ AUTH__PROVIDERS__POCKETID__OIDC__CLIENT_SECRET=your-client-secret
 AUTH__PROVIDERS__POCKETID__OIDC__ISSUER=https://auth.yourdomain.com
 ```
 
-### Other Providers
-
-#### Authelia
+### Authelia
 
 Callback URL: `https://yourdomain.com/api/v1/auth/providers/authelia/callback`
 
@@ -171,7 +243,7 @@ AUTH__PROVIDERS__AUTHELIA__OIDC__CLIENT_SECRET=your-secret
 AUTH__PROVIDERS__AUTHELIA__OIDC__ISSUER=https://auth.yourdomain.com
 ```
 
-#### Keycloak
+### Keycloak
 
 Callback URL: `https://yourdomain.com/api/v1/auth/providers/keycloak/callback`
 
@@ -184,7 +256,20 @@ AUTH__PROVIDERS__KEYCLOAK__OIDC__CLIENT_SECRET=your-secret
 AUTH__PROVIDERS__KEYCLOAK__OIDC__ISSUER=https://keycloak.yourdomain.com/realms/your-realm
 ```
 
-### Multiple Providers
+### Okta
+
+Callback URL: `https://yourdomain.com/api/v1/auth/providers/okta/callback`
+
+```bash
+AUTH__PROVIDERS__KEYS=okta
+AUTH__PROVIDERS__OKTA__NAME=Okta
+AUTH__PROVIDERS__OKTA__TYPE=oidc
+AUTH__PROVIDERS__OKTA__OIDC__CLIENT_ID=your-okta-client-id
+AUTH__PROVIDERS__OKTA__OIDC__CLIENT_SECRET=your-okta-secret
+AUTH__PROVIDERS__OKTA__OIDC__ISSUER=https://your-domain.okta.com
+```
+
+## Multiple Providers
 
 ```bash
 AUTH__PROVIDERS__KEYS=local,pocketid,authelia
