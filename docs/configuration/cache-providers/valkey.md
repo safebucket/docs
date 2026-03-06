@@ -1,6 +1,9 @@
 # Valkey
 
-[Valkey](https://valkey.io/) is an open-source, high-performance key-value store forked from Redis. The Valkey provider uses the same [Rueidis](https://github.com/redis/rueidis) client as the Redis provider and is fully interchangeable.
+[Valkey](https://valkey.io/) is an open-source, high-performance key-value store
+forked from Redis. The Valkey provider uses the same
+[Rueidis](https://github.com/redis/rueidis) client as the Redis provider and is
+fully interchangeable.
 
 ## Configuration
 
@@ -24,13 +27,13 @@ cache:
       - localhost:6379
     password: changeme
     tls_enabled: false
-    tls_server_name: ""
+    tls_server_name: ''
 ```
 
-| Variable                        | Description                                            | Default | Required |
-|---------------------------------|--------------------------------------------------------|---------|----------|
-| `CACHE__TYPE`                   | Cache provider type                                    | -       | ✅        |
-| `CACHE__VALKEY__HOSTS`          | Comma-separated list of Valkey host:port addresses     | -       | ✅        |
-| `CACHE__VALKEY__PASSWORD`       | Valkey password                                        | -       | ❌        |
-| `CACHE__VALKEY__TLS_ENABLED`    | Enable TLS for the Valkey connection                   | `false` | ❌        |
-| `CACHE__VALKEY__TLS_SERVER_NAME`| TLS server name for certificate verification           | -       | ❌        |
+| Variable                         | Description                                        | Default | Required |
+| -------------------------------- | -------------------------------------------------- | ------- | -------- |
+| `CACHE__TYPE`                    | Cache provider type                                | -       | ✅       |
+| `CACHE__VALKEY__HOSTS`           | Comma-separated list of Valkey host:port addresses | -       | ✅       |
+| `CACHE__VALKEY__PASSWORD`        | Valkey password                                    | -       | ❌       |
+| `CACHE__VALKEY__TLS_ENABLED`     | Enable TLS for the Valkey connection               | `false` | ❌       |
+| `CACHE__VALKEY__TLS_SERVER_NAME` | TLS server name for certificate verification       | -       | ❌       |

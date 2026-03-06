@@ -1,19 +1,21 @@
 # Generic S3
 
-SafeBucket supports S3-compatible storage providers through the generic `s3` storage type. This allows you to use any
-provider that implements the S3 API, as long as it supports **presigned POST policies** and **CORS**.
+SafeBucket supports S3-compatible storage providers through the generic `s3`
+storage type. This allows you to use any provider that implements the S3 API, as
+long as it supports **presigned POST policies** and **CORS**.
 
-:::info Dedicated providers are more optimized
-Dedicated storage types (RustFS, MinIO, AWS S3, GCP) are **event-driven**, they receive real-time notifications when
-files are uploaded or deleted. The generic S3 type relies on other mechanisms, which are less efficient. Trash is also
-less optimized, as dedicated providers use **lifecycle policies** and **event notifications** to efficiently manage
-deleted files. If your provider has a dedicated integration, prefer using that over the generic S3 type.
-:::
+:::info Dedicated providers are more optimized Dedicated storage types (RustFS,
+MinIO, AWS S3, GCP) are **event-driven**, they receive real-time notifications
+when files are uploaded or deleted. The generic S3 type relies on other
+mechanisms, which are less efficient. Trash is also less optimized, as dedicated
+providers use **lifecycle policies** and **event notifications** to efficiently
+manage deleted files. If your provider has a dedicated integration, prefer using
+that over the generic S3 type. :::
 
 ## Provider Compatibility
 
 | Provider               | Presigned POST | Status       |
-|------------------------|----------------|--------------|
+| ---------------------- | -------------- | ------------ |
 | Hetzner Object Storage | Yes            | Tested       |
 | Storj                  | Yes            | Tested       |
 | Garage                 | Yes            | Tested       |
@@ -22,7 +24,8 @@ deleted files. If your provider has a dedicated integration, prefer using that o
 
 ## [Hetzner Object Storage](https://www.hetzner.com/storage/object-storage)
 
-Hetzner Object Storage is an affordable S3-compatible storage service hosted in Europe.
+Hetzner Object Storage is an affordable S3-compatible storage service hosted in
+Europe.
 
 ### Configuration
 
@@ -50,8 +53,8 @@ storage:
     force_path_style: false
 ```
 
-- **endpoint**: `<location>.your-objectstorage.com` without the scheme. Locations: `fsn1` (Falkenstein), `hel1` (
-  Helsinki), `nbg1` (Nuremberg).
+- **endpoint**: `<location>.your-objectstorage.com` without the scheme.
+  Locations: `fsn1` (Falkenstein), `hel1` ( Helsinki), `nbg1` (Nuremberg).
 - **external_endpoint**: Same as endpoint but with `https://`.
 - **force_path_style**: `false`, Hetzner uses virtual-hosted-style URLs.
 
@@ -83,9 +86,9 @@ Replace `AllowedOrigins` with your actual app URL(s).
 
 ## [Storj](https://www.storj.io/)
 
-Storj is a decentralized cloud storage network that offers enhanced privacy, security, and global distribution. Files
-are
-encrypted, split into pieces, and distributed across a global network of nodes.
+Storj is a decentralized cloud storage network that offers enhanced privacy,
+security, and global distribution. Files are encrypted, split into pieces, and
+distributed across a global network of nodes.
 
 ### Prerequisites
 
@@ -131,15 +134,16 @@ storage:
 
 - **endpoint**: `gateway.storjshare.io` (S3-compatible gateway).
 - **force_path_style**: `true`, Storj requires path-style URLs.
-- **Credentials**: Generate S3-compatible credentials from the Storj dashboard under **Access > Create S3 Credentials**.
+- **Credentials**: Generate S3-compatible credentials from the Storj dashboard
+  under **Access > Create S3 Credentials**.
 
 ### Regional Considerations
 
-Storj's decentralized network automatically distributes data globally. However, you can choose a satellite (gateway
-region) based on your primary user location:
+Storj's decentralized network automatically distributes data globally. However,
+you can choose a satellite (gateway region) based on your primary user location:
 
 | Satellite | Endpoint                    | Best For     |
-|-----------|-----------------------------|--------------|
+| --------- | --------------------------- | ------------ |
 | US1       | `gateway.storjshare.io`     | Americas     |
 | EU1       | `gateway.eu1.storjshare.io` | Europe       |
 | AP1       | `gateway.ap1.storjshare.io` | Asia Pacific |
@@ -172,7 +176,8 @@ Replace `AllowedOrigins` with your actual app URL(s).
 
 ## [Garage](https://garagehq.deuxfleurs.fr/)
 
-Garage is a lightweight, self-hosted S3-compatible distributed storage system designed for self-hosting.
+Garage is a lightweight, self-hosted S3-compatible distributed storage system
+designed for self-hosting.
 
 ### Configuration
 

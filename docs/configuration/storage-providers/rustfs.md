@@ -1,6 +1,7 @@
 # RustFS
 
-[RustFS](https://github.com/rustfs/rustfs) is a lightweight, high-performance S3-compatible object storage server written in Rust.
+[RustFS](https://github.com/rustfs/rustfs) is a lightweight, high-performance
+S3-compatible object storage server written in Rust.
 
 ## Configuration
 
@@ -17,11 +18,13 @@ STORAGE__RUSTFS__SECRET_KEY=rustfsadmin
 
 **Note on Endpoints:**
 
-- `STORAGE__RUSTFS__ENDPOINT`: Used by Safebucket backend for internal storage operations
-- `STORAGE__RUSTFS__EXTERNAL_ENDPOINT`: Used for generating presigned URLs that browsers can access
+- `STORAGE__RUSTFS__ENDPOINT`: Used by Safebucket backend for internal storage
+  operations
+- `STORAGE__RUSTFS__EXTERNAL_ENDPOINT`: Used for generating presigned URLs that
+  browsers can access
 
-When running in Docker, these are typically different (Docker hostname vs localhost). When running outside Docker, they
-can be the same.
+When running in Docker, these are typically different (Docker hostname vs
+localhost). When running outside Docker, they can be the same.
 
 ### YAML Configuration
 
@@ -38,8 +41,8 @@ storage:
 
 ## Event Notifications
 
-RustFS integrates with NATS JetStream via MQTT for real-time file event notifications. Configure these on the RustFS
-container itself:
+RustFS integrates with NATS JetStream via MQTT for real-time file event
+notifications. Configure these on the RustFS container itself:
 
 **RustFS Container Environment Variables:**
 
@@ -73,5 +76,5 @@ Event notifications enable features like:
 - Activity feed updates
 - Bucket change notifications
 
-See the [Environment Variables](../environment-variables#events-configuration) documentation for complete events
-configuration.
+See the [Environment Variables](../environment-variables#events-configuration)
+documentation for complete events configuration.

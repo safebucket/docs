@@ -1,6 +1,7 @@
 # Loki
 
-[Grafana Loki](https://grafana.com/oss/loki/) is a horizontally scalable, highly available log ingestion and querying system.
+[Grafana Loki](https://grafana.com/oss/loki/) is a horizontally scalable, highly
+available log ingestion and querying system.
 
 ## Configuration
 
@@ -21,6 +22,6 @@ activity:
 ```
 
 | Variable                   | Description                            | Default | Required |
-|----------------------------|----------------------------------------|---------|----------|
-| `ACTIVITY__TYPE`           | Activity provider type                 | -       | ✅        |
-| `ACTIVITY__LOKI__ENDPOINT` | Loki endpoint URL (must be valid HTTP) | -       | ✅        |
+| -------------------------- | -------------------------------------- | ------- | -------- |
+| `ACTIVITY__TYPE`           | Activity provider type                 | -       | ✅       |
+| `ACTIVITY__LOKI__ENDPOINT` | Loki endpoint URL (must be valid HTTP) | -       | ✅       |

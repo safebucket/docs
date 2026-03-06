@@ -4,8 +4,9 @@ sidebar_position: 1
 
 # API Overview
 
-Safebucket provides a comprehensive REST API for programmatic access to file sharing functionality. The API is built
-with Go using the Chi router and follows RESTful conventions.
+Safebucket provides a comprehensive REST API for programmatic access to file
+sharing functionality. The API is built with Go using the Chi router and follows
+RESTful conventions.
 
 ## Base URL
 
@@ -48,8 +49,8 @@ Content-Type: application/json
 
 #### OIDC Authentication
 
-OIDC authentication is handled through the web interface. Once authenticated, you can extract the JWT token from the
-session.
+OIDC authentication is handled through the web interface. Once authenticated,
+you can extract the JWT token from the session.
 
 ### Using the Token
 
@@ -64,7 +65,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ### Authentication (`/auth`)
 
 | Method | Endpoint                    | Description          |
-|--------|-----------------------------|----------------------|
+| ------ | --------------------------- | -------------------- |
 | `POST` | `/auth/login`               | Local authentication |
 | `GET`  | `/auth/providers`           | List OIDC providers  |
 | `GET`  | `/auth/callback/{provider}` | OIDC callback        |
@@ -73,7 +74,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ### Users (`/users`)
 
 | Method | Endpoint      | Description              |
-|--------|---------------|--------------------------|
+| ------ | ------------- | ------------------------ |
 | `GET`  | `/users/me`   | Get current user profile |
 | `PUT`  | `/users/me`   | Update user profile      |
 | `GET`  | `/users`      | List users (admin only)  |
@@ -82,7 +83,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ### Buckets (`/buckets`)
 
 | Method   | Endpoint                       | Description           |
-|----------|--------------------------------|-----------------------|
+| -------- | ------------------------------ | --------------------- |
 | `GET`    | `/buckets`                     | List user's buckets   |
 | `POST`   | `/buckets`                     | Create new bucket     |
 | `GET`    | `/buckets/{id}`                | Get bucket details    |
@@ -96,7 +97,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ### Invitations (`/invites`)
 
 | Method   | Endpoint                | Description              |
-|----------|-------------------------|--------------------------|
+| -------- | ----------------------- | ------------------------ |
 | `POST`   | `/invites`              | Create bucket invitation |
 | `GET`    | `/invites`              | List sent invitations    |
 | `GET`    | `/invites/{id}`         | Get invitation details   |
@@ -139,7 +140,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ## Common HTTP Status Codes
 
 | Code  | Meaning               | Description                   |
-|-------|-----------------------|-------------------------------|
+| ----- | --------------------- | ----------------------------- |
 | `200` | OK                    | Request successful            |
 | `201` | Created               | Resource created successfully |
 | `400` | Bad Request           | Invalid request parameters    |
@@ -186,9 +187,9 @@ The API implements rate limiting to prevent abuse:
 
 - **Rate Limit**: 100 requests per minute per IP
 - **Headers**: Rate limit information in response headers
-    - `X-RateLimit-Limit`: Request limit
-    - `X-RateLimit-Remaining`: Remaining requests
-    - `X-RateLimit-Reset`: Reset timestamp
+  - `X-RateLimit-Limit`: Request limit
+  - `X-RateLimit-Remaining`: Remaining requests
+  - `X-RateLimit-Reset`: Reset timestamp
 
 When rate limit is exceeded:
 
@@ -204,7 +205,8 @@ When rate limit is exceeded:
 
 ## CORS
 
-Cross-Origin Resource Sharing (CORS) is configured based on the `APP__ALLOWED_ORIGINS` setting:
+Cross-Origin Resource Sharing (CORS) is configured based on the
+`APP__ALLOWED_ORIGINS` setting:
 
 ```bash
 # Allow specific origins
@@ -264,7 +266,7 @@ class SafeBucketAPI {
     const options = {
       method,
       headers: {
-        'Authorization': `Bearer ${this.token}`,
+        Authorization: `Bearer ${this.token}`,
         'Content-Type': 'application/json',
       },
     };
@@ -281,8 +283,8 @@ class SafeBucketAPI {
   async login(email, password) {
     const response = await fetch(`${this.baseURL}/api/v1/auth/login`, {
       method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({email, password}),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
     });
     const data = await response.json();
     this.token = data.data.token;
@@ -295,18 +297,21 @@ class SafeBucketAPI {
   }
 
   async createBucket(name, description) {
-    return this.request('POST', '/buckets', {name, description});
+    return this.request('POST', '/buckets', { name, description });
   }
 
   async uploadFile(bucketId, file) {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${this.baseURL}/api/v1/buckets/${bucketId}/upload`, {
-      method: 'POST',
-      headers: {'Authorization': `Bearer ${this.token}`},
-      body: formData,
-    });
+    const response = await fetch(
+      `${this.baseURL}/api/v1/buckets/${bucketId}/upload`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${this.token}` },
+        body: formData,
+      },
+    );
     return response.json();
   }
 }
@@ -372,11 +377,13 @@ buckets = api.get_buckets()
 
 ## API Versioning
 
-The API uses URL versioning (`/api/v1/`). Future versions will maintain backward compatibility where possible, with
-breaking changes requiring a new version path.
+The API uses URL versioning (`/api/v1/`). Future versions will maintain backward
+compatibility where possible, with breaking changes requiring a new version
+path.
 
 ## Support
 
 - **Documentation**: This API documentation
 - **Issues**: [GitHub Issues](https://github.com/safebucket/safebucket/issues)
-- **Community**: [GitHub Discussions](https://github.com/safebucket/safebucket/discussions)
+- **Community**:
+  [GitHub Discussions](https://github.com/safebucket/safebucket/discussions)
