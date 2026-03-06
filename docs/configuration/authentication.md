@@ -74,7 +74,7 @@ Safebucket supports any OpenID Connect providers for seamless user authenticatio
 
 On your OIDC provider, set the callback URL to:
 
-```
+```text
 https://yourdomain.com/api/v1/auth/providers/myprovider/callback
 ```
 
@@ -216,9 +216,11 @@ AUTH__PROVIDERS__GITHUB__OIDC__ISSUER=https://github.com
 
 1. **Create an OIDC client** in your Pocket ID admin panel
 2. **Set the callback URL** to:
-   ```
+
+   ```text
    https://yourdomain.com/api/v1/auth/providers/pocketid/callback
    ```
+
 3. **Copy your Client ID and Client Secret**
 
 ```bash

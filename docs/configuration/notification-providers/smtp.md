@@ -33,16 +33,16 @@ notifier:
     skip_verify_tls: false
 ```
 
-| Variable                          | Description                  | Default | Required |
-|-----------------------------------|------------------------------|---------|----------|
-| `NOTIFIER__TYPE`                  | Notification provider type   | -       | ✅        |
-| `NOTIFIER__SMTP__HOST`            | SMTP server host             | -       | ✅        |
-| `NOTIFIER__SMTP__PORT`            | SMTP server port             | -       | ✅        |
-| `NOTIFIER__SMTP__USERNAME`        | SMTP username                | -       | ❌        |
-| `NOTIFIER__SMTP__PASSWORD`        | SMTP password                | -       | ❌        |
-| `NOTIFIER__SMTP__SENDER`          | From email address           | -       | ✅        |
-| `NOTIFIER__SMTP__TLS_MODE`        | TLS connection mode (`ssl`, `starttls`, `none`) | `starttls` | ❌        |
-| `NOTIFIER__SMTP__SKIP_VERIFY_TLS` | Skip TLS certificate verification | `false` | ❌   |
+| Variable                          | Description                                     | Default    | Required |
+|-----------------------------------|-------------------------------------------------|------------|----------|
+| `NOTIFIER__TYPE`                  | Notification provider type                      | -          | Yes      |
+| `NOTIFIER__SMTP__HOST`            | SMTP server host                                | -          | Yes      |
+| `NOTIFIER__SMTP__PORT`            | SMTP server port                                | -          | Yes      |
+| `NOTIFIER__SMTP__USERNAME`        | SMTP username                                   | -          | No       |
+| `NOTIFIER__SMTP__PASSWORD`        | SMTP password                                   | -          | No       |
+| `NOTIFIER__SMTP__SENDER`          | From email address                              | -          | Yes      |
+| `NOTIFIER__SMTP__TLS_MODE`        | TLS connection mode (`ssl`, `starttls`, `none`) | `starttls` | No       |
+| `NOTIFIER__SMTP__SKIP_VERIFY_TLS` | Skip TLS certificate verification               | `false`    | No       |
 
 :::warning
 `SKIP_VERIFY_TLS` disables certificate verification. Do not use in production.
