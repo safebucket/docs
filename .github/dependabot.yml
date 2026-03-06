@@ -1,13 +1,18 @@
 version: 2
 updates:
-  # Maintain dependencies for npm (package.json)
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    groups:
+      npm-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
-  # Maintain GitHub Actions in your workflows
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
