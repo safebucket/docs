@@ -4,17 +4,17 @@ sidebar_position: 3
 
 # Authentication
 
-Safebucket supports multiple authentication methods including local authentication and OIDC providers. This guide covers
-configuration for various authentication options.
+Safebucket supports multiple authentication methods including local authentication and OIDC providers.
 
 ## Overview
 
 Safebucket's authentication system provides:
 
 - **Local Authentication**: Username/password with secure password hashing (Argon2id)
-- **OIDC Integration**: Support for popular OIDC providers (Google, GitHub, custom OIDC)
+- **OIDC Integration**: Support for any OIDC provider (Pocket ID, Authelia, Keycloak, ...)
 - **Role-Based Access Control**: Granular permissions with roles and groups
 - **Admin Management**: Built-in admin user creation and management
+- **Sharing Restrictions**: Control sharing permissions per provider with domain restrictions
 - **JWT Tokens**: Stateless authentication
 
 ## Authentication Flow
@@ -68,23 +68,26 @@ Safebucket automatically creates an admin user on startup:
 
 ## OIDC Providers
 
-Safebucket supports any OpenID Connect providers for seamless user authentication.
-
 ### Configuration Pattern
 
-OIDC providers follow this configuration pattern:
+On your OIDC provider, set the callback URL to:
+
+```
+https://yourdomain.com/api/v1/auth/providers/myprovider/callback
+```
 
 #### Environment Variables
 
 ```bash
-# Enable providers
-AUTH__PROVIDERS__KEYS=google,github,custom
+# Enable providers (comma-separated list of provider keys)
+AUTH__PROVIDERS__KEYS=myprovider
 
-# Provider configuration (replace {PROVIDER} with actual provider name)
-AUTH__PROVIDERS__{PROVIDER}__NAME=Display Name
-AUTH__PROVIDERS__{PROVIDER}__CLIENT_ID=your-client-id
-AUTH__PROVIDERS__{PROVIDER}__CLIENT_SECRET=your-client-secret
-AUTH__PROVIDERS__{PROVIDER}__ISSUER=https://provider-issuer-url
+# Provider configuration (replace MYPROVIDER with your provider key)
+AUTH__PROVIDERS__MYPROVIDER__NAME=Display Name
+AUTH__PROVIDERS__MYPROVIDER__TYPE=oidc
+AUTH__PROVIDERS__MYPROVIDER__OIDC__CLIENT_ID=your-client-id
+AUTH__PROVIDERS__MYPROVIDER__OIDC__CLIENT_SECRET=your-client-secret
+AUTH__PROVIDERS__MYPROVIDER__OIDC__ISSUER=https://provider-issuer-url
 ```
 
 #### YAML Configuration
@@ -101,47 +104,23 @@ auth:
         issuer: https://provider-issuer-url
       sharing:
         allowed: true
-        allowed_domains:
+        domains:
           - yourdomain.com
 ```
 
-## Google
+### Sharing Restrictions
 
-Configure Google for easy user authentication.
-
-### Prerequisites
-
-1. **Google Cloud Console** project
-2. **OAuth 2.0 Client ID** configured
-3. **Authorized redirect URIs** set
-
-### Setup Steps
-
-1. **Create OAuth Application**:
-    - Go to [Google Cloud Console](https://console.cloud.google.com)
-    - Navigate to APIs & Services > Credentials
-    - Create OAuth 2.0 Client ID (Web application)
-
-2. **Configure Redirect URIs**:
-   ```
-   http://localhost:3001/auth/callback/google  (development)
-   https://yourdomain.com/auth/callback/google (production)
-   ```
-
-3. **Get Credentials**:
-    - Client ID: `123456789-abcdef.apps.googleusercontent.com`
-    - Client Secret: `your-secret-key`
-
-### Configuration
+Restrict sharing to specific email domains or disable it entirely per provider.
 
 #### Environment Variables
 
 ```bash
-AUTH__PROVIDERS__KEYS=google
-AUTH__PROVIDERS__GOOGLE__NAME=Google
-AUTH__PROVIDERS__GOOGLE__CLIENT_ID=123456789-abcdef.apps.googleusercontent.com
-AUTH__PROVIDERS__GOOGLE__CLIENT_SECRET=your-client-secret
-AUTH__PROVIDERS__GOOGLE__ISSUER=https://accounts.google.com
+# Enable sharing with domain restrictions
+AUTH__PROVIDERS__MYPROVIDER__SHARING__ALLOWED=true
+AUTH__PROVIDERS__MYPROVIDER__SHARING__DOMAINS=company.com,partner.org
+
+# Or disable sharing entirely
+AUTH__PROVIDERS__MYPROVIDER__SHARING__ALLOWED=false
 ```
 
 #### YAML Configuration
@@ -149,157 +128,80 @@ AUTH__PROVIDERS__GOOGLE__ISSUER=https://accounts.google.com
 ```yaml
 auth:
   providers:
-    google:
-      type: oidc
-      name: Google
-      oidc:
-        client_id: 123456789-abcdef.apps.googleusercontent.com
-        client_secret: your-client-secret
-        issuer: https://accounts.google.com
+    myprovider:
       sharing:
         allowed: true
-```
-
-## GitHub
-
-Configure GitHub for developer-friendly authentication.
-
-### Setup Steps
-
-1. **Create OAuth App**:
-    - Go to GitHub Settings > Developer settings > OAuth Apps
-    - Click "New OAuth App"
-
-2. **Configure Application**:
-    - **Application name**: Safebucket
-    - **Homepage URL**: `https://yourdomain.com`
-    - **Authorization callback URL**: `https://yourdomain.com/auth/callback/github`
-
-3. **Get Credentials**:
-    - Client ID: `your-github-client-id`
-    - Client Secret: `your-github-client-secret`
-
-### Configuration
-
-#### Environment Variables
-
-```bash
-AUTH__PROVIDERS__KEYS=github
-AUTH__PROVIDERS__GITHUB__NAME=GitHub
-AUTH__PROVIDERS__GITHUB__CLIENT_ID=your-github-client-id
-AUTH__PROVIDERS__GITHUB__CLIENT_SECRET=your-github-client-secret
-AUTH__PROVIDERS__GITHUB__ISSUER=https://github.com
-```
-
-#### YAML Configuration
-
-```yaml
-auth:
-  providers:
-    github:
-      type: oidc
-      name: GitHub
-      oidc:
-        client_id: your-github-client-id
-        client_secret: your-github-client-secret
-        issuer: https://github.com
-      sharing:
-        allowed: true
-```
-
-## Custom OIDC Provider
-
-Configure any OpenID Connect compatible provider.
-
-### Examples
-
-#### Authelia
-
-```bash
-AUTH__PROVIDERS__KEYS=authelia
-AUTH__PROVIDERS__AUTHELIA__NAME=Authelia
-AUTH__PROVIDERS__AUTHELIA__CLIENT_ID=safebucket
-AUTH__PROVIDERS__AUTHELIA__CLIENT_SECRET=your-secret
-AUTH__PROVIDERS__AUTHELIA__ISSUER=https://auth.yourdomain.com
-```
-
-#### Keycloak
-
-```bash
-AUTH__PROVIDERS__KEYS=keycloak
-AUTH__PROVIDERS__KEYCLOAK__NAME=Keycloak
-AUTH__PROVIDERS__KEYCLOAK__CLIENT_ID=safebucket
-AUTH__PROVIDERS__KEYCLOAK__CLIENT_SECRET=your-secret
-AUTH__PROVIDERS__KEYCLOAK__ISSUER=https://keycloak.yourdomain.com/realms/your-realm
-```
-
-#### Okta
-
-```bash
-AUTH__PROVIDERS__KEYS=okta
-AUTH__PROVIDERS__OKTA__NAME=Okta
-AUTH__PROVIDERS__OKTA__CLIENT_ID=your-okta-client-id
-AUTH__PROVIDERS__OKTA__CLIENT_SECRET=your-okta-secret
-AUTH__PROVIDERS__OKTA__ISSUER=https://your-domain.okta.com
-```
-
-## Sharing Configuration
-
-Control which users can share files and with whom.
-
-### Domain Restrictions
-
-Restrict sharing to specific domains:
-
-```yaml
-auth:
-  providers:
-    google:
-      type: oidc
-      # ... oidc config ...
-      sharing:
-        allowed: true
-        allowed_domains:
+        domains:
           - company.com
           - partner.org
 ```
 
-### Disable Sharing
+### Example with Pocket ID
 
-Completely disable sharing for a provider:
+[Pocket ID](https://pocket-id.org) is a simple, self-hosted OIDC provider with passkey support.
 
-```yaml
-auth:
-  providers:
-    provider_name:
-      # ... oidc config ...
-      sharing:
-        allowed: false
-```
-
-## Multiple Providers
-
-Safebucket supports multiple authentication providers simultaneously:
+1. **Create an OIDC client** in your Pocket ID admin panel
+2. **Set the callback URL** to:
+   ```
+   https://yourdomain.com/api/v1/auth/providers/pocketid/callback
+   ```
+3. **Copy your Client ID and Client Secret**
 
 ```bash
-# Enable multiple providers
-AUTH__PROVIDERS__KEYS=local,google,github,authelia
+AUTH__PROVIDERS__KEYS=pocketid
+AUTH__PROVIDERS__POCKETID__NAME=Pocket ID
+AUTH__PROVIDERS__POCKETID__TYPE=oidc
+AUTH__PROVIDERS__POCKETID__OIDC__CLIENT_ID=your-client-id
+AUTH__PROVIDERS__POCKETID__OIDC__CLIENT_SECRET=your-client-secret
+AUTH__PROVIDERS__POCKETID__OIDC__ISSUER=https://auth.yourdomain.com
+```
 
-# Configure each provider
-AUTH__PROVIDERS__GOOGLE__NAME=Google
-AUTH__PROVIDERS__GOOGLE__CLIENT_ID=google-client-id
-AUTH__PROVIDERS__GOOGLE__CLIENT_SECRET=google-secret
-AUTH__PROVIDERS__GOOGLE__ISSUER=https://accounts.google.com
+### Other Providers
 
-AUTH__PROVIDERS__GITHUB__NAME=GitHub  
-AUTH__PROVIDERS__GITHUB__CLIENT_ID=github-client-id
-AUTH__PROVIDERS__GITHUB__CLIENT_SECRET=github-secret
-AUTH__PROVIDERS__GITHUB__ISSUER=https://github.com
+#### Authelia
 
+Callback URL: `https://yourdomain.com/api/v1/auth/providers/authelia/callback`
+
+```bash
+AUTH__PROVIDERS__KEYS=authelia
+AUTH__PROVIDERS__AUTHELIA__NAME=Authelia
+AUTH__PROVIDERS__AUTHELIA__TYPE=oidc
+AUTH__PROVIDERS__AUTHELIA__OIDC__CLIENT_ID=safebucket
+AUTH__PROVIDERS__AUTHELIA__OIDC__CLIENT_SECRET=your-secret
+AUTH__PROVIDERS__AUTHELIA__OIDC__ISSUER=https://auth.yourdomain.com
+```
+
+#### Keycloak
+
+Callback URL: `https://yourdomain.com/api/v1/auth/providers/keycloak/callback`
+
+```bash
+AUTH__PROVIDERS__KEYS=keycloak
+AUTH__PROVIDERS__KEYCLOAK__NAME=Keycloak
+AUTH__PROVIDERS__KEYCLOAK__TYPE=oidc
+AUTH__PROVIDERS__KEYCLOAK__OIDC__CLIENT_ID=safebucket
+AUTH__PROVIDERS__KEYCLOAK__OIDC__CLIENT_SECRET=your-secret
+AUTH__PROVIDERS__KEYCLOAK__OIDC__ISSUER=https://keycloak.yourdomain.com/realms/your-realm
+```
+
+### Multiple Providers
+
+```bash
+AUTH__PROVIDERS__KEYS=local,pocketid,authelia
+
+# Pocket ID
+AUTH__PROVIDERS__POCKETID__NAME=Pocket ID
+AUTH__PROVIDERS__POCKETID__TYPE=oidc
+AUTH__PROVIDERS__POCKETID__OIDC__CLIENT_ID=pocketid-client-id
+AUTH__PROVIDERS__POCKETID__OIDC__CLIENT_SECRET=pocketid-secret
+AUTH__PROVIDERS__POCKETID__OIDC__ISSUER=https://auth.yourdomain.com
+
+# Authelia
 AUTH__PROVIDERS__AUTHELIA__NAME=Company SSO
-AUTH__PROVIDERS__AUTHELIA__CLIENT_ID=safebucket
-AUTH__PROVIDERS__AUTHELIA__CLIENT_SECRET=authelia-secret
-AUTH__PROVIDERS__AUTHELIA__ISSUER=https://auth.company.com
+AUTH__PROVIDERS__AUTHELIA__TYPE=oidc
+AUTH__PROVIDERS__AUTHELIA__OIDC__CLIENT_ID=safebucket
+AUTH__PROVIDERS__AUTHELIA__OIDC__CLIENT_SECRET=authelia-secret
+AUTH__PROVIDERS__AUTHELIA__OIDC__ISSUER=https://sso.company.com
 ```
 
 Users can choose their preferred authentication method on the login page.
@@ -317,9 +219,3 @@ Users can choose their preferred authentication method on the login page.
 - **Local Users**: Assigned "User" role by default
 - **OIDC Users**: Assigned "User" role by default
 - **Admin User**: Assigned "Admin" role automatically
-
-## Security Best Practices
-
-1. **Secret Key**: Use a strong, randomly generated 256-bit key
-2. **Rotation**: Rotate JWT secrets periodically
-3. **Storage**: Store secrets securely (environment variables, secrets manager)
