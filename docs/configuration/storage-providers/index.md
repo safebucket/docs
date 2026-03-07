@@ -12,9 +12,11 @@ Dedicated providers are **event-driven** and fully optimized. You can also use
 tested S3-compatible provider via the Generic S3 type, though with less
 efficient.
 
-:::tip Dedicated providers Dedicated providers receive real-time event
+:::tip Dedicated providers
+Dedicated providers receive real-time event
 notifications for uploads, deletions and enabling efficient trash management via
-lifecycle policies. Prefer a dedicated provider when one is available. :::
+lifecycle policies. Prefer a dedicated provider when one is available.
+:::
 
 ## Dedicated Providers
 

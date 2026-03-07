@@ -26,5 +26,7 @@ notifier:
 | `NOTIFIER__TYPE`                  | Notification provider type               | -       | ✅       |
 | `NOTIFIER__FILESYSTEM__DIRECTORY` | Directory for storing notification files | -       | ✅       |
 
-:::info Each notification is stored as a separate `.json` file containing
-recipient, subject, template name, arguments, and timestamp. :::
+:::info
+Each notification is stored as a separate `.json` file containing
+recipient, subject, template name, arguments, and timestamp.
+:::

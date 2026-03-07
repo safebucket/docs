@@ -16,9 +16,11 @@ file operations, and storage events.
 - [**Memory**](./memory): In-process event queue using Go channels.
   Single-instance only.
 
-:::tip Which provider should I use? Use **Memory** for development and testing
+:::tip Which provider should I use?
+Use **Memory** for development and testing
 (single instance). Use **JetStream**, **GCP Pub/Sub**, or **AWS SQS** for
-production deployments. :::
+production deployments.
+:::
 
 ## Queue Configuration
 
@@ -52,7 +54,9 @@ events:
 | `EVENTS__QUEUES__BUCKET_EVENTS__NAME`   | Storage bucket events queue  | -       | ✅       |
 | `EVENTS__QUEUES__OBJECT_DELETION__NAME` | Object deletion events queue | -       | ✅       |
 
-:::info Bucket events The `bucket_events` queue receives events emitted by the
+:::info Bucket events
+The `bucket_events` queue receives events emitted by the
 storage provider (uploads, deletions). Only dedicated storage providers (RustFS,
 MinIO, AWS S3, GCP, Generic S3) emit these events. The queue name is still
-required in configuration regardless of the storage provider used. :::
+required in configuration regardless of the storage provider used.
+:::

@@ -4,13 +4,15 @@ SafeBucket supports S3-compatible storage providers through the generic `s3`
 storage type. This allows you to use any provider that implements the S3 API, as
 long as it supports **presigned POST policies** and **CORS**.
 
-:::info Dedicated providers are more optimized Dedicated storage types (RustFS,
+:::info Dedicated providers are more optimized
+Dedicated storage types (RustFS,
 MinIO, AWS S3, GCP) are **event-driven**, they receive real-time notifications
 when files are uploaded or deleted. The generic S3 type relies on other
 mechanisms, which are less efficient. Trash is also less optimized, as dedicated
 providers use **lifecycle policies** and **event notifications** to efficiently
 manage deleted files. If your provider has a dedicated integration, prefer using
-that over the generic S3 type. :::
+that over the generic S3 type.
+:::
 
 ## Provider Compatibility
 
