@@ -22,5 +22,7 @@ events:
 | -------------- | ------------------- | ------- | -------- |
 | `EVENTS__TYPE` | Event provider type | -       | ✅       |
 
-:::warning The Memory provider does not persist events across restarts and only
-works with a single application instance. :::
+:::warning
+The Memory provider does not persist events across restarts and only
+works with a single application instance.
+:::

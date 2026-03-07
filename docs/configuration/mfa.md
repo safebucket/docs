@@ -37,8 +37,10 @@ app:
   refresh_token_expiry: 600
 ```
 
-:::warning `APP__MFA_ENCRYPTION_KEY` must be exactly 32 bytes. Keep this key
-safe, losing it will invalidate all enrolled MFA devices. :::
+:::warning
+`APP__MFA_ENCRYPTION_KEY` must be exactly 32 bytes. Keep this key
+safe, losing it will invalidate all enrolled MFA devices.
+:::
 
 ## How It Works
 

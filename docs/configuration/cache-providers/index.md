@@ -16,6 +16,8 @@ attempt tracking, and notification batching. Three cache backends are supported.
 - [**Valkey**](./valkey): Valkey server, an open-source Redis alternative. Same
   feature set as the Redis provider.
 
-:::tip Which provider should I use? Use **Memory** for local development or
+:::tip Which provider should I use?
+Use **Memory** for local development or
 single-instance setups. Use **Redis** or **Valkey** for production deployments
-with multiple instances. :::
+with multiple instances.
+:::

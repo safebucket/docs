@@ -52,5 +52,7 @@ PostgreSQL supports several SSL modes for securing the database connection:
 | `verify-ca`   | Encrypt and verify the server certificate is signed by a trusted CA            |
 | `verify-full` | Encrypt, verify the CA, and verify the server hostname matches the certificate |
 
-:::warning Only use `disable` in development environments. For production, use
-`require` or stricter modes. :::
+:::warning
+Only use `disable` in development environments. For production, use
+`require` or stricter modes.
+:::

@@ -13,5 +13,7 @@ Safebucket supports multiple notification providers for delivering notifications
   external mail server required.
 - [**SMTP**](./smtp), Sends HTML emails via an SMTP server.
 
-:::tip Which provider should I use? Use the **Filesystem** provider for
-development and testing. Use **SMTP** for production deployments. :::
+:::tip Which provider should I use?
+Use the **Filesystem** provider for
+development and testing. Use **SMTP** for production deployments.
+:::

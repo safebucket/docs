@@ -14,6 +14,8 @@ activity logs (file uploads, downloads, deletions, etc.).
 - [**Loki**](./loki): Grafana Loki for scalable, production-grade log
   aggregation.
 
-:::tip Which provider should I use? Use the **Filesystem** provider for simple,
+:::tip Which provider should I use?
+Use the **Filesystem** provider for simple,
 light setups where you want a small footprint. Use **Loki** for scalable or
-production deployments. :::
+production deployments.
+:::
