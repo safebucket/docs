@@ -1,7 +1,7 @@
 # Filesystem
 
-The Filesystem notification provider writes notifications as JSON files to disk. Useful for development and testing, no
-external mail server required.
+The Filesystem notification provider writes notifications as JSON files to disk.
+Useful for development and testing, no external mail server required.
 
 ## Configuration
 
@@ -22,11 +22,11 @@ notifier:
 ```
 
 | Variable                          | Description                              | Default | Required |
-|-----------------------------------|------------------------------------------|---------|----------|
-| `NOTIFIER__TYPE`                  | Notification provider type               | -       | ✅        |
-| `NOTIFIER__FILESYSTEM__DIRECTORY` | Directory for storing notification files | -       | ✅        |
+| --------------------------------- | ---------------------------------------- | ------- | -------- |
+| `NOTIFIER__TYPE`                  | Notification provider type               | -       | ✅       |
+| `NOTIFIER__FILESYSTEM__DIRECTORY` | Directory for storing notification files | -       | ✅       |
 
 :::info
-Each notification is stored as a separate `.json` file containing recipient, subject, template name, arguments, and
-timestamp.
+Each notification is stored as a separate `.json` file containing
+recipient, subject, template name, arguments, and timestamp.
 :::

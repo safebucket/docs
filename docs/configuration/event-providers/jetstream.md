@@ -1,7 +1,7 @@
 # NATS JetStream
 
-[NATS JetStream](https://docs.nats.io/nats-concepts/jetstream) provides distributed messaging with work-queue retention
-and explicit acknowledgment.
+[NATS JetStream](https://docs.nats.io/nats-concepts/jetstream) provides
+distributed messaging with work-queue retention and explicit acknowledgment.
 
 ## Configuration
 
@@ -24,7 +24,7 @@ events:
 ```
 
 | Variable                  | Description         | Default | Required |
-|---------------------------|---------------------|---------|----------|
-| `EVENTS__TYPE`            | Event provider type | -       | ✅        |
-| `EVENTS__JETSTREAM__HOST` | NATS server host    | -       | ✅        |
-| `EVENTS__JETSTREAM__PORT` | NATS server port    | -       | ✅        |
+| ------------------------- | ------------------- | ------- | -------- |
+| `EVENTS__TYPE`            | Event provider type | -       | ✅       |
+| `EVENTS__JETSTREAM__HOST` | NATS server host    | -       | ✅       |
+| `EVENTS__JETSTREAM__PORT` | NATS server port    | -       | ✅       |

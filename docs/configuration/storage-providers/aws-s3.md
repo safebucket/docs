@@ -1,6 +1,7 @@
 # AWS S3
 
-[Amazon S3](https://aws.amazon.com/s3/) provides enterprise-grade object storage with global availability and advanced features.
+[Amazon S3](https://aws.amazon.com/s3/) provides enterprise-grade object storage
+with global availability and advanced features.
 
 ## Prerequisites
 
@@ -47,14 +48,19 @@ Create an IAM policy with these permissions:
 
 ### AWS Credentials
 
-Safebucket uses the [AWS SDK default credential chain](https://docs.aws.amazon.com/sdkref/latest/guide/standardized-credentials.html). You can authenticate using any supported method:
+Safebucket uses the
+[AWS SDK default credential chain](https://docs.aws.amazon.com/sdkref/latest/guide/standardized-credentials.html).
+You can authenticate using any supported method:
 
-- Environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`)
+- Environment variables (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`,
+  `AWS_REGION`)
 - Shared credentials file (`~/.aws/credentials`)
 - IAM roles (EC2, ECS, Lambda)
 - AWS profiles
 
-See the [AWS configuration reference](https://docs.aws.amazon.com/sdkref/latest/guide/settings-reference.html) for all supported variables.
+See the
+[AWS configuration reference](https://docs.aws.amazon.com/sdkref/latest/guide/settings-reference.html)
+for all supported variables.
 
 ### Environment Variables
 
@@ -96,16 +102,19 @@ events:
 ## S3 Event Notifications Setup
 
 1. **Create SQS Queue**:
+
    ```bash
    aws sqs create-queue --queue-name safebucket-sqs --region us-east-1
    ```
 
 2. **Configure S3 Event Notifications**:
-    - Go to S3 Console → Your Bucket → Properties → Event Notifications
-    - Create notification for "All object create events" and "All object delete events"
-    - Set destination to your SQS queue
+   - Go to S3 Console → Your Bucket → Properties → Event Notifications
+   - Create notification for "All object create events" and "All object delete
+     events"
+   - Set destination to your SQS queue
 
 3. **Update Queue Policy** to allow S3 to send messages:
+
    ```json
    {
      "Version": "2012-10-17",

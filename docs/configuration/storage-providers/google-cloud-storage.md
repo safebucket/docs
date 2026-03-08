@@ -1,6 +1,7 @@
 # Google Cloud Storage
 
-[Google Cloud Storage](https://cloud.google.com/storage) offers global object storage with strong consistency and integration with other GCP services.
+[Google Cloud Storage](https://cloud.google.com/storage) offers global object
+storage with strong consistency and integration with other GCP services.
 
 ## Prerequisites
 
@@ -13,20 +14,25 @@
 
 Create a service account with these roles:
 
-- `Storage Admin` (or custom role with storage.objects.*)
+- `Storage Admin` (or custom role with storage.objects.\*)
 - `Pub/Sub Editor` (for event notifications)
 
 ## Configuration
 
 ### GCP Credentials
 
-Safebucket uses [Application Default Credentials (ADC)](https://cloud.google.com/docs/authentication/application-default-credentials). You can authenticate using any supported method:
+Safebucket uses
+[Application Default Credentials (ADC)](https://cloud.google.com/docs/authentication/application-default-credentials).
+You can authenticate using any supported method:
 
-- `GOOGLE_APPLICATION_CREDENTIALS` environment variable pointing to a service account key file
+- `GOOGLE_APPLICATION_CREDENTIALS` environment variable pointing to a service
+  account key file
 - User credentials via `gcloud auth application-default login`
 - Attached service account (GKE, Cloud Run, Compute Engine)
 
-See the [ADC documentation](https://cloud.google.com/docs/authentication/application-default-credentials) for all supported methods.
+See the
+[ADC documentation](https://cloud.google.com/docs/authentication/application-default-credentials)
+for all supported methods.
 
 ### Environment Variables
 
@@ -70,6 +76,7 @@ events:
 ## GCS Event Notifications Setup
 
 1. **Create Pub/Sub Topic and Subscription**:
+
    ```bash
    # Create topic
    gcloud pubsub topics create safebucket-bucket-events
@@ -80,12 +87,14 @@ events:
    ```
 
 2. **Configure Bucket Notifications**:
+
    ```bash
    gsutil notification create -t safebucket-bucket-events \
      -f json gs://safebucket-gcp
    ```
 
 3. **Create Service Account and Download Key**:
+
    ```bash
    # Create service account
    gcloud iam service-accounts create safebucket-storage

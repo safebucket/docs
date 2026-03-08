@@ -8,8 +8,9 @@ sidebar_position: 2
 
 ### Uploads & Downloads
 
-Files are uploaded directly to your cloud storage provider via presigned URLs. The application server never handles file
-data. Clients upload and download straight from the storage backend.
+Files are uploaded directly to your cloud storage provider via presigned URLs.
+The application server never handles file data. Clients upload and download
+straight from the storage backend.
 
 - Buckets as logical containers for sharing
 - Nested folder hierarchies within buckets
@@ -47,16 +48,21 @@ Soft-delete with configurable retention and automatic cleanup.
 Access control operates at two levels.
 
 **Platform roles** define what a user can do across the application:
-- **Admin**: Full platform management, user administration, system-wide activity view
+
+- **Admin**: Full platform management, user administration, system-wide activity
+  view
 - **User**: Create buckets, manage their own buckets and memberships
-- **Guest**: Can only access buckets they have been explicitly invited to. Cannot create buckets.
+- **Guest**: Can only access buckets they have been explicitly invited to.
+  Cannot create buckets.
 
 **Bucket roles** define what a member can do within a specific bucket:
+
 - **Owner**: Full bucket management and member administration
 - **Contributor**: Upload, download, rename, and delete files and folders
 - **Viewer**: Read-only access
 
-All file access is bucket-scoped. Permissions are enforced at API middleware level on every request.
+All file access is bucket-scoped. Permissions are enforced at API middleware
+level on every request.
 
 ### User Invitations
 
@@ -117,16 +123,19 @@ MFA for local users.
 
 Admin users have access to a dedicated dashboard with four views:
 
-- **Dashboard**: Platform statistics including total users, buckets, files, folders, and storage used
+- **Dashboard**: Platform statistics including total users, buckets, files,
+  folders, and storage used
 - **Activity**: System-wide activity log
 - **Users**: Full user list with roles and account status
-- **Buckets**: All buckets across the platform with member counts and storage usage
+- **Buckets**: All buckets across the platform with member counts and storage
+  usage
 
 ![Admin activity view](./../static/features/admin_activity.png)
 
 ## Personalization
 
-- Multiple color themes: Default, Darkmatter, Quantum Rose, Ocean Breeze, Elegant Luxury, Neo Brutalism
+- Multiple color themes: Default, Darkmatter, Quantum Rose, Ocean Breeze,
+  Elegant Luxury, Neo Brutalism
 - Light and dark mode with system preference detection
 - Language selection (English, French)
 
@@ -134,14 +143,17 @@ Admin users have access to a dedicated dashboard with four views:
 
 ## Infrastructure
 
-Every component is swappable. Safebucket provides ready-to-use deployment templates, but each layer (storage, events,
-cache, deployment) can be replaced with whatever fits your environment.
+Every component is swappable. Safebucket provides ready-to-use deployment
+templates, but each layer (storage, events, cache, deployment) can be replaced
+with whatever fits your environment.
 
 **Deployment templates:**
 
-- **local/full**: Docker Compose with all services (Safebucket, PostgreSQL, RustFS, Valkey, NATS, Loki, Mailpit)
+- **local/full**: Docker Compose with all services (Safebucket, PostgreSQL,
+  RustFS, Valkey, NATS, Loki, Mailpit)
 - **local/lite**: Minimal Docker Compose for a lightweight setup
 - **dev**: Infrastructure services only, run Safebucket from source
-- **aws**: Terraform modules for ECS Fargate, RDS, ElastiCache, S3, SQS, and CloudWatch
+- **aws**: Terraform modules for ECS Fargate, RDS, ElastiCache, S3, SQS, and
+  CloudWatch
 
 [Get started](./getting-started/local-lite-deployment)

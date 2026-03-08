@@ -4,8 +4,8 @@ sidebar_position: 1
 
 # Environment Variables
 
-Safebucket uses environment variables for configuration. This page documents all available environment variables
-organized by category.
+Safebucket uses environment variables for configuration. This page documents all
+available environment variables organized by category.
 
 ## Configuration Methods
 
@@ -30,39 +30,42 @@ Default search paths:
 
 ### Environment Variable Naming Convention
 
-Safebucket uses **double underscores (`__`)** as separators in environment variables, which map to nested configuration:
+Safebucket uses **double underscores (`__`)** as separators in environment
+variables, which map to nested configuration:
 
 - `APP__LOG_LEVEL` becomes `app.log_level` in the config structure
 - `STORAGE__RUSTFS__BUCKET_NAME` becomes `storage.rustfs.bucket_name`
 
-This hierarchical approach makes configuration organization clear and consistent.
+This hierarchical approach makes configuration organization clear and
+consistent.
 
 ## Application Settings
 
 ### Basic Application Configuration
 
 | Variable                    | Description                                             | Default               | Required | Valid Values                                       |
-|-----------------------------|---------------------------------------------------------|-----------------------|----------|----------------------------------------------------|
-| `APP__LOG_LEVEL`            | Logging level for the application                       | `info`                | ❌        | `debug`, `info`, `warn`, `error`, `fatal`, `panic` |
-| `APP__API_URL`              | API base URL                                            | -                     | ✅        | -                                                  |
-| `APP__WEB_URL`              | Frontend web URL                                        | -                     | ✅        | -                                                  |
-| `APP__PORT`                 | Server port (80-65535)                                  | `8080`                | ❌        | `80-65535`                                         |
-| `APP__JWT_SECRET`           | JWT signing secret                                      | -                     | ✅        | -                                                  |
-| `APP__ADMIN_EMAIL`          | Admin user email                                        | -                     | ✅        | Valid email                                        |
-| `APP__ADMIN_PASSWORD`       | Admin user password                                     | -                     | ✅        | -                                                  |
-| `APP__TRASH_RETENTION_DAYS` | Days to retain files in trash before automatic deletion | `7`                   | ❌        | `1-365`                                            |
-| `APP__MAX_UPLOAD_SIZE`      | Maximum file upload size in bytes                       | `53687091200` (50 GB) | ❌        | `≥ 1`                                              |
+| --------------------------- | ------------------------------------------------------- | --------------------- | -------- | -------------------------------------------------- |
+| `APP__LOG_LEVEL`            | Logging level for the application                       | `info`                | ❌       | `debug`, `info`, `warn`, `error`, `fatal`, `panic` |
+| `APP__API_URL`              | API base URL                                            | -                     | ✅       | -                                                  |
+| `APP__WEB_URL`              | Frontend web URL                                        | -                     | ✅       | -                                                  |
+| `APP__PORT`                 | Server port (80-65535)                                  | `8080`                | ❌       | `80-65535`                                         |
+| `APP__JWT_SECRET`           | JWT signing secret                                      | -                     | ✅       | -                                                  |
+| `APP__ADMIN_EMAIL`          | Admin user email                                        | -                     | ✅       | Valid email                                        |
+| `APP__ADMIN_PASSWORD`       | Admin user password                                     | -                     | ✅       | -                                                  |
+| `APP__TRASH_RETENTION_DAYS` | Days to retain files in trash before automatic deletion | `7`                   | ❌       | `1-365`                                            |
+| `APP__MAX_UPLOAD_SIZE`      | Maximum file upload size in bytes                       | `53687091200` (50 GB) | ❌       | `≥ 1`                                              |
 
 ### MFA Configuration
 
-For MFA environment variables and setup, see the [MFA Configuration](./mfa) page.
+For MFA environment variables and setup, see the [MFA Configuration](./mfa)
+page.
 
 ### CORS and Security
 
 | Variable               | Description                       | Default | Required |
-|------------------------|-----------------------------------|---------|----------|
-| `APP__ALLOWED_ORIGINS` | Comma-separated allowed origins   | -       | ✅        |
-| `APP__TRUSTED_PROXIES` | Comma-separated trusted proxy IPs | -       | ✅        |
+| ---------------------- | --------------------------------- | ------- | -------- |
+| `APP__ALLOWED_ORIGINS` | Comma-separated allowed origins   | -       | ✅       |
+| `APP__TRUSTED_PROXIES` | Comma-separated trusted proxy IPs | -       | ✅       |
 
 **Example:**
 
@@ -80,9 +83,9 @@ APP__TRUSTED_PROXIES=127.0.0.1,::1
 ### Static Files
 
 | Variable                       | Description                | Default    | Required |
-|--------------------------------|----------------------------|------------|----------|
-| `APP__STATIC_FILES__ENABLED`   | Enable static file serving | `true`     | ❌        |
-| `APP__STATIC_FILES__DIRECTORY` | Static files directory     | `web/dist` | ❌        |
+| ------------------------------ | -------------------------- | ---------- | -------- |
+| `APP__STATIC_FILES__ENABLED`   | Enable static file serving | `true`     | ❌       |
+| `APP__STATIC_FILES__DIRECTORY` | Static files directory     | `web/dist` | ❌       |
 
 ### TLS
 
@@ -115,59 +118,66 @@ In containerized environments, you can mount TLS certificates as secrets and poi
 ## Database Configuration
 
 | Variable         | Description   | Default    | Required |
-|------------------|---------------|------------|----------|
-| `DATABASE__TYPE` | Database type | `postgres` | ❌        |
+| ---------------- | ------------- | ---------- | -------- |
+| `DATABASE__TYPE` | Database type | `postgres` | ❌       |
 
-For detailed database configuration (PostgreSQL, SQLite), see the [Database Providers](./database-providers) page.
+For detailed database configuration (PostgreSQL, SQLite), see the
+[Database Providers](./database-providers) page.
 
 ## Authentication Configuration
 
-For detailed authentication configuration including OIDC providers and domain restrictions, see
-the [Authentication Configuration](./authentication) page.
+For detailed authentication configuration including OIDC providers and domain
+restrictions, see the [Authentication Configuration](./authentication) page.
 
 ## Storage Configuration
 
 | Variable        | Description                                                   | Default | Required |
-|-----------------|---------------------------------------------------------------|---------|----------|
-| `STORAGE__TYPE` | Storage provider type (`rustfs`, `minio`, `aws`, `gcp`, `s3`) | -       | ✅        |
+| --------------- | ------------------------------------------------------------- | ------- | -------- |
+| `STORAGE__TYPE` | Storage provider type (`rustfs`, `minio`, `aws`, `gcp`, `s3`) | -       | ✅       |
 
-For detailed storage provider configuration, see the [Storage Providers](./storage-providers) page.
+For detailed storage provider configuration, see the
+[Storage Providers](./storage-providers) page.
 
 ## Cache Configuration
 
 | Variable      | Description                                       | Default | Required |
-|---------------|---------------------------------------------------|---------|----------|
-| `CACHE__TYPE` | Cache provider type (`memory`, `redis`, `valkey`) | -       | ✅        |
+| ------------- | ------------------------------------------------- | ------- | -------- |
+| `CACHE__TYPE` | Cache provider type (`memory`, `redis`, `valkey`) | -       | ✅       |
 
-For detailed cache provider configuration, see the [Cache Providers](./cache-providers) page.
+For detailed cache provider configuration, see the
+[Cache Providers](./cache-providers) page.
 
 ## Events Configuration
 
 | Variable       | Description                                               | Default | Required |
-|----------------|-----------------------------------------------------------|---------|----------|
-| `EVENTS__TYPE` | Event provider type (`jetstream`, `gcp`, `aws`, `memory`) | -       | ✅        |
+| -------------- | --------------------------------------------------------- | ------- | -------- |
+| `EVENTS__TYPE` | Event provider type (`jetstream`, `gcp`, `aws`, `memory`) | -       | ✅       |
 
-For detailed event provider configuration, see the [Event Providers](./event-providers) page.
+For detailed event provider configuration, see the
+[Event Providers](./event-providers) page.
 
 ## Notification Configuration
 
 | Variable         | Description                                       | Default | Required |
-|------------------|---------------------------------------------------|---------|----------|
-| `NOTIFIER__TYPE` | Notification provider type (`smtp`, `filesystem`) | -       | ✅        |
+| ---------------- | ------------------------------------------------- | ------- | -------- |
+| `NOTIFIER__TYPE` | Notification provider type (`smtp`, `filesystem`) | -       | ✅       |
 
-For detailed notification provider configuration, see the [Notification Providers](./notification-providers) page.
+For detailed notification provider configuration, see the
+[Notification Providers](./notification-providers) page.
 
 ## Activity Logging
 
 | Variable         | Description                                   | Default | Required |
-|------------------|-----------------------------------------------|---------|----------|
-| `ACTIVITY__TYPE` | Activity provider type (`filesystem`, `loki`) | -       | ✅        |
+| ---------------- | --------------------------------------------- | ------- | -------- |
+| `ACTIVITY__TYPE` | Activity provider type (`filesystem`, `loki`) | -       | ✅       |
 
-For detailed activity provider configuration, see the [Activity Providers](./activity-providers) page.
+For detailed activity provider configuration, see the
+[Activity Providers](./activity-providers) page.
 
 ## Complete Example
 
-Here's a complete example of environment variables for a local development setup:
+Here's a complete example of environment variables for a local development
+setup:
 
 ```bash
 # Application
@@ -243,5 +253,5 @@ AUTH__PROVIDERS__LOCAL__TYPE=local
 
 ## Validation
 
-Safebucket validates all configuration on startup. If required variables are missing or invalid, the application will
-exit with detailed error messages.
+Safebucket validates all configuration on startup. If required variables are
+missing or invalid, the application will exit with detailed error messages.

@@ -1,8 +1,10 @@
 # Memory
 
-The in-memory cache stores all data in the application process. It requires no external services.
+The in-memory cache stores all data in the application process. It requires no
+external services.
 
-Data is not shared between instances and is lost on restart. This provider is only suitable for single-instance deployments.
+Data is not shared between instances and is lost on restart. This provider is
+only suitable for single-instance deployments.
 
 ## Configuration
 
@@ -19,6 +21,6 @@ cache:
   type: memory
 ```
 
-| Variable       | Description          | Default | Required |
-|----------------|----------------------|---------|----------|
-| `CACHE__TYPE`  | Cache provider type  | -       | ✅        |
+| Variable      | Description         | Default | Required |
+| ------------- | ------------------- | ------- | -------- |
+| `CACHE__TYPE` | Cache provider type | -       | ✅       |
