@@ -86,12 +86,12 @@ APP__TRUSTED_PROXIES=127.0.0.1,::1
 
 ### TLS
 
-Safebucket supports optional TLS termination. When both a certificate and key file are provided, the server starts in HTTPS mode. If neither is set, the server runs plain HTTP.
+Safebucket supports optional TLS termination. Providing either a certificate or a key file requires the other to be present as well. When both are provided, the server starts in HTTPS mode. If neither is set, the server runs plain HTTP.
 
-| Variable              | Description                  | Default | Required |
-|-----------------------|------------------------------|---------|----------|
-| `APP__TLS_CERT_FILE`  | Path to TLS certificate file | -       | ❌        |
-| `APP__TLS_KEY_FILE`   | Path to TLS private key file | -       | ❌        |
+| Variable              | Description                  | Default | Required                   |
+|-----------------------|------------------------------|---------|----------------------------|
+| `APP__TLS_CERT_FILE`  | Path to TLS certificate file | -       | ❌ (Required with key)      |
+| `APP__TLS_KEY_FILE`   | Path to TLS private key file | -       | ❌ (Required with cert)     |
 
 **Environment variables:**
 
