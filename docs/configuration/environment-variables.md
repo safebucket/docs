@@ -87,6 +87,34 @@ APP__TRUSTED_PROXIES=127.0.0.1,::1
 | `APP__STATIC_FILES__ENABLED`   | Enable static file serving | `true`     | ❌       |
 | `APP__STATIC_FILES__DIRECTORY` | Static files directory     | `web/dist` | ❌       |
 
+### TLS
+
+Safebucket supports optional TLS termination. Providing a certificate and a key file.
+
+| Variable              | Description                  | Default | Required                 |
+| --------------------- | ---------------------------- | ------- | ------------------------ |
+| `APP__TLS_CERT_FILE`  | Path to TLS certificate file | -       | ❌ (Required with key)   |
+| `APP__TLS_KEY_FILE`   | Path to TLS private key file | -       | ❌ (Required with cert)  |
+
+**Environment variables:**
+
+```bash
+APP__TLS_CERT_FILE=/etc/safebucket/tls/tls.crt
+APP__TLS_KEY_FILE=/etc/safebucket/tls/tls.key
+```
+
+**YAML configuration:**
+
+```yaml
+app:
+  tls_cert_file: /etc/safebucket/tls/tls.crt
+  tls_key_file: /etc/safebucket/tls/tls.key
+```
+
+:::tip
+In containerized environments, you can mount TLS certificates as secrets and point these variables to the mount paths.
+:::
+
 ## Database Configuration
 
 | Variable         | Description   | Default    | Required |
