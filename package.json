@@ -13,8 +13,7 @@
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
     "typecheck": "tsc",
-    "lint": "markdownlint \"**/*.md\"",
-    "test": "npm run typecheck"
+    "lint": "markdownlint \"**/*.md\""
   },
   "dependencies": {
     "@docusaurus/core": "3.9.2",
