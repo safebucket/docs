@@ -68,7 +68,7 @@ Safebucket automatically creates an admin user on startup:
 
 ## OIDC Providers
 
-Safebucket supports any OpenID Connect providers for seamless user authentication.
+Safebucket supports any OpenID Connect provider.
 
 ### Configuration Pattern
 
