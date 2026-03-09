@@ -9,12 +9,12 @@ production deployments.
 
 | Variable                       | Description         | Default | Required |
 |--------------------------------|---------------------|---------|----------|
-| `DATABASE__POSTGRES__HOST`     | PostgreSQL host     | -       | ✅        |
-| `DATABASE__POSTGRES__PORT`     | PostgreSQL port     | `5432`  | ❌        |
-| `DATABASE__POSTGRES__USER`     | Database username   | -       | ✅        |
-| `DATABASE__POSTGRES__PASSWORD` | Database password   | -       | ✅        |
-| `DATABASE__POSTGRES__NAME`     | Database name       | -       | ✅        |
-| `DATABASE__POSTGRES__SSLMODE`  | SSL connection mode | -       | ❌        |
+| `DATABASE__POSTGRES__HOST`     | PostgreSQL host     | -       | ✅       |
+| `DATABASE__POSTGRES__PORT`     | PostgreSQL port     | `5432`  | ❌       |
+| `DATABASE__POSTGRES__USER`     | Database username   | -       | ✅       |
+| `DATABASE__POSTGRES__PASSWORD` | Database password   | -       | ✅       |
+| `DATABASE__POSTGRES__NAME`     | Database name       | -       | ✅       |
+| `DATABASE__POSTGRES__SSLMODE`  | SSL connection mode | -       | ❌       |
 
 ```bash
 DATABASE__TYPE=postgres
