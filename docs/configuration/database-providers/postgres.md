@@ -1,15 +1,14 @@
 # PostgreSQL
 
 [PostgreSQL](https://www.postgresql.org/) is the recommended database for
-production deployments. It provides full concurrency support, connection
-pooling, and robust data integrity.
+production deployments.
 
 ## Configuration
 
 ### Environment Variables
 
 | Variable                       | Description         | Default | Required |
-| ------------------------------ | ------------------- | ------- | -------- |
+|--------------------------------|---------------------|---------|----------|
 | `DATABASE__POSTGRES__HOST`     | PostgreSQL host     | -       | ✅       |
 | `DATABASE__POSTGRES__PORT`     | PostgreSQL port     | `5432`  | ❌       |
 | `DATABASE__POSTGRES__USER`     | Database username   | -       | ✅       |
@@ -46,8 +45,8 @@ database:
 PostgreSQL supports several SSL modes for securing the database connection:
 
 | Mode          | Description                                                                    |
-| ------------- | ------------------------------------------------------------------------------ |
-| `disable`     | No SSL — unencrypted connection                                                |
+|---------------|--------------------------------------------------------------------------------|
+| `disable`     | No SSL, unencrypted connection                                                 |
 | `require`     | Encrypt the connection but don't verify the server certificate                 |
 | `verify-ca`   | Encrypt and verify the server certificate is signed by a trusted CA            |
 | `verify-full` | Encrypt, verify the CA, and verify the server hostname matches the certificate |

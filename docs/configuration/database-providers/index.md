@@ -9,7 +9,7 @@ the one that best fits your deployment needs.
 
 :::tip Which database should I use?
 Use **PostgreSQL** for production
-deployments — it offers full concurrency, connection pooling, and scales with
+deployments: it offers full concurrency, connection pooling, and scales with
 your workload. Use **SQLite** for lightweight or development deployments where
 minimal infrastructure is preferred.
 :::
@@ -22,7 +22,7 @@ minimal infrastructure is preferred.
 
 ## Providers
 
-- [**PostgreSQL**](./postgres) — Full-featured relational database for
+- [**PostgreSQL**](./postgres): Full-featured relational database for
   production use
-- [**SQLite**](./sqlite) — Embedded file-based database for lightweight
+- [**SQLite**](./sqlite): Embedded file-based database for lightweight
   deployments

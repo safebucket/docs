@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # API Overview
 
-Safebucket provides a comprehensive REST API for programmatic access to file
+Safebucket exposes a REST API for programmatic access to file
 sharing functionality. The API is built with Go using the Chi router and follows
 RESTful conventions.
 
