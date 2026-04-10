@@ -43,17 +43,34 @@ consistent.
 
 ### Basic Application Configuration
 
-| Variable                    | Description                                             | Default               | Required | Valid Values                                       |
-| --------------------------- | ------------------------------------------------------- | --------------------- | -------- | -------------------------------------------------- |
-| `APP__LOG_LEVEL`            | Logging level for the application                       | `info`                | ❌       | `debug`, `info`, `warn`, `error`, `fatal`, `panic` |
-| `APP__API_URL`              | API base URL                                            | -                     | ✅       | -                                                  |
-| `APP__WEB_URL`              | Frontend web URL                                        | -                     | ✅       | -                                                  |
-| `APP__PORT`                 | Server port (80-65535)                                  | `8080`                | ❌       | `80-65535`                                         |
-| `APP__JWT_SECRET`           | JWT signing secret                                      | -                     | ✅       | -                                                  |
-| `APP__ADMIN_EMAIL`          | Admin user email                                        | -                     | ✅       | Valid email                                        |
-| `APP__ADMIN_PASSWORD`       | Admin user password                                     | -                     | ✅       | -                                                  |
-| `APP__TRASH_RETENTION_DAYS` | Days to retain files in trash before automatic deletion | `7`                   | ❌       | `1-365`                                            |
-| `APP__MAX_UPLOAD_SIZE`      | Maximum file upload size in bytes                       | `53687091200` (50 GB) | ❌       | `≥ 1`                                              |
+| Variable                                   | Description                                             | Default               | Required | Valid Values                                       |
+|--------------------------------------------|---------------------------------------------------------|-----------------------|----------|----------------------------------------------------|
+| `APP__LOG_LEVEL`                           | Logging level for the application                       | `info`                | ❌        | `debug`, `info`, `warn`, `error`, `fatal`, `panic` |
+| `APP__PROFILE`                             | Application profile controlling which components run    | `default`             | ❌        | `default`, `api`, `worker`                         |
+| `APP__API_URL`                             | API base URL                                            | -                     | ✅        | -                                                  |
+| `APP__WEB_URL`                             | Frontend web URL                                        | -                     | ✅        | -                                                  |
+| `APP__PORT`                                | Server port (80-65535)                                  | `8080`                | ❌        | `80-65535`                                         |
+| `APP__JWT_SECRET`                          | JWT signing secret                                      | -                     | ✅        | -                                                  |
+| `APP__ADMIN_EMAIL`                         | Admin user email                                        | -                     | ✅        | Valid email                                        |
+| `APP__ADMIN_PASSWORD`                      | Admin user password                                     | -                     | ✅        | -                                                  |
+| `APP__TRASH_RETENTION_DAYS`                | Days to retain files in trash before automatic deletion | `7`                   | ❌        | `1-365`                                            |
+| `APP__MAX_UPLOAD_SIZE`                     | Maximum file upload size in bytes                       | `53687091200` (50 GB) | ❌        | `≥ 1`                                              |
+| `APP__AUTHENTICATED_REQUESTS_PER_MINUTE`   | Rate limit for authenticated requests (per user)        | `200`                 | ❌        | `≥ 1`                                              |
+| `APP__UNAUTHENTICATED_REQUESTS_PER_MINUTE` | Rate limit for unauthenticated requests (per IP)        | `20`                  | ❌        | `≥ 1`                                              |
+
+### Profile
+
+The `APP__PROFILE` setting controls which components are started:
+
+| Profile   | HTTP Server | Workers                              |
+|-----------|-------------|--------------------------------------|
+| `default` | ✅           | All workers enabled                  |
+| `api`     | ✅           | All workers disabled                 |
+| `worker`  | ❌           | All workers enabled (singleton mode) |
+
+Workers are background processes that handle asynchronous tasks independently of the HTTP server: processing object deletions, handling bucket events, cleaning up trash, and running garbage collection (stale uploads, expired files/shares/sessions).
+
+Use `api` and `worker` profiles to run the HTTP server and background workers as separate processes (e.g., in a horizontally scaled deployment).
 
 ### MFA Configuration
 
