@@ -183,15 +183,14 @@ file: [binary file data]
 
 ## Rate Limiting
 
-The API implements rate limiting to prevent abuse:
+The API implements rate limiting to prevent abuse. Limits are applied per user for authenticated requests and per IP for unauthenticated requests:
 
-- **Rate Limit**: 100 requests per minute per IP
-- **Headers**: Rate limit information in response headers
-  - `X-RateLimit-Limit`: Request limit
-  - `X-RateLimit-Remaining`: Remaining requests
-  - `X-RateLimit-Reset`: Reset timestamp
+| Request type    | Default limit           | Configuration                              |
+|-----------------|-------------------------|--------------------------------------------|
+| Authenticated   | 200 requests per minute | `APP__AUTHENTICATED_REQUESTS_PER_MINUTE`   |
+| Unauthenticated | 20 requests per minute  | `APP__UNAUTHENTICATED_REQUESTS_PER_MINUTE` |
 
-When rate limit is exceeded:
+When the rate limit is exceeded, the response includes a `Retry-After` header indicating how many seconds to wait:
 
 ```json
 {
