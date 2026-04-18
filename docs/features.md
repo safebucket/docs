@@ -20,6 +20,23 @@ straight from the storage backend.
 
 ![Bucket list view](./../static/features/bucket_list_view.png)
 
+### Quick Share & Reverse Share
+
+Share files, folders, or an entire bucket via a public link. Recipients
+download without a Safebucket account, and the same link can also accept
+uploads back from external users.
+
+- Three scopes: individual files, a folder, or the whole bucket
+- Optional expiration date
+- Optional maximum view count
+- Optional password protection
+- Optional reverse share available on folder and bucket shares
+- Optional maximum upload count and per-file size limit on reverse shares
+
+![Quick share dialog](./../static/features/quick_share_dialog.png)
+
+![Quick share dialog options](./../static/features/quick_share_dialog_options.png)
+
 ### File Expiration
 
 Optional per-file expiration dates set at upload time.
