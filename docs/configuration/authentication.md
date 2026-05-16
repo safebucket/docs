@@ -15,7 +15,7 @@ Safebucket's authentication system provides:
 - **Role-Based Access Control**: Granular permissions with roles and groups
 - **Admin Management**: Built-in admin user creation and management
 - **Sharing Restrictions**: Control sharing permissions per provider with domain restrictions
-- **Encrypted tokens**: HS256-signed JWS wrapped in a JWE (AES-256-GCM, key derived from `APP__JWT_SECRET` via HKDF-SHA256). Both the payload and the signature are unreadable without the secret.
+- **Encrypted tokens**: HS256-signed JWS wrapped in a JWE. Both the payload and the signature are unreadable without the secret.
 - **Server-tracked sessions**: Access tokens carry a session ID validated against the cache on every request, so logout and session revocation take effect immediately
 
 ## Authentication Flow
@@ -31,7 +31,8 @@ Local authentication uses email/password with secure Argon2id password hashing.
 #### Environment Variables
 
 ```bash
-APP__JWT_SECRET=your-256-bit-secret-key
+# Token signing secret
+APP__TOKEN_SECRET=your-256-bit-secret-key
 
 # Admin User
 APP__ADMIN_EMAIL=admin@safebucket.io
@@ -42,7 +43,7 @@ APP__ADMIN_PASSWORD=ChangeMePlease
 
 ```yaml
 app:
-  jwt_secret: your-256-bit-secret-key
+  token_secret: your-256-bit-secret-key
   admin_email: admin@safebucket.io
   admin_password: ChangeMePlease
 

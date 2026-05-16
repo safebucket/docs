@@ -44,13 +44,13 @@ consistent.
 ### Basic Application Configuration
 
 | Variable                                    | Description                                             | Default               | Required | Valid Values                                       |
-| ------------------------------------------- |---------------------------------------------------------| --------------------- | -------- | -------------------------------------------------- |
+| ------------------------------------------- | ------------------------------------------------------- | --------------------- | -------- | -------------------------------------------------- |
 | `APP__LOG_LEVEL`                            | Logging level for the application                       | `info`                | ❌       | `debug`, `info`, `warn`, `error`, `fatal`, `panic` |
 | `APP__PROFILE`                              | Application profile controlling which components run    | `default`             | ❌       | `default`, `api`, `worker`                         |
 | `APP__API_URL`                              | API base URL                                            | -                     | ✅       | -                                                  |
 | `APP__WEB_URL`                              | Frontend web URL                                        | -                     | ✅       | -                                                  |
 | `APP__PORT`                                 | Server port (80-65535)                                  | `8080`                | ❌       | `80-65535`                                         |
-| `APP__JWT_SECRET`                           | Token secret                                            | -                     | ✅       | 32+ chars                                          |
+| `APP__TOKEN_SECRET`                         | Token signing secret                                    | -                     | ✅       | -                                                  |
 | `APP__ADMIN_EMAIL`                          | Admin user email                                        | -                     | ✅       | Valid email                                        |
 | `APP__ADMIN_PASSWORD`                       | Admin user password                                     | -                     | ✅       | -                                                  |
 | `APP__TRASH_RETENTION_DAYS`                 | Days to retain files in trash before automatic deletion | `7`                   | ❌       | `1-365`                                            |
@@ -90,7 +90,7 @@ page.
 APP__API_URL=http://localhost:1323
 APP__WEB_URL=http://localhost:3001
 APP__PORT=1323
-APP__JWT_SECRET=your-256-bit-secret
+APP__TOKEN_SECRET=your-256-bit-secret
 APP__ADMIN_EMAIL=admin@safebucket.io
 APP__ADMIN_PASSWORD=ChangeMePlease
 APP__ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
@@ -202,7 +202,7 @@ APP__LOG_LEVEL=info
 APP__API_URL=http://localhost:8080
 APP__WEB_URL=http://localhost:8080
 APP__PORT=8080
-APP__JWT_SECRET=6n5o+dFncio8gQA4jt7pUJrJz92WrqD25zXAa8ashxA
+APP__TOKEN_SECRET=6n5o+dFncio8gQA4jt7pUJrJz92WrqD25zXAa8ashxA
 APP__ADMIN_EMAIL=admin@safebucket.io
 APP__ADMIN_PASSWORD=ChangeMePlease
 APP__ALLOWED_ORIGINS=http://localhost:8080,http://127.0.0.1:8080
