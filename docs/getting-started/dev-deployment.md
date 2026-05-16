@@ -186,4 +186,3 @@ be set separately when running locally.
 - [Configure OIDC providers](../configuration/authentication)
 - [Learn about storage providers](../configuration/storage-providers)
 - [Explore environment variables](../configuration/environment-variables)
-- [Read the API documentation](../api/overview)
