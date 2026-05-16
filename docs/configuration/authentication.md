@@ -10,12 +10,13 @@ Safebucket supports multiple authentication methods including local authenticati
 
 Safebucket's authentication system provides:
 
-- **Local Authentication**: Username/password with secure password hashing (Argon2id)
+- **Local Authentication**: Username/password with Argon2id hashing
 - **OIDC Integration**: Support for any OIDC provider (Pocket ID, Authelia, Keycloak, Google, GitHub, custom OIDC)
 - **Role-Based Access Control**: Granular permissions with roles and groups
 - **Admin Management**: Built-in admin user creation and management
 - **Sharing Restrictions**: Control sharing permissions per provider with domain restrictions
-- **JWT Tokens**: Stateless authentication
+- **Encrypted tokens**: HS256-signed JWS wrapped in a JWE (AES-256-GCM, key derived from `APP__JWT_SECRET` via HKDF-SHA256). Both the payload and the signature are unreadable without the secret.
+- **Server-tracked sessions**: Access tokens carry a session ID validated against the cache on every request, so logout and session revocation take effect immediately
 
 ## Authentication Flow
 
@@ -30,7 +31,6 @@ Local authentication uses email/password with secure Argon2id password hashing.
 #### Environment Variables
 
 ```bash
-# JWT Configuration
 APP__JWT_SECRET=your-256-bit-secret-key
 
 # Admin User

@@ -195,9 +195,9 @@ CloudWatch.
 ### ECS-Specific Required Variables
 
 | Variable           | Description                    | Example                                                       |
-| ------------------ | ------------------------------ | ------------------------------------------------------------- |
+| ------------------ |--------------------------------| ------------------------------------------------------------- |
 | `safebucket_image` | Container image for Safebucket | `your-account.dkr.ecr.region.amazonaws.com/safebucket:latest` |
-| `jwt_secret`       | JWT signing secret (32+ chars) | `your-jwt-secret-32-chars-minimum-here`                       |
+| `jwt_secret`       | Token secret (32+ chars)       | `your-jwt-secret-32-chars-minimum-here`                       |
 | `admin_password`   | Default admin user password    | `your-admin-password-here-12342`                              |
 
 ### Optional Variables
@@ -399,7 +399,7 @@ Safebucket service receives these environment variables automatically:
 
 #### Secrets (from AWS Secrets Manager)
 
-- `APP__JWT_SECRET`: JWT signing key
+- `APP__JWT_SECRET`: Token secret
 - `APP__ADMIN_PASSWORD`: Admin user password
 - `DATABASE__PASSWORD`: RDS password
 - `CACHE__REDIS__PASSWORD`: Redis AUTH token

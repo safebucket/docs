@@ -44,13 +44,13 @@ consistent.
 ### Basic Application Configuration
 
 | Variable                                    | Description                                             | Default               | Required | Valid Values                                       |
-| ------------------------------------------- | ------------------------------------------------------- | --------------------- | -------- | -------------------------------------------------- |
+| ------------------------------------------- |---------------------------------------------------------| --------------------- | -------- | -------------------------------------------------- |
 | `APP__LOG_LEVEL`                            | Logging level for the application                       | `info`                | ❌       | `debug`, `info`, `warn`, `error`, `fatal`, `panic` |
 | `APP__PROFILE`                              | Application profile controlling which components run    | `default`             | ❌       | `default`, `api`, `worker`                         |
 | `APP__API_URL`                              | API base URL                                            | -                     | ✅       | -                                                  |
 | `APP__WEB_URL`                              | Frontend web URL                                        | -                     | ✅       | -                                                  |
 | `APP__PORT`                                 | Server port (80-65535)                                  | `8080`                | ❌       | `80-65535`                                         |
-| `APP__JWT_SECRET`                           | JWT signing secret                                      | -                     | ✅       | -                                                  |
+| `APP__JWT_SECRET`                           | Token secret                                            | -                     | ✅       | 32+ chars                                          |
 | `APP__ADMIN_EMAIL`                          | Admin user email                                        | -                     | ✅       | Valid email                                        |
 | `APP__ADMIN_PASSWORD`                       | Admin user password                                     | -                     | ✅       | -                                                  |
 | `APP__TRASH_RETENTION_DAYS`                 | Days to retain files in trash before automatic deletion | `7`                   | ❌       | `1-365`                                            |
