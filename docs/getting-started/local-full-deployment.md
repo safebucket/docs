@@ -92,4 +92,3 @@ The local deployment uses these configuration files:
 - [Configure OIDC providers](../configuration/authentication)
 - [Set up cloud storage](../configuration/storage-providers)
 - [Configure environment variables](../configuration/environment-variables)
-- [Explore the API](../api/overview)
