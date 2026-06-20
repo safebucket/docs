@@ -315,15 +315,6 @@ AUTH__PROVIDERS__LOCAL__TYPE=local
 # AUTH__PROVIDERS__AUTHELIA__OIDC__ISSUER=https://auth.local
 # AUTH__PROVIDERS__AUTHELIA__OIDC__SHARING__ENABLED=true
 
-# Authentication - LDAP Provider (Optional, commented example)
-# AUTH__PROVIDERS__KEYS=local,myldap
-# AUTH__PROVIDERS__MYLDAP__NAME=Corporate LDAP
-# AUTH__PROVIDERS__MYLDAP__TYPE=ldap
-# AUTH__PROVIDERS__MYLDAP__LDAP__URL=ldap://localhost:389
-# AUTH__PROVIDERS__MYLDAP__LDAP__BIND_DN=cn=admin,dc=example,dc=org
-# AUTH__PROVIDERS__MYLDAP__LDAP__BIND_PASSWORD=admin
-# AUTH__PROVIDERS__MYLDAP__LDAP__BASE_DN=ou=users,dc=example,dc=org
-# AUTH__PROVIDERS__MYLDAP__LDAP__USER_FILTER=(mail=%s)
 ```
 
 ## Validation
