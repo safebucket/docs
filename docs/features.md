@@ -22,7 +22,7 @@ straight from the storage backend.
 
 ### In-browser Preview
 
-Preview files directly in the browser without downloading them. 
+Preview files directly in the browser without downloading them.
 
 - Images (PNG, JPG, GIF, WebP, SVG, and more)
 - Video and audio playback
