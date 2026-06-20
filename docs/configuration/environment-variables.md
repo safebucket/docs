@@ -43,30 +43,30 @@ consistent.
 
 ### Basic Application Configuration
 
-| Variable                                    | Description                                             | Default               | Required | Valid Values                                       |
-| ------------------------------------------- | ------------------------------------------------------- | --------------------- | -------- | -------------------------------------------------- |
-| `APP__LOG_LEVEL`                            | Logging level for the application                       | `info`                | ❌       | `debug`, `info`, `warn`, `error`, `fatal`, `panic` |
-| `APP__PROFILE`                              | Application profile controlling which components run    | `default`             | ❌       | `default`, `api`, `worker`                         |
-| `APP__API_URL`                              | API base URL                                            | -                     | ✅       | -                                                  |
-| `APP__WEB_URL`                              | Frontend web URL                                        | -                     | ✅       | -                                                  |
-| `APP__PORT`                                 | Server port (80-65535)                                  | `8080`                | ❌       | `80-65535`                                         |
-| `APP__TOKEN_SECRET`                         | Token signing secret                                    | -                     | ✅       | -                                                  |
-| `APP__ADMIN_EMAIL`                          | Admin user email                                        | -                     | ✅       | Valid email                                        |
-| `APP__ADMIN_PASSWORD`                       | Admin user password                                     | -                     | ✅       | -                                                  |
-| `APP__TRASH_RETENTION_DAYS`                 | Days to retain files in trash before automatic deletion | `7`                   | ❌       | `1-365`                                            |
-| `APP__MAX_UPLOAD_SIZE`                      | Maximum file upload size in bytes                       | `53687091200` (50 GB) | ❌       | `≥ 1`                                              |
-| `APP__AUTHENTICATED_REQUESTS_PER_MINUTE`    | Rate limit for authenticated requests (per user)        | `200`                 | ❌       | `≥ 1`                                              |
-| `APP__UNAUTHENTICATED_REQUESTS_PER_MINUTE`  | Rate limit for unauthenticated requests (per IP)        | `20`                  | ❌       | `≥ 1`                                              |
+| Variable                                   | Description                                             | Default               | Required | Valid Values                                       |
+| ------------------------------------------ | ------------------------------------------------------- | --------------------- | -------- | -------------------------------------------------- |
+| `APP__LOG_LEVEL`                           | Logging level for the application                       | `info`                | ❌       | `debug`, `info`, `warn`, `error`, `fatal`, `panic` |
+| `APP__PROFILE`                             | Application profile controlling which components run    | `default`             | ❌       | `default`, `api`, `worker`                         |
+| `APP__API_URL`                             | API base URL                                            | -                     | ✅       | -                                                  |
+| `APP__WEB_URL`                             | Frontend web URL                                        | -                     | ✅       | -                                                  |
+| `APP__PORT`                                | Server port (80-65535)                                  | `8080`                | ❌       | `80-65535`                                         |
+| `APP__TOKEN_SECRET`                        | Token signing secret                                    | -                     | ✅       | -                                                  |
+| `APP__ADMIN_EMAIL`                         | Admin user email                                        | -                     | ✅       | Valid email                                        |
+| `APP__ADMIN_PASSWORD`                      | Admin user password                                     | -                     | ✅       | -                                                  |
+| `APP__TRASH_RETENTION_DAYS`                | Days to retain files in trash before automatic deletion | `7`                   | ❌       | `1-365`                                            |
+| `APP__MAX_UPLOAD_SIZE`                     | Maximum file upload size in bytes                       | `53687091200` (50 GB) | ❌       | `≥ 1`                                              |
+| `APP__AUTHENTICATED_REQUESTS_PER_MINUTE`   | Rate limit for authenticated requests (per user)        | `200`                 | ❌       | `≥ 1`                                              |
+| `APP__UNAUTHENTICATED_REQUESTS_PER_MINUTE` | Rate limit for unauthenticated requests (per IP)        | `20`                  | ❌       | `≥ 1`                                              |
 
 ### Profile
 
 The `APP__PROFILE` setting controls which components are started:
 
-| Profile    | HTTP Server | Workers                              |
-| ---------- | ----------- | ------------------------------------ |
-| `default`  | ✅          | All workers enabled                  |
-| `api`      | ✅          | All workers disabled                 |
-| `worker`   | ❌          | All workers enabled (singleton mode) |
+| Profile   | HTTP Server | Workers                              |
+| --------- | ----------- | ------------------------------------ |
+| `default` | ✅          | All workers enabled                  |
+| `api`     | ✅          | All workers disabled                 |
+| `worker`  | ❌          | All workers enabled (singleton mode) |
 
 Workers are background processes that handle asynchronous tasks independently of the HTTP server: processing object deletions, handling bucket events, cleaning up trash, and running garbage collection (stale uploads, expired files/shares/sessions).
 
@@ -79,10 +79,11 @@ page.
 
 ### CORS and Security
 
-| Variable               | Description                       | Default | Required |
-| ---------------------- | --------------------------------- | ------- | -------- |
-| `APP__ALLOWED_ORIGINS` | Comma-separated allowed origins   | -       | ✅       |
-| `APP__TRUSTED_PROXIES` | Comma-separated trusted proxy IPs | -       | ✅       |
+| Variable                   | Description                                                          | Default | Required |
+| -------------------------- | -------------------------------------------------------------------- | ------- | -------- |
+| `APP__ALLOWED_ORIGINS`     | Comma-separated allowed origins                                      | -       | ✅       |
+| `APP__TRUSTED_PROXIES`     | Comma-separated trusted proxy IPs (CIDR notation, e.g. `10.0.0.0/8`) | -       | ✅       |
+| `APP__COOKIE_SECURE_FORCE` | Force the `Secure` flag on auth cookies even when served over HTTP   | `false` | ❌       |
 
 **Example:**
 
@@ -108,10 +109,10 @@ APP__TRUSTED_PROXIES=127.0.0.1,::1
 
 Safebucket supports optional TLS termination. Providing a certificate and a key file.
 
-| Variable              | Description                  | Default | Required                 |
-| --------------------- | ---------------------------- | ------- | ------------------------ |
-| `APP__TLS_CERT_FILE`  | Path to TLS certificate file | -       | ❌ (Required with key)   |
-| `APP__TLS_KEY_FILE`   | Path to TLS private key file | -       | ❌ (Required with cert)  |
+| Variable             | Description                  | Default | Required                |
+| -------------------- | ---------------------------- | ------- | ----------------------- |
+| `APP__TLS_CERT_FILE` | Path to TLS certificate file | -       | ❌ (Required with key)  |
+| `APP__TLS_KEY_FILE`  | Path to TLS private key file | -       | ❌ (Required with cert) |
 
 **Environment variables:**
 
@@ -143,8 +144,9 @@ For detailed database configuration (PostgreSQL, SQLite), see the
 
 ## Authentication Configuration
 
-For detailed authentication configuration including OIDC providers and domain
-restrictions, see the [Authentication Configuration](./authentication) page.
+For detailed authentication configuration including OIDC providers, LDAP, and
+domain restrictions, see the [Authentication Configuration](./authentication)
+page.
 
 ## Storage Configuration
 
@@ -190,6 +192,52 @@ For detailed notification provider configuration, see the
 
 For detailed activity provider configuration, see the
 [Activity Providers](./activity-providers) page.
+
+## Tracing
+
+Safebucket can export OpenTelemetry traces to a Tempo backend. Tracing is
+disabled by default.
+
+| Variable                        | Description                         | Default      | Required |
+| ------------------------------- | ----------------------------------- | ------------ | -------- |
+| `TRACING__ENABLED`              | Enable distributed tracing          | `false`      | ❌       |
+| `TRACING__TYPE`                 | Tracing backend (`tempo`)           | -            | ❌       |
+| `TRACING__TEMPO__ENDPOINT`      | OTLP HTTP endpoint of the collector | -            | ❌       |
+| `TRACING__TEMPO__SERVICE_NAME`  | Service name reported in traces     | `safebucket` | ❌       |
+| `TRACING__TEMPO__SAMPLING_RATE` | Sampling rate between `0` and `1`   | `1.0`        | ❌       |
+
+```yaml
+tracing:
+  enabled: true
+  type: tempo
+  tempo:
+    endpoint: http://localhost:4318
+    service_name: safebucket
+    sampling_rate: 1.0
+```
+
+## Profiling
+
+Safebucket can send continuous profiling data to a Pyroscope server. Profiling
+is disabled by default.
+
+| Variable                                 | Description                     | Default      | Required |
+| ---------------------------------------- | ------------------------------- | ------------ | -------- |
+| `PROFILING__ENABLED`                     | Enable continuous profiling     | `false`      | ❌       |
+| `PROFILING__TYPE`                        | Profiling backend (`pyroscope`) | -            | ❌       |
+| `PROFILING__PYROSCOPE__SERVER_ADDRESS`   | Pyroscope server URL            | -            | ❌       |
+| `PROFILING__PYROSCOPE__APPLICATION_NAME` | Application name in Pyroscope   | `safebucket` | ❌       |
+| `PROFILING__PYROSCOPE__UPLOAD_RATE`      | Upload interval in seconds      | `15`         | ❌       |
+
+```yaml
+profiling:
+  enabled: true
+  type: pyroscope
+  pyroscope:
+    server_address: http://localhost:4040
+    application_name: safebucket
+    upload_rate: 15
+```
 
 ## Complete Example
 
@@ -266,6 +314,7 @@ AUTH__PROVIDERS__LOCAL__TYPE=local
 # AUTH__PROVIDERS__AUTHELIA__OIDC__CLIENT_SECRET=your-client-secret
 # AUTH__PROVIDERS__AUTHELIA__OIDC__ISSUER=https://auth.local
 # AUTH__PROVIDERS__AUTHELIA__OIDC__SHARING__ENABLED=true
+
 ```
 
 ## Validation

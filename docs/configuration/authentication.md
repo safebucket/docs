@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Authentication
 
-Safebucket supports multiple authentication methods including local authentication and OIDC providers. This guide covers configuration for various authentication options.
+Safebucket supports multiple authentication methods including local authentication, OIDC providers, and LDAP. This guide covers configuration for various authentication options.
 
 ## Overview
 
@@ -12,6 +12,7 @@ Safebucket's authentication system provides:
 
 - **Local Authentication**: Username/password with Argon2id hashing
 - **OIDC Integration**: Support for any OIDC provider (Pocket ID, Authelia, Keycloak, Google, GitHub, custom OIDC)
+- **LDAP Integration**: Authenticate against an LDAP directory or Active Directory
 - **Role-Based Access Control**: Granular permissions with roles and groups
 - **Admin Management**: Built-in admin user creation and management
 - **Sharing Restrictions**: Control sharing permissions per provider with domain restrictions
@@ -293,6 +294,77 @@ AUTH__PROVIDERS__AUTHELIA__OIDC__ISSUER=https://sso.company.com
 ```
 
 Users can choose their preferred authentication method on the login page.
+
+## LDAP Providers
+
+Safebucket can authenticate users against an LDAP directory or Active Directory.
+The login form posts the username and password to Safebucket, which binds with
+the service account (`bind_dn`), finds the user via `user_filter`, then rebinds
+as that user to verify the password. On first login, a Safebucket account is
+created automatically with the `User` role.
+
+### Configuration
+
+#### Environment Variables
+
+```bash
+AUTH__PROVIDERS__KEYS=myldap
+AUTH__PROVIDERS__MYLDAP__NAME=Corporate LDAP
+AUTH__PROVIDERS__MYLDAP__TYPE=ldap
+AUTH__PROVIDERS__MYLDAP__LDAP__URL=ldap://localhost:389
+AUTH__PROVIDERS__MYLDAP__LDAP__BIND_DN=cn=admin,dc=example,dc=org
+AUTH__PROVIDERS__MYLDAP__LDAP__BIND_PASSWORD=admin
+AUTH__PROVIDERS__MYLDAP__LDAP__BASE_DN=ou=users,dc=example,dc=org
+AUTH__PROVIDERS__MYLDAP__LDAP__USER_FILTER=(mail=%s)
+```
+
+#### YAML Configuration
+
+```yaml
+auth:
+  providers:
+    myldap:
+      type: ldap
+      name: Corporate LDAP
+      domains: []
+      mfa_required: false
+      ldap:
+        url: ldap://localhost:389
+        bind_dn: cn=admin,dc=example,dc=org
+        bind_password: admin
+        base_dn: ou=users,dc=example,dc=org
+        user_filter: "(mail=%s)"
+        attribute_map:
+          email: mail
+        start_tls: false
+        tls_insecure_skip: false
+        connect_timeout_ms: 5000
+      sharing:
+        allowed: false
+        domains: []
+```
+
+### LDAP Settings
+
+| Setting               | Description                                                 | Default |
+| --------------------- | ----------------------------------------------------------- | ------- |
+| `url`                 | LDAP server URL. Use `ldaps://` for implicit TLS            | -       |
+| `bind_dn`             | Service account DN used to search the directory             | -       |
+| `bind_password`       | Service account password                                    | -       |
+| `base_dn`             | Search root for user lookups                                | -       |
+| `user_filter`         | Search filter, with `%s` replaced by the submitted username | -       |
+| `attribute_map.email` | LDAP attribute to read the user's email from                | `mail`  |
+| `start_tls`           | Upgrade a plain `ldap://` connection to TLS via StartTLS    | `false` |
+| `tls_insecure_skip`   | Skip TLS certificate verification                           | `false` |
+| `connect_timeout_ms`  | Connection timeout in milliseconds                          | `5000`  |
+
+:::warning
+Do not enable `tls_insecure_skip` in production. It disables certificate
+verification and exposes credentials on the network.
+:::
+
+Like other providers, LDAP supports per-provider [MFA enforcement](./mfa) via
+`mfa_required` and [sharing restrictions](#sharing-restrictions) via `sharing`.
 
 ## Role-Based Access Control (RBAC)
 
