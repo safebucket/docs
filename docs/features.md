@@ -20,6 +20,25 @@ straight from the storage backend.
 
 ![Bucket list view](./../static/features/bucket_list_view.png)
 
+### In-browser Preview
+
+Preview files directly in the browser without downloading them. 
+
+- Images (PNG, JPG, GIF, WebP, SVG, and more)
+- Video and audio playback
+- PDF documents
+- Text files
+
+### Bulk Download
+
+Select multiple files and folders and download them together as a single ZIP
+archive, assembled in the browser.
+
+- Multi-select files and entire folders across a bucket
+- Selected items are bundled client-side into one timestamped ZIP
+- Download progress with partial-failure reporting
+- Up to 100 files or 1 GB per archive
+
 ### Quick Share & Reverse Share
 
 Share files, folders, or an entire bucket via a public link. Recipients
@@ -97,6 +116,8 @@ Real-time activity logging for all user actions.
 
 - Logins, uploads, downloads, deletions, member changes tracked
 - Searchable audit logs indexed by action, user, and object type
+- Date-range filtering with paginated results
+- Admins can filter system-wide activity by action and object type
 - Per-bucket activity view for owners
 - Admin dashboard with system-wide activity and upload trends
 
@@ -114,11 +135,13 @@ Email notifications for file activity within buckets.
 
 ## Authentication
 
-### SSO & Local Authentication
+### SSO, LDAP & Local Authentication
 
-SSO via any OIDC provider and local password authentication for external users.
+SSO via any OIDC provider, LDAP directory authentication, and local password
+authentication for external users.
 
 - OIDC/SSO with any OpenID Connect provider
+- LDAP and Active Directory authentication
 - Local authentication for external users
 - Multiple identity providers at the same time
 - Domain-based restrictions per provider
@@ -128,11 +151,11 @@ SSO via any OIDC provider and local password authentication for external users.
 
 ### Multi-Factor Authentication
 
-MFA for local users.
+MFA across all authentication providers.
 
 - Works with any TOTP authenticator app
 - Multiple MFA devices per account
-- Activate or deactivate MFA in the configuration
+- Enforced per provider (local, OIDC, LDAP) via configuration
 
 [Configure MFA](./configuration/mfa)
 
@@ -155,6 +178,7 @@ Admin users have access to a dedicated dashboard with four views:
   Elegant Luxury, Neo Brutalism
 - Light and dark mode with system preference detection
 - Language selection (English, French)
+- Configurable timezone for activity and statistics display
 
 ![Preferences page](./../static/features/preferences.png)
 
