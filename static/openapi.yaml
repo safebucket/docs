@@ -1,0 +1,2658 @@
+openapi: 3.0.3
+info:
+  title: Safebucket API
+  version: "1.0.0"
+  description: >
+    REST API for Safebucket, a self-hosted secure file sharing platform where
+    file uploads/downloads go directly to the storage backend via presigned
+    URLs.
+
+
+    Authentication is provider-based (`local`, `oidc`, `ldap`). Access,
+    refresh, MFA, and public-share tokens are JWTs carried either as a Bearer
+    header or as HttpOnly cookies (`safebucket_access_token`,
+    `safebucket_refresh_token`, `safebucket_mfa_token`,
+    `safebucket_share_token`). Endpoints that accept a restricted-audience
+    token (MFA login, password reset, invite acceptance) are noted in their
+    description; regular `BearerAuth`/`CookieAuth` schemes are shown for
+    illustration only in those cases since OpenAPI has no way to express JWT
+    audience restrictions.
+
+
+    Error responses always have the shape `{"status": <int>, "error":
+    [<string>, ...]}` (see the `Error` schema). Error code strings are stable
+    identifiers (e.g. `BUCKET_NOT_FOUND`, `INVALID_MFA_CODE`) intended for
+    programmatic handling; only a representative subset of codes is called
+    out per endpoint below, not an exhaustive enumeration.
+
+
+    Authentication failures: a request with a missing or invalid token is
+    rejected with `403 FORBIDDEN` (not 401). `401 SESSION_REVOKED` is
+    returned when the token is valid but its session has been revoked, and
+    `403 FORBIDDEN` is also used when a restricted-audience token is used on
+    a route it does not allow or when the caller's role/group is
+    insufficient.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: ''
+    description: Relative to the Safebucket deployment root
+
+tags:
+  - name: Auth
+    description: Login, logout, token refresh, MFA login step-up, password reset, auth providers
+  - name: Users
+    description: User account management (admin and self-service)
+  - name: Sessions
+    description: Active refresh-token session management per user
+  - name: MFA
+    description: TOTP multi-factor authentication device management
+  - name: Buckets
+    description: Buckets, the top-level container for files and folders
+  - name: Bucket Members
+    description: Bucket membership and invitations
+  - name: Bucket Files
+    description: File upload/download/trash lifecycle within a bucket
+  - name: Bucket Folders
+    description: Folder create/rename/trash lifecycle within a bucket
+  - name: Bucket Shares
+    description: Owner-side management of public share links for a bucket
+  - name: Invites
+    description: Challenge-based verification flow for invited (external) users
+  - name: Admin
+    description: Platform-wide statistics and administration (admin role only)
+  - name: Public Shares
+    description: >
+      Anonymous access to shared buckets/files/folders. Distinct from
+      "Bucket Shares" (which manages share links as the owner); these
+      endpoints are consumed by whoever holds the share link. The
+      `safebucket_share_token` cookie (issued by `POST /shares/{id}/auth`)
+      is only required when the share is password-protected; shares without
+      a password are accessible without any token (`401
+      SHARE_TOKEN_REQUIRED` / `SHARE_TOKEN_INVALID` otherwise). Every
+      endpoint under `/shares/{shareId}` can additionally return `404
+      SHARE_NOT_FOUND` (unknown or revoked share), `410 SHARE_EXPIRED`, and
+      `403 SHARE_MAX_VIEWS_REACHED` from the shared access-validation
+      middleware.
+  - name: Config
+    description: Frontend runtime configuration (not part of the JSON REST API)
+
+security:
+  - BearerAuth: []
+  - CookieAuth: []
+
+paths:
+  # ---------------------------------------------------------------------
+  # Auth
+  # ---------------------------------------------------------------------
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      operationId: login
+      summary: Log in with email/password (local provider)
+      description: >
+        Validates credentials against the `local` provider matching the
+        email's domain. On success either issues access/refresh cookies
+        directly, or (if MFA is enabled/required) issues a restricted
+        `safebucket_mfa_token` cookie and returns `mfa_required: true`.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AuthLoginBody' }
+      responses:
+        '200':
+          description: Authenticated (or MFA step-up required)
+          headers:
+            Set-Cookie: { $ref: '#/components/headers/AuthOrMFACookies' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthLoginResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401':
+          description: Invalid credentials (`INVALID_CREDENTIALS`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403':
+          description: No local provider matches this email's domain (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /api/v1/auth/verify:
+    post:
+      tags: [Auth]
+      operationId: verifyAccessToken
+      summary: Verify an access token and return its claims
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AuthVerifyBody' }
+      responses:
+        '201':
+          description: Token is valid; returns the decoded JWT claims
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserClaims' }
+        '401':
+          description: Invalid token or wrong audience (`INVALID_ACCESS_TOKEN`, `INVALID_ACCESS_TOKEN_AUDIENCE`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/auth/refresh:
+    post:
+      tags: [Auth]
+      operationId: refreshAccessToken
+      summary: Exchange a refresh token for a new access token
+      description: >
+        Reads the refresh token from the `safebucket_refresh_token` cookie,
+        falling back to the `Authorization: Bearer` header. Sets a new
+        `safebucket_access_token` cookie on success.
+      security:
+        - CookieRefreshAuth: []
+        - BearerAuth: []
+      responses:
+        '200':
+          description: New access token issued (set via cookie); body is an empty JSON object
+          headers:
+            Set-Cookie:
+              description: New `safebucket_access_token` cookie
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { type: object }
+        '401':
+          description: Missing/invalid/expired refresh token, or session revoked (`FORBIDDEN`, `UNAUTHORIZED`, `SESSION_REVOKED`, `USER_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/auth/logout:
+    post:
+      tags: [Auth]
+      operationId: logout
+      summary: Log out and revoke the current session
+      description: Clears all auth cookies. Idempotent if no refresh cookie/session is present.
+      security:
+        - CookieRefreshAuth: []
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Logged out (auth cookies cleared)
+        '401':
+          description: Session already revoked (`SESSION_REVOKED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/auth/mfa/verify:
+    post:
+      tags: [Auth]
+      operationId: verifyMfaLogin
+      summary: Complete login by verifying an MFA TOTP code
+      description: >
+        Requires the restricted `safebucket_mfa_token` (audience
+        `auth:mfa:login`) issued by `/auth/login`. On success issues full
+        access/refresh cookies (or, in the password-reset flow, a fresh
+        restricted MFA-reset cookie).
+      security:
+        - CookieMFAAuth: []
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MFALoginVerifyBody' }
+      responses:
+        '200':
+          description: MFA verified; authenticated
+          headers:
+            Set-Cookie: { $ref: '#/components/headers/AuthOrMFACookies' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthLoginResponse' }
+        '400':
+          description: MFA not enabled for this account (`MFA_NOT_ENABLED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          description: Invalid or replayed TOTP code (`INVALID_MFA_CODE`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '429':
+          description: Too many failed MFA attempts (`MFA_RATE_LIMITED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/auth/me:
+    get:
+      tags: [Auth]
+      operationId: getCurrentUser
+      summary: Get the authenticated user's identity summary
+      responses:
+        '200':
+          description: Current user summary
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthMeResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/auth/reset-password:
+    post:
+      tags: [Auth]
+      operationId: requestPasswordReset
+      summary: Request a password reset code by email
+      description: >
+        Always returns 201 regardless of whether the email exists
+        (enumeration-safe). If a matching local-provider user exists, a
+        6-character code is emailed and a password-reset challenge is
+        created (5 min expiry, 3 attempts). Rate-limited per email
+        (3 requests per 1-hour window).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PasswordResetRequestBody' }
+      responses:
+        '201':
+          description: Request accepted (no body)
+        '429':
+          description: Rate limit exceeded for this email or IP (`RATE_LIMIT_EXCEEDED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/auth/reset-password/{challengeId}/validate:
+    post:
+      tags: [Auth]
+      operationId: validatePasswordReset
+      summary: Validate a password-reset code
+      description: >
+        On success issues a restricted `safebucket_mfa_token` cookie
+        (audience `auth:mfa:password-reset`) used to complete the reset via
+        `/complete`, optionally after an MFA step-up if the account has MFA
+        enabled.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ChallengeIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PasswordResetValidateBody' }
+      responses:
+        '201':
+          description: Code verified; restricted token issued
+          headers:
+            Set-Cookie:
+              description: New `safebucket_mfa_token` cookie (audience `auth:mfa:password-reset`)
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthLoginResponse' }
+        '400':
+          description: Challenge invalid, expired, or has no associated user (`INVALID_REQUEST`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          description: Wrong code (`WRONG_CODE`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403':
+          description: Challenge locked after too many failed attempts (`CHALLENGE_LOCKED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/auth/reset-password/{challengeId}/complete:
+    post:
+      tags: [Auth]
+      operationId: completePasswordReset
+      summary: Complete a password reset
+      description: >
+        Requires the restricted `safebucket_mfa_token` from `/validate`
+        (challenge ID in the JWT must match the path). Revokes all existing
+        sessions and issues new full access/refresh cookies.
+      security:
+        - CookieMFAAuth: []
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ChallengeIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PasswordResetCompleteBody' }
+      responses:
+        '204':
+          description: Password reset; new auth cookies issued
+          headers:
+            Set-Cookie: { $ref: '#/components/headers/AuthCookies' }
+        '400':
+          description: Challenge ID mismatch or invalid/expired challenge (`INVALID_REQUEST`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403':
+          description: MFA required but not completed (`MFA_REQUIRED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/auth/providers:
+    get:
+      tags: [Auth]
+      operationId: listAuthProviders
+      summary: List configured auth providers
+      description: Used by the login page to render provider buttons.
+      security: []
+      responses:
+        '200':
+          description: Configured providers
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageProviderResponse' }
+
+  /api/v1/auth/providers/{provider}/begin:
+    get:
+      tags: [Auth]
+      operationId: beginOidcLogin
+      summary: Begin an OIDC login redirect
+      description: Redirects the browser to the OIDC provider's authorization endpoint.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ProviderParam'
+      responses:
+        '302':
+          description: Redirect to the OIDC provider's authorization URL
+        '400':
+          description: Invalid provider name (`INVALID_PROVIDER_NAME`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Provider not configured or not of type oidc (`PROVIDER_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/auth/providers/{provider}/callback:
+    get:
+      tags: [Auth]
+      operationId: oidcCallback
+      summary: OIDC redirect callback
+      description: >
+        Exchanges the authorization code, verifies the ID token, then
+        redirects to `app.web_url` with auth (or MFA) cookies set. Creates
+        the user on first login if allowed by the provider's domain
+        restrictions.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ProviderParam'
+        - name: state
+          in: query
+          required: true
+          schema: { type: string }
+        - name: code
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        '302':
+          description: Redirect to `app.web_url` with auth or MFA cookies set
+          headers:
+            Set-Cookie: { $ref: '#/components/headers/AuthOrMFACookies' }
+        '400':
+          description: >
+            State or nonce cookie missing/mismatched, token exchange failed,
+            or ID token missing (`OIDC_STATE_NOT_FOUND`,
+            `OIDC_STATE_MISMATCH`, `OIDC_NONCE_NOT_FOUND`,
+            `OIDC_NONCE_MISMATCH`, `OAUTH_EXCHANGE_FAILED`,
+            `ID_TOKEN_MISSING`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          description: ID token verification failed (`ID_TOKEN_VERIFY_FAILED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403':
+          description: Email domain not allowed for this provider (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Provider not configured or not of type oidc (`PROVIDER_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '502':
+          description: Failed to fetch userinfo from the OIDC provider (`OAUTH_USERINFO_FAILED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/auth/providers/{provider}/login:
+    post:
+      tags: [Auth]
+      operationId: ldapLogin
+      summary: Log in via an LDAP provider bind
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ProviderParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AuthLoginBody' }
+      responses:
+        '200':
+          description: Authenticated (or MFA step-up required)
+          headers:
+            Set-Cookie: { $ref: '#/components/headers/AuthOrMFACookies' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthLoginResponse' }
+        '401':
+          description: Invalid LDAP credentials (`INVALID_CREDENTIALS`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403':
+          description: Email domain not allowed for this provider (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Provider not configured or not of type ldap (`PROVIDER_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '503':
+          description: LDAP directory unreachable (`AUTH_PROVIDER_UNAVAILABLE`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  # ---------------------------------------------------------------------
+  # Users
+  # ---------------------------------------------------------------------
+  /api/v1/users:
+    get:
+      tags: [Users]
+      operationId: listUsers
+      summary: List all users
+      description: Requires role `admin`.
+      responses:
+        '200':
+          description: All users
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageUser' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Users]
+      operationId: createUser
+      summary: Create a local user
+      description: Requires role `admin`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserCreateBody' }
+      responses:
+        '201':
+          description: Created user
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409':
+          description: A user with this email already exists (`USER_ALREADY_EXISTS`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/users/{userId}:
+    get:
+      tags: [Users]
+      operationId: getUser
+      summary: Get a user
+      description: Allowed for the user themselves, or an admin.
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Users]
+      operationId: updateUser
+      summary: Update a user's profile or password
+      description: >
+        Allowed for the user themselves, or an admin. Password change
+        (`old_password`/`new_password`) is only permitted for local-provider
+        accounts.
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserUpdateBody' }
+      responses:
+        '204':
+          description: User updated
+        '401':
+          description: Incorrect current password (`INCORRECT_PASSWORD`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403':
+          description: Password change not allowed for non-local providers (`PASSWORD_CHANGE_NOT_ALLOWED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Users]
+      operationId: deleteUser
+      summary: Delete a user
+      description: >
+        Requires role `admin`. Cascades to the user's memberships,
+        challenges, MFA devices, and created invites, and revokes all their
+        sessions.
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '204':
+          description: User deleted
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/users/{userId}/stats:
+    get:
+      tags: [Users]
+      operationId: getUserStats
+      summary: Get a user's usage stats
+      description: Allowed for the user themselves, or an admin.
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '200':
+          description: Total files/buckets accessible to the user
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserStatsResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ---------------------------------------------------------------------
+  # Sessions
+  # ---------------------------------------------------------------------
+  /api/v1/users/{userId}/sessions:
+    get:
+      tags: [Sessions]
+      operationId: listSessions
+      summary: List active sessions for a user
+      description: Allowed for the user themselves, or an admin.
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '200':
+          description: Active sessions
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    delete:
+      tags: [Sessions]
+      operationId: revokeOtherSessions
+      summary: Revoke all other sessions for a user
+      description: Keeps the session used to make this request active.
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+      responses:
+        '204':
+          description: Other sessions revoked
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/v1/users/{userId}/sessions/{sessionId}:
+    delete:
+      tags: [Sessions]
+      operationId: revokeSession
+      summary: Revoke one session for a user
+      parameters:
+        - $ref: '#/components/parameters/UserIdParam'
+        - name: sessionId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+          description: Session ID (SID); parsed as a UUID (`400 INVALID_UUID` otherwise)
+      responses:
+        '204':
+          description: Session revoked
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Session not found or already inactive (`SESSION_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  # ---------------------------------------------------------------------
+  # MFA
+  # ---------------------------------------------------------------------
+  /api/v1/mfa/devices:
+    get:
+      tags: [MFA]
+      operationId: listMfaDevices
+      summary: List the authenticated user's verified MFA devices
+      responses:
+        '200':
+          description: Verified devices (default device first)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MFADevicesListResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [MFA]
+      operationId: addMfaDevice
+      summary: Start enrolling a new TOTP device
+      description: >
+        Returns a TOTP secret and QR code URI; the device stays unverified
+        until confirmed via `/verify`. Requires re-authentication
+        (`password` for local/LDAP, TOTP `code` for OIDC step-up) unless this
+        is the very first device on a restricted MFA/reset token. Capped at
+        a configured max devices per user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MFADeviceSetupBody' }
+      responses:
+        '201':
+          description: Device created (unverified); secret and QR code returned
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MFADeviceSetupResponse' }
+        '400':
+          description: >
+            Max devices reached (`MAX_MFA_DEVICES_REACHED`), or the required
+            step-up credential is missing (`BAD_REQUEST`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          description: >
+            Not authenticated, or the step-up credential was invalid
+            (`INVALID_PASSWORD`, `INVALID_MFA_CODE`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403':
+          description: Restricted token not allowed for non-initial device setup (`MFA_SETUP_RESTRICTED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '429':
+          description: Too many failed TOTP step-up attempts (`MFA_RATE_LIMITED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: A verified device with this name already exists (`MFA_DEVICE_NAME_EXISTS`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '500':
+          description: TOTP secret generation/encryption failed (`MFA_SETUP_FAILED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '503':
+          description: Step-up re-authentication provider unavailable (`AUTH_PROVIDER_UNAVAILABLE`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/mfa/devices/{deviceId}:
+    get:
+      tags: [MFA]
+      operationId: getMfaDevice
+      summary: Get an MFA device
+      parameters:
+        - $ref: '#/components/parameters/MfaDeviceIdParam'
+      responses:
+        '200':
+          description: Device details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MFADevice' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: Device not found (`MFA_DEVICE_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    patch:
+      tags: [MFA]
+      operationId: updateMfaDevice
+      summary: Rename or set an MFA device as default
+      parameters:
+        - $ref: '#/components/parameters/MfaDeviceIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MFADeviceUpdateBody' }
+      responses:
+        '204':
+          description: Device updated
+        '400':
+          description: Cannot default an unverified device (`UNVERIFIED_DEVICE_CANNOT_BE_DEFAULT`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404':
+          description: Device not found (`MFA_DEVICE_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: A verified device with this name already exists (`MFA_DEVICE_NAME_EXISTS`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    delete:
+      tags: [MFA]
+      operationId: removeMfaDevice
+      summary: Remove an MFA device
+      description: Requires re-authentication (password or TOTP step-up) if the device was verified.
+      parameters:
+        - $ref: '#/components/parameters/MfaDeviceIdParam'
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MFADeviceRemoveBody' }
+      responses:
+        '204':
+          description: Device removed
+        '400':
+          description: Required step-up credential is missing (`BAD_REQUEST`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          description: >
+            Not authenticated, or the step-up credential was invalid
+            (`INVALID_PASSWORD`, `INVALID_MFA_CODE`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Device not found (`MFA_DEVICE_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '429':
+          description: Too many failed TOTP step-up attempts (`MFA_RATE_LIMITED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '503':
+          description: Step-up re-authentication provider unavailable (`AUTH_PROVIDER_UNAVAILABLE`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/mfa/devices/{deviceId}/verify:
+    post:
+      tags: [MFA]
+      operationId: verifyMfaDevice
+      summary: Confirm a TOTP device with its first code
+      description: >
+        Verifies the device and, in the password-reset flow, issues a fresh
+        restricted MFA-reset cookie; otherwise issues full auth cookies and
+        creates a session (this endpoint doubles as "finish enrollment" and,
+        for the password-reset flow, "MFA step-up").
+      parameters:
+        - $ref: '#/components/parameters/MfaDeviceIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MFADeviceVerifyBody' }
+      responses:
+        '200':
+          description: Device verified
+          headers:
+            Set-Cookie: { $ref: '#/components/headers/AuthOrMFACookies' }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthLoginResponse' }
+        '401':
+          description: Invalid or replayed TOTP code (`INVALID_MFA_CODE`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Device not found (`MFA_DEVICE_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: Device already verified (`MFA_DEVICE_ALREADY_VERIFIED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '429':
+          description: Too many failed attempts (`MFA_RATE_LIMITED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  # ---------------------------------------------------------------------
+  # Buckets
+  # ---------------------------------------------------------------------
+  /api/v1/buckets:
+    get:
+      tags: [Buckets]
+      operationId: listBuckets
+      summary: List buckets the caller is a member of
+      description: Requires role `guest` or above (i.e. any authenticated user).
+      responses:
+        '200':
+          description: Buckets the caller can access, at any role
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageBucket' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Buckets]
+      operationId: createBucket
+      summary: Create a bucket
+      description: Requires role `user` or above. The caller becomes the bucket owner.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BucketCreateUpdateBody' }
+      responses:
+        '201':
+          description: Created bucket
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Bucket' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '500': { $ref: '#/components/responses/InternalServerError' }
+
+  /api/v1/buckets/activity:
+    get:
+      tags: [Buckets]
+      operationId: getBucketsActivity
+      summary: Get activity across all buckets the caller can access
+      parameters:
+        - $ref: '#/components/parameters/ActivityFrom'
+        - $ref: '#/components/parameters/ActivityTo'
+        - $ref: '#/components/parameters/ActivityCursor'
+        - $ref: '#/components/parameters/ActivityLimit'
+      responses:
+        '200':
+          description: >
+            Paginated activity log entries. The item shape is intentionally
+            opaque (schema-less JSON objects; fields vary by action type).
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageActivityEntry' }
+        '400': { $ref: '#/components/responses/ActivityBadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api/v1/buckets/{bucketId}:
+    get:
+      tags: [Buckets]
+      operationId: getBucket
+      summary: Get a bucket with its files and folders
+      description: Requires viewer role or above on this bucket.
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+        - name: status
+          in: query
+          schema: { type: string, enum: [all, deleted, uploaded, uploading], default: uploaded }
+          description: Filters the returned files/folders by lifecycle state.
+      responses:
+        '200':
+          description: Bucket with files/folders matching the requested status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Bucket' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Bucket not found (`BUCKET_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    patch:
+      tags: [Buckets]
+      operationId: updateBucket
+      summary: Rename a bucket
+      description: Requires owner role on this bucket.
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BucketCreateUpdateBody' }
+      responses:
+        '204':
+          description: Bucket renamed
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '500':
+          description: >
+            Update failed (`UPDATE_FAILED`). Note: this is also returned
+            when the bucket does not exist rather than a 404.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    delete:
+      tags: [Buckets]
+      operationId: deleteBucket
+      summary: Delete a bucket
+      description: >
+        Requires owner role on this bucket. Deletes pending invites for the
+        bucket and triggers asynchronous storage purge of all its files/folders.
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+      responses:
+        '204':
+          description: Bucket deleted (storage purge happens asynchronously)
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '500':
+          description: >
+            Delete failed (`DELETE_FAILED`). Note: this is also returned
+            when the bucket does not exist rather than a 404.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/buckets/{bucketId}/activity:
+    get:
+      tags: [Buckets]
+      operationId: getBucketActivity
+      summary: Get activity for a single bucket
+      description: Requires viewer role or above on this bucket.
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+        - $ref: '#/components/parameters/ActivityFrom'
+        - $ref: '#/components/parameters/ActivityTo'
+        - $ref: '#/components/parameters/ActivityCursor'
+        - $ref: '#/components/parameters/ActivityLimit'
+      responses:
+        '200':
+          description: Paginated activity log entries for this bucket (opaque JSON objects)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageActivityEntry' }
+        '400': { $ref: '#/components/responses/ActivityBadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Bucket not found (`BUCKET_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  # ---------------------------------------------------------------------
+  # Bucket Members
+  # ---------------------------------------------------------------------
+  /api/v1/buckets/{bucketId}/members:
+    get:
+      tags: [Bucket Members]
+      operationId: listBucketMembers
+      summary: List members and pending invites of a bucket
+      description: Requires viewer role or above on this bucket.
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+      responses:
+        '200':
+          description: Active members and pending invites
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageBucketMember' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    put:
+      tags: [Bucket Members]
+      operationId: updateBucketMembers
+      summary: Replace the full member list of a bucket
+      description: >
+        Requires owner role on this bucket. Diffs the submitted member list
+        against the current one: new emails become invites (or direct
+        memberships if the user already exists), changed groups update
+        memberships/invites, and omitted members are removed. Always keeps
+        the caller as a member. Subject to the provider's sharing
+        domain/allowlist restrictions.
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateMembersBody' }
+      responses:
+        '204':
+          description: Membership list updated
+        '400':
+          description: Sharing not allowed for the caller's provider (`UNKNOWN_USER_PROVIDER`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403':
+          description: Sharing disabled for this provider (`SHARING_DISABLED_FOR_PROVIDER`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Bucket not found (`BUCKET_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/buckets/{bucketId}/members/notifications:
+    patch:
+      tags: [Bucket Members]
+      operationId: updateMembershipNotifications
+      summary: Update the caller's notification preferences for a bucket
+      description: Requires viewer role or above on this bucket.
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MembershipNotificationBody' }
+      responses:
+        '204':
+          description: Preferences updated
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Membership not found (`NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  # ---------------------------------------------------------------------
+  # Bucket Files
+  # ---------------------------------------------------------------------
+  /api/v1/buckets/{bucketId}/files:
+    post:
+      tags: [Bucket Files]
+      operationId: uploadFile
+      summary: Start a file upload
+      description: >
+        Requires contributor role or above on this bucket. Creates a `File`
+        record in `uploading` status and returns a presigned POST policy for
+        the client to upload directly to storage. For providers without
+        bucket-notification support, the client must confirm completion via
+        `PATCH .../files/{fileId}` with `status: uploaded`.
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FileTransferBody' }
+      responses:
+        '201':
+          description: Presigned upload policy
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FileTransferResponse' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Bucket or target folder not found (`BUCKET_NOT_FOUND`, `FOLDER_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: A file with this name already exists in this location (`FILE_ALREADY_EXISTS`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/buckets/{bucketId}/files/{fileId}:
+    patch:
+      tags: [Bucket Files]
+      operationId: patchFile
+      summary: Transition a file's status (confirm upload, trash, or restore)
+      description: >
+        Requires contributor role or above on this bucket. `status:
+        "uploaded"` confirms a pending upload, or restores the file if it
+        was trashed. `status: "deleted"` moves the file to trash.
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+        - $ref: '#/components/parameters/FileIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FilePatchBody' }
+      responses:
+        '204':
+          description: File status transitioned
+        '400':
+          description: Invalid status value (`INVALID_STATUS`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403':
+          description: File has expired (`FILE_EXPIRED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: >
+            File not found (`FILE_NOT_FOUND`), or, when confirming an
+            upload, the object is missing from storage (`FILE_NOT_IN_STORAGE`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: >
+            Invalid transition for the file's current state (`INVALID_FILE_STATUS_TRANSITION`,
+            `FILE_ALREADY_TRASHED`, `FILE_RESTORE_IN_PROGRESS`, `FILE_NAME_CONFLICT`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    delete:
+      tags: [Bucket Files]
+      operationId: deleteFile
+      summary: Permanently delete a trashed file
+      description: >
+        Requires contributor role or above on this bucket. The file must
+        already be in trash; this removes it from storage and the database.
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+        - $ref: '#/components/parameters/FileIdParam'
+      responses:
+        '204':
+          description: File permanently deleted
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: File not found (`FILE_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: File is not in trash (`FILE_NOT_IN_TRASH`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/buckets/{bucketId}/files/{fileId}/url:
+    get:
+      tags: [Bucket Files]
+      operationId: downloadFile
+      summary: Get a presigned download URL for a file
+      description: Requires viewer role or above on this bucket.
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+        - $ref: '#/components/parameters/FileIdParam'
+        - $ref: '#/components/parameters/DownloadContextParam'
+      responses:
+        '200':
+          description: Presigned download URL
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FileTransferResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403':
+          description: File is trashed or has expired (`CANNOT_DOWNLOAD_TRASHED_FILE`, `FILE_EXPIRED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: File not found (`FILE_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  # ---------------------------------------------------------------------
+  # Bucket Folders
+  # ---------------------------------------------------------------------
+  /api/v1/buckets/{bucketId}/folders:
+    post:
+      tags: [Bucket Folders]
+      operationId: createFolder
+      summary: Create a folder
+      description: Requires contributor role or above on this bucket.
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FolderCreateBody' }
+      responses:
+        '201':
+          description: Created folder
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Folder' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Parent folder not found (`PARENT_FOLDER_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: A folder with this name already exists here (`FOLDER_ALREADY_EXISTS`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/buckets/{bucketId}/folders/{folderId}:
+    put:
+      tags: [Bucket Folders]
+      operationId: renameFolder
+      summary: Rename a folder
+      description: Requires contributor role or above on this bucket.
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+        - $ref: '#/components/parameters/FolderIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FolderUpdateBody' }
+      responses:
+        '204':
+          description: Folder renamed
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Folder not found (`FOLDER_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: A sibling folder with this name already exists (`FOLDER_NAME_CONFLICT`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    patch:
+      tags: [Bucket Folders]
+      operationId: updateFolderStatus
+      summary: Trash or restore a folder
+      description: >
+        Requires contributor role or above on this bucket. `status:
+        "deleted"` moves the folder to trash; `status: "created"` restores
+        it (restoring parent folders as needed).
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+        - $ref: '#/components/parameters/FolderIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FolderPatchBody' }
+      responses:
+        '204':
+          description: Folder status transitioned
+        '400':
+          description: Invalid status value (`INVALID_STATUS`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Folder not found (`FOLDER_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: >
+            Invalid transition for the folder's current state
+            (`FOLDER_ALREADY_TRASHED`, `FOLDER_RESTORE_IN_PROGRESS`,
+            `FOLDER_NAME_CONFLICT` if a folder with the same name already
+            exists at the restore destination)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '410':
+          description: Trash retention period has expired; the folder can no longer be restored (`FOLDER_TRASH_EXPIRED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    delete:
+      tags: [Bucket Folders]
+      operationId: deleteFolder
+      summary: Permanently delete a trashed folder
+      description: >
+        Requires contributor role or above on this bucket. The folder must
+        already be in trash. Deletion is asynchronous: this triggers a purge
+        event and returns immediately, it does not remove the folder from
+        the database synchronously.
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+        - $ref: '#/components/parameters/FolderIdParam'
+      responses:
+        '204':
+          description: Folder purge triggered
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Folder not found (`FOLDER_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: Folder is not in trash (`FOLDER_NOT_IN_TRASH`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  # ---------------------------------------------------------------------
+  # Bucket Shares
+  # ---------------------------------------------------------------------
+  /api/v1/buckets/{bucketId}/shares:
+    get:
+      tags: [Bucket Shares]
+      operationId: listBucketShares
+      summary: List public share links for a bucket
+      description: Requires owner role on this bucket.
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+      responses:
+        '200':
+          description: Share links for this bucket
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageShare' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Bucket Shares]
+      operationId: createBucketShare
+      summary: Create a public share link
+      description: >
+        Requires owner role on this bucket. `type` determines the scope:
+        `files` (specific `file_ids`), `folder` (a single `folder_id`, whole
+        subtree), or `bucket` (entire bucket).
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ShareCreateBody' }
+      responses:
+        '201':
+          description: Created share
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Share' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Bucket, folder, or one of the files not found (`BUCKET_NOT_FOUND`, `FOLDER_NOT_FOUND`, `FILE_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/buckets/{bucketId}/shares/{shareId}:
+    delete:
+      tags: [Bucket Shares]
+      operationId: deleteBucketShare
+      summary: Revoke a public share link
+      description: Requires owner role on this bucket.
+      parameters:
+        - $ref: '#/components/parameters/BucketIdParam'
+        - $ref: '#/components/parameters/ShareIdParam'
+      responses:
+        '204':
+          description: Share revoked
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404':
+          description: Share not found (`SHARE_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  # ---------------------------------------------------------------------
+  # Invites
+  # ---------------------------------------------------------------------
+  /api/v1/invites/{inviteId}/challenges:
+    post:
+      tags: [Invites]
+      operationId: createInviteChallenge
+      summary: Request an invite acceptance code
+      description: >
+        Public endpoint (no auth) used by an invited external user to
+        request a 6-character verification code by email, ahead of setting
+        their password. Rate-limited per email (5 requests per 1-hour
+        window).
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/InviteIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InviteChallengeCreateBody' }
+      responses:
+        '201':
+          description: Challenge created and code emailed (no body)
+        '403':
+          description: Local auth provider not enabled, or domain not allowed (`FORBIDDEN`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Invite not found, or email doesn't match the invite (`INVITE_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /api/v1/invites/{inviteId}/challenges/{challengeId}/validate:
+    post:
+      tags: [Invites]
+      operationId: validateInviteChallenge
+      summary: Validate an invite code and create the user account
+      description: >
+        Public endpoint (no auth). On success creates the local user account,
+        converts all pending invites for that email into bucket memberships,
+        and issues full access/refresh cookies.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/InviteIdParam'
+        - $ref: '#/components/parameters/ChallengeIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InviteChallengeValidateBody' }
+      responses:
+        '204':
+          description: Account created; auth cookies issued
+          headers:
+            Set-Cookie: { $ref: '#/components/headers/AuthCookies' }
+        '401':
+          description: Wrong code (`WRONG_CODE`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403':
+          description: Local auth provider not enabled, or challenge locked (`FORBIDDEN`, `CHALLENGE_LOCKED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Challenge not found (`CHALLENGE_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: A user with this email already exists (`USER_ALREADY_EXISTS`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '410':
+          description: Challenge expired (`CHALLENGE_EXPIRED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  # ---------------------------------------------------------------------
+  # Admin
+  # ---------------------------------------------------------------------
+  /api/v1/admin/stats:
+    get:
+      tags: [Admin]
+      operationId: getAdminStats
+      summary: Get platform-wide statistics
+      description: Requires role `admin`.
+      parameters:
+        - name: days
+          in: query
+          schema: { type: integer, enum: [30, 90, 180] }
+          description: Window for the shared-files-per-hour time series.
+      responses:
+        '200':
+          description: Platform statistics
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AdminStatsResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/v1/admin/activity:
+    get:
+      tags: [Admin]
+      operationId: getAdminActivity
+      summary: Get activity across all users and buckets
+      description: Requires role `admin`.
+      parameters:
+        - name: action
+          in: query
+          style: form
+          explode: true
+          schema: { type: array, items: { type: string } }
+          description: Filter by one or more activity action names.
+        - name: type
+          in: query
+          style: form
+          explode: true
+          schema: { type: array, items: { type: string } }
+          description: Filter by one or more RBAC resource types.
+        - $ref: '#/components/parameters/ActivityFrom'
+        - $ref: '#/components/parameters/ActivityTo'
+        - $ref: '#/components/parameters/ActivityCursor'
+        - $ref: '#/components/parameters/ActivityLimit'
+      responses:
+        '200':
+          description: Paginated activity log entries across the platform (opaque JSON objects)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageActivityEntry' }
+        '400': { $ref: '#/components/responses/ActivityBadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /api/v1/admin/buckets:
+    get:
+      tags: [Admin]
+      operationId: listAdminBuckets
+      summary: List all buckets platform-wide with owner/size summary
+      description: Requires role `admin`.
+      responses:
+        '200':
+          description: All buckets with creator, member count, file count, and size
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PageAdminBucketListItem' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ---------------------------------------------------------------------
+  # Public Shares
+  # ---------------------------------------------------------------------
+  /api/v1/shares/{shareId}/auth:
+    post:
+      tags: [Public Shares]
+      operationId: authenticateShare
+      summary: Authenticate against a password-protected share
+      description: >
+        Public endpoint (no user auth). On success issues a
+        `safebucket_share_token` cookie scoped to this share, required by
+        every other endpoint under `/shares/{shareId}`.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/ShareIdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ShareAuthBody' }
+      responses:
+        '200':
+          description: Authenticated; share token issued. Body is an empty JSON object
+          headers:
+            Set-Cookie:
+              description: New `safebucket_share_token` cookie
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { type: object }
+        '400':
+          description: Share has no password set (`SHARE_NOT_PASSWORD_PROTECTED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          description: Wrong password (`SHARE_PASSWORD_INVALID`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Share not found or revoked (`SHARE_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '410':
+          description: Share has expired (`SHARE_EXPIRED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/shares/{shareId}:
+    get:
+      tags: [Public Shares]
+      operationId: listShareItems
+      summary: List the files/folders available in a share
+      description: >
+        Requires a valid `safebucket_share_token` cookie if the share is
+        password-protected. Increments the share's view counter.
+      security:
+        - CookieShareAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ShareIdPathParam'
+      responses:
+        '200':
+          description: Share contents
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicShareResponse' }
+        '403':
+          description: Share has reached its maximum view count (`SHARE_MAX_VIEWS_REACHED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/shares/{shareId}/download:
+    get:
+      tags: [Public Shares]
+      operationId: downloadSingleShareFile
+      summary: Download a single-file share via 302 redirect
+      description: >
+        Convenience endpoint for shares of type `files` containing exactly
+        one live file: responds `302 Found` pointing at the presigned
+        storage URL. Only available when `app.allow_redirect_download` is
+        enabled. Requires a valid `safebucket_share_token` cookie if the
+        share is password-protected.
+      security:
+        - CookieShareAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ShareIdPathParam'
+      responses:
+        '302':
+          description: Redirect to the presigned download URL
+        '403':
+          description: Redirect downloads disabled on this deployment (`REDIRECT_DOWNLOAD_DISABLED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: >
+            Share is not of type `files` or does not contain exactly one
+            downloadable file (`SHARE_NOT_SINGLE_FILE`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/shares/{shareId}/files/{fileId}/url:
+    get:
+      tags: [Public Shares]
+      operationId: downloadShareFile
+      summary: Get a presigned download URL for a shared file
+      description: >
+        Requires a valid `safebucket_share_token` cookie if the share is
+        password-protected.
+      security:
+        - CookieShareAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ShareIdPathParam'
+        - $ref: '#/components/parameters/FileIdParam'
+        - $ref: '#/components/parameters/DownloadContextParam'
+      responses:
+        '200':
+          description: Presigned download URL
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FileTransferResponse' }
+        '404':
+          description: File not found or not part of this share (`FILE_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/shares/{shareId}/files/{fileId}/download:
+    get:
+      tags: [Public Shares]
+      operationId: downloadShareFileRedirect
+      summary: Download a shared file via 302 redirect
+      description: >
+        Redirect variant of the presigned-URL endpoint: responds `302 Found`
+        pointing at the presigned storage URL. Only available when
+        `app.allow_redirect_download` is enabled. Note: unlike the other
+        share endpoints, this path is currently not on the authentication
+        bypass list, so it requires a regular authenticated session in
+        addition to the share cookie.
+      security:
+        - CookieShareAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ShareIdPathParam'
+        - $ref: '#/components/parameters/FileIdParam'
+      responses:
+        '302':
+          description: Redirect to the presigned download URL
+        '403':
+          description: Redirect downloads disabled on this deployment (`REDIRECT_DOWNLOAD_DISABLED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: File not found or not part of this share (`FILE_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/shares/{shareId}/files/{fileId}:
+    patch:
+      tags: [Public Shares]
+      operationId: confirmShareUpload
+      summary: Confirm a shared upload completed
+      description: >
+        Requires a valid `safebucket_share_token` cookie if the share is
+        password-protected. Required for storage providers without
+        bucket-notification support, analogous to the authenticated
+        file-confirm flow.
+      security:
+        - CookieShareAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ShareIdPathParam'
+        - $ref: '#/components/parameters/FileIdParam'
+      responses:
+        '204':
+          description: Upload confirmed
+        '403':
+          description: File does not belong to this share (`SHARE_FILE_NOT_IN_SHARE`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: File not found (`FILE_NOT_FOUND`, `FILE_NOT_IN_STORAGE`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: File is not awaiting upload confirmation (`INVALID_FILE_STATUS_TRANSITION`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /api/v1/shares/{shareId}/files:
+    post:
+      tags: [Public Shares]
+      operationId: uploadShareFile
+      summary: Start a file upload into a share
+      description: >
+        Requires a valid `safebucket_share_token` cookie if the share is
+        password-protected. Only allowed when the share has `allow_upload:
+        true`. Returns a presigned POST policy, mirroring the authenticated
+        upload flow.
+      security:
+        - CookieShareAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ShareIdPathParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ShareUploadBody' }
+      responses:
+        '201':
+          description: Presigned upload policy
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FileTransferResponse' }
+        '400':
+          description: File exceeds the share's max upload size (`SHARE_UPLOAD_SIZE_EXCEEDED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403':
+          description: Uploads not allowed, or max uploads reached (`SHARE_UPLOAD_NOT_ALLOWED`, `MAX_UPLOADS_REACHED`, `SHARE_MAX_UPLOADS_REACHED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Target folder not found (`FOLDER_NOT_FOUND`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: A file with this name already exists in this location (`FILE_ALREADY_EXISTS`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  # ---------------------------------------------------------------------
+  # Config
+  # ---------------------------------------------------------------------
+  /config.json:
+    get:
+      tags: [Config]
+      operationId: getFrontendConfig
+      summary: Get frontend runtime configuration
+      description: >
+        Not part of the JSON REST API under `/api/v1` - served directly by
+        the static file service alongside the embedded SPA. No
+        authentication required.
+      security: []
+      responses:
+        '200':
+          description: Runtime configuration for the frontend
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConfigJSON' }
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Full access token (`app:*` audience), sent as `Authorization Bearer <token>`.
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: safebucket_access_token
+      description: Full access token (`app:*` audience) stored in an HttpOnly cookie.
+    CookieRefreshAuth:
+      type: apiKey
+      in: cookie
+      name: safebucket_refresh_token
+      description: Refresh token (`auth:refresh` audience), only valid for `/auth/refresh` and `/auth/logout`.
+    CookieMFAAuth:
+      type: apiKey
+      in: cookie
+      name: safebucket_mfa_token
+      description: >
+        Restricted token issued mid-flow (`auth:mfa:login` or
+        `auth:mfa:password-reset` audience). Only valid for MFA
+        verify/device-management and password-reset completion endpoints.
+    CookieShareAuth:
+      type: apiKey
+      in: cookie
+      name: safebucket_share_token
+      description: >
+        Share-scoped access token issued by `POST /shares/{shareId}/auth`.
+        Only enforced for password-protected shares; shares without a
+        password are accessible without it.
+
+  headers:
+    AuthCookies:
+      description: >
+        Sets `safebucket_access_token` and `safebucket_refresh_token`
+        cookies (HttpOnly, SameSite=Lax, Secure when TLS is enabled).
+      schema: { type: string }
+    AuthOrMFACookies:
+      description: >
+        Either full auth cookies (`safebucket_access_token` +
+        `safebucket_refresh_token`) if no MFA step-up is needed, or a single
+        restricted `safebucket_mfa_token` cookie if `mfa_required: true` is
+        returned in the body.
+      schema: { type: string }
+
+  parameters:
+    BucketIdParam:
+      name: bucketId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+      description: Bucket ID
+    FileIdParam:
+      name: fileId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+      description: File ID
+    FolderIdParam:
+      name: folderId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+      description: Folder ID
+    ShareIdParam:
+      name: shareId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+      description: Share ID
+    ShareIdPathParam:
+      name: shareId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+      description: Public share ID (from the share link)
+    UserIdParam:
+      name: userId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+      description: User ID
+    MfaDeviceIdParam:
+      name: deviceId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+      description: MFA device ID
+    InviteIdParam:
+      name: inviteId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+      description: Invite ID
+    ChallengeIdParam:
+      name: challengeId
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+      description: Challenge ID
+    ProviderParam:
+      name: provider
+      in: path
+      required: true
+      schema: { type: string }
+      description: Configured auth provider key (e.g. `local`, `okta`, `corp-ldap`)
+    DownloadContextParam:
+      name: context
+      in: query
+      schema: { type: string, enum: [preview, download], default: download }
+      description: '`preview` returns an inline-safe Content-Type for in-browser rendering; `download` (default) forces an attachment.'
+    ActivityFrom:
+      name: from
+      in: query
+      schema: { type: string, format: date-time }
+      description: >
+        RFC 3339 start of the window. Defaults to 30 days before `to`. The
+        window (`to` - `from`) may not exceed 90 days.
+    ActivityTo:
+      name: to
+      in: query
+      schema: { type: string, format: date-time }
+      description: RFC 3339 end of the window. Defaults to now.
+    ActivityCursor:
+      name: cursor
+      in: query
+      schema: { type: string }
+      description: Opaque pagination cursor from a previous response's `next_cursor`.
+    ActivityLimit:
+      name: limit
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200, default: 100 }
+
+  responses:
+    BadRequest:
+      description: Validation error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ActivityBadRequest:
+      description: >
+        Invalid range or cursor: `from` after `to` or malformed `cursor`
+        (`BAD_REQUEST`), or a window larger than 90 days
+        (`ACTIVITY_RANGE_TOO_LARGE`)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: >
+        Not authenticated. Note: a missing or invalid token is rejected with
+        `403 FORBIDDEN` (not 401); `401` is returned when the token's session
+        has been revoked (`SESSION_REVOKED`).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: >
+        Missing/invalid token, or the caller's role/group is below the
+        required minimum (`FORBIDDEN`)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Resource not found (`NOT_FOUND`)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    TooManyRequests:
+      description: Rate limit exceeded (`RATE_LIMIT_EXCEEDED`)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    InternalServerError:
+      description: Unexpected server error (`INTERNAL_SERVER_ERROR`)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+  schemas:
+    Error:
+      type: object
+      description: Wire shape of every error response (`internal/models/api.go`).
+      properties:
+        status: { type: integer, example: 404 }
+        error:
+          type: array
+          items: { type: string }
+          example: ["BUCKET_NOT_FOUND"]
+      required: [status, error]
+
+    # -- Auth --------------------------------------------------------
+    AuthLoginBody:
+      type: object
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+        password: { type: string, maxLength: 72 }
+      required: [email, password]
+
+    AuthLoginResponse:
+      type: object
+      properties:
+        mfa_required: { type: boolean }
+        user_id: { type: string, format: uuid, nullable: true }
+      required: [mfa_required]
+
+    AuthVerifyBody:
+      type: object
+      properties:
+        access_token: { type: string, maxLength: 2048 }
+      required: [access_token]
+
+    UserClaims:
+      type: object
+      description: Decoded JWT claims (standard registered claims plus these).
+      properties:
+        email: { type: string }
+        user_id: { type: string, format: uuid }
+        role: { $ref: '#/components/schemas/Role' }
+        provider: { type: string }
+        mfa: { type: boolean }
+        sid: { type: string }
+        challenge_id: { type: string, format: uuid, nullable: true }
+
+    AuthMeResponse:
+      type: object
+      properties:
+        user_id: { type: string, format: uuid }
+        email: { type: string }
+        role: { type: string }
+        auth_provider: { type: string }
+        mfa: { type: boolean }
+        mfa_devices_count: { type: integer }
+      required: [user_id, email, role, auth_provider, mfa, mfa_devices_count]
+
+    ProviderResponse:
+      type: object
+      properties:
+        id: { type: string, description: Provider key (config map key) }
+        name: { type: string }
+        type: { $ref: '#/components/schemas/ProviderType' }
+        domains:
+          type: array
+          items: { type: string }
+      required: [id, name, type, domains]
+
+    PageProviderResponse:
+      type: object
+      description: Not paginated - returns the full provider list every time.
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/ProviderResponse' }
+      required: [data]
+
+    PasswordResetRequestBody:
+      type: object
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+      required: [email]
+
+    PasswordResetValidateBody:
+      type: object
+      properties:
+        code: { type: string, minLength: 6, maxLength: 6, description: 6-character alphanumeric code }
+      required: [code]
+
+    PasswordResetCompleteBody:
+      type: object
+      properties:
+        new_password: { type: string, minLength: 8, maxLength: 72 }
+      required: [new_password]
+
+    MFALoginVerifyBody:
+      type: object
+      properties:
+        device_id: { type: string, format: uuid, nullable: true, description: Defaults to the account's default verified device }
+        code: { type: string, minLength: 6, maxLength: 6, pattern: '^[0-9]{6}$' }
+      required: [code]
+
+    # -- Users -------------------------------------------------------
+    Role:
+      type: string
+      enum: [admin, user, guest]
+
+    ProviderType:
+      type: string
+      enum: [local, oidc, ldap]
+
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        first_name: { type: string }
+        last_name: { type: string }
+        email: { type: string, format: email }
+        is_initialized: { type: boolean }
+        provider_type: { $ref: '#/components/schemas/ProviderType' }
+        provider_key: { type: string }
+        role: { $ref: '#/components/schemas/Role' }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+      required: [id, first_name, last_name, email, is_initialized, provider_type, provider_key, role, created_at, updated_at]
+
+    PageUser:
+      type: object
+      description: Not paginated - returns the full user list every time.
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/User' }
+      required: [data]
+
+    UserCreateBody:
+      type: object
+      properties:
+        first_name: { type: string, maxLength: 100 }
+        last_name: { type: string, maxLength: 100 }
+        email: { type: string, format: email, maxLength: 254 }
+        password: { type: string, minLength: 8, maxLength: 72 }
+      required: [email, password]
+
+    UserUpdateBody:
+      type: object
+      properties:
+        first_name: { type: string, maxLength: 100 }
+        last_name: { type: string, maxLength: 100 }
+        old_password: { type: string, maxLength: 72, description: Required if new_password is set; local provider only }
+        new_password: { type: string, minLength: 8, maxLength: 72 }
+
+    UserStatsResponse:
+      type: object
+      properties:
+        total_files: { type: integer }
+        total_buckets: { type: integer }
+      required: [total_files, total_buckets]
+
+    # -- Sessions ------------------------------------------------------
+    SessionResponse:
+      type: object
+      properties:
+        id: { type: string, description: Session ID (SID) }
+        is_current: { type: boolean }
+        created_at: { type: string, format: date-time }
+      required: [id, is_current, created_at]
+
+    SessionListResponse:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items: { $ref: '#/components/schemas/SessionResponse' }
+      required: [sessions]
+
+    # -- MFA -----------------------------------------------------------
+    MFADevice:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        user_id: { type: string, format: uuid }
+        name: { type: string }
+        type: { type: string, enum: [totp] }
+        is_default: { type: boolean }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        verified_at: { type: string, format: date-time, nullable: true }
+        last_used_at: { type: string, format: date-time, nullable: true }
+      required: [id, user_id, name, type, is_default, created_at, updated_at]
+
+    MFADevicesListResponse:
+      type: object
+      properties:
+        devices:
+          type: array
+          items: { $ref: '#/components/schemas/MFADevice' }
+      required: [devices]
+
+    MFADeviceSetupBody:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 50 }
+        password: { type: string, description: Required for local/LDAP re-auth step-up }
+        code: { type: string, minLength: 6, maxLength: 6, description: Required for OIDC TOTP step-up }
+      required: [name]
+
+    MFADeviceSetupResponse:
+      type: object
+      properties:
+        device_id: { type: string, format: uuid }
+        secret: { type: string, description: Base32 TOTP secret }
+        qr_code_uri: { type: string, description: otpauth:// URI for QR code rendering }
+        issuer: { type: string }
+      required: [device_id, secret, qr_code_uri, issuer]
+
+    MFADeviceVerifyBody:
+      type: object
+      properties:
+        code: { type: string, minLength: 6, maxLength: 6, pattern: '^[0-9]{6}$' }
+      required: [code]
+
+    MFADeviceUpdateBody:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 100 }
+        is_default: { type: boolean }
+
+    MFADeviceRemoveBody:
+      type: object
+      properties:
+        password: { type: string, description: Required for local/LDAP re-auth if the device was verified }
+        code: { type: string, minLength: 6, maxLength: 6, description: Required for OIDC TOTP step-up if the device was verified }
+
+    # -- Buckets ---------------------------------------------------------
+    Bucket:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        files:
+          type: array
+          items: { $ref: '#/components/schemas/File' }
+          nullable: true
+          description: '`null` (not `[]`) in list responses that do not load bucket contents'
+        folders:
+          type: array
+          items: { $ref: '#/components/schemas/Folder' }
+          nullable: true
+          description: '`null` (not `[]`) in list responses that do not load bucket contents'
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        deleted_at: { type: string, format: date-time, nullable: true }
+      required: [id, name, files, folders, created_at, updated_at]
+
+    PageBucket:
+      type: object
+      description: Not paginated - returns every bucket the caller can access every time.
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Bucket' }
+      required: [data]
+
+    BucketCreateUpdateBody:
+      type: object
+      properties:
+        name: { type: string, maxLength: 100 }
+      required: [name]
+
+
+    PageActivityEntry:
+      type: object
+      description: >
+        The only genuinely cursor-paginated list response in this API (backed
+        by `helpers.SearchActivityPage`). Pass `next_cursor` back as the
+        `cursor` query param to fetch the next page; absent when there are no
+        more results.
+      properties:
+        data:
+          type: array
+          description: Schema-less activity log entries; fields vary by action type.
+          items: { type: object }
+        next_cursor: { type: string, nullable: true }
+      required: [data]
+
+    # -- Bucket Members --------------------------------------------------
+    Group:
+      type: string
+      enum: [owner, contributor, viewer]
+
+    BucketMemberBody:
+      type: object
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+        group: { $ref: '#/components/schemas/Group' }
+      required: [email, group]
+
+    UpdateMembersBody:
+      type: object
+      properties:
+        members:
+          type: array
+          minItems: 1
+          maxItems: 1000
+          items: { $ref: '#/components/schemas/BucketMemberBody' }
+      required: [members]
+
+    BucketMember:
+      type: object
+      properties:
+        user_id: { type: string, format: uuid, description: Absent for members who are still a pending invite }
+        email: { type: string, format: email }
+        first_name: { type: string }
+        last_name: { type: string }
+        group: { $ref: '#/components/schemas/Group' }
+        status: { type: string, enum: [active, invited] }
+        upload_notifications: { type: boolean }
+        download_notifications: { type: boolean }
+      required: [email, group, status, upload_notifications, download_notifications]
+
+    PageBucketMember:
+      type: object
+      description: Not paginated - returns every member and pending invite every time.
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/BucketMember' }
+      required: [data]
+
+    MembershipNotificationBody:
+      type: object
+      properties:
+        upload_notifications: { type: boolean }
+        download_notifications: { type: boolean }
+      required: [upload_notifications, download_notifications]
+
+    # -- Bucket Files ------------------------------------------------------
+    File:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        extension: { type: string }
+        status: { type: string, enum: [uploading, uploaded, deleted, restoring] }
+        bucket_id: { type: string, format: uuid }
+        folder_id: { type: string, format: uuid, nullable: true }
+        size: { type: integer, format: int64 }
+        deleted_by: { type: string, format: uuid, nullable: true }
+        expires_at: { type: string, format: date-time, nullable: true }
+        original_path: { type: string, description: Only populated when listing trashed files }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        deleted_at: { type: string, format: date-time, nullable: true }
+      required: [id, name, extension, status, bucket_id, size, created_at, updated_at]
+
+    FileTransferBody:
+      type: object
+      properties:
+        name: { type: string, maxLength: 255, description: Must be a valid filename }
+        folder_id: { type: string, format: uuid, nullable: true }
+        size: { type: integer, minimum: 1, description: 'Bytes; capped by the configured max upload size' }
+        expires_at: { type: string, format: date-time, nullable: true, description: Must be in the future }
+      required: [name, size]
+
+    FileTransferResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        url: { type: string, description: "Presigned S3-compatible URL (POST for uploads, GET for downloads)" }
+        body:
+          type: object
+          additionalProperties: { type: string }
+          nullable: true
+          description: Additional form fields required for the presigned POST upload (`null` for downloads)
+      required: [id, url]
+
+    FilePatchBody:
+      type: object
+      properties:
+        status: { type: string, enum: [deleted, uploaded] }
+      required: [status]
+
+    # -- Bucket Folders ----------------------------------------------------
+    Folder:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        status: { type: string, enum: [created, deleted, restoring] }
+        folder_id: { type: string, format: uuid, nullable: true }
+        bucket_id: { type: string, format: uuid }
+        deleted_by: { type: string, format: uuid, nullable: true }
+        original_path: { type: string, description: Only populated when listing trashed folders }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        deleted_at: { type: string, format: date-time, nullable: true }
+      required: [id, name, status, bucket_id, created_at, updated_at]
+
+    FolderCreateBody:
+      type: object
+      properties:
+        name: { type: string, maxLength: 255, description: Must be a valid folder name }
+        folder_id: { type: string, format: uuid, nullable: true, description: Parent folder; omit for a root-level folder }
+      required: [name]
+
+    FolderUpdateBody:
+      type: object
+      properties:
+        name: { type: string, maxLength: 255 }
+      required: [name]
+
+    FolderPatchBody:
+      type: object
+      properties:
+        status: { type: string, enum: [deleted, created] }
+      required: [status]
+
+    # -- Bucket Shares / Public Shares --------------------------------------
+    ShareType:
+      type: string
+      enum: [files, folder, bucket]
+
+    Share:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        bucket_id: { type: string, format: uuid }
+        folder_id: { type: string, format: uuid, nullable: true }
+        expires_at: { type: string, format: date-time, nullable: true }
+        max_views: { type: integer, nullable: true }
+        current_views: { type: integer }
+        password_protected: { type: boolean }
+        type: { $ref: '#/components/schemas/ShareType' }
+        allow_upload: { type: boolean }
+        max_uploads: { type: integer, nullable: true }
+        current_uploads: { type: integer }
+        max_upload_size: { type: integer, format: int64, nullable: true }
+        files:
+          type: array
+          items: { $ref: '#/components/schemas/ShareFile' }
+        created_by: { type: string, format: uuid }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        deleted_at: { type: string, format: date-time, nullable: true }
+      required: [id, name, bucket_id, current_views, password_protected, type, allow_upload, current_uploads, created_by, created_at, updated_at]
+
+    ShareFile:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        share_id: { type: string, format: uuid }
+        file_id: { type: string, format: uuid }
+        file: { $ref: '#/components/schemas/File' }
+      required: [id, share_id, file_id]
+
+    PageShare:
+      type: object
+      description: Not paginated - returns every share link for the bucket every time.
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Share' }
+      required: [data]
+
+    ShareCreateBody:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 255 }
+        type: { $ref: '#/components/schemas/ShareType' }
+        folder_id: { type: string, format: uuid, description: Required when type is folder }
+        file_ids:
+          type: array
+          items: { type: string, format: uuid }
+          description: Required when type is files
+        expires_at: { type: string, format: date-time, nullable: true, description: Must be in the future }
+        max_views: { type: integer, minimum: 1, nullable: true }
+        password: { type: string, minLength: 8, maxLength: 72 }
+        allow_upload: { type: boolean, description: Not allowed when type is files }
+        max_uploads: { type: integer, minimum: 1, nullable: true }
+        max_upload_size: { type: integer, format: int64, minimum: 1, nullable: true }
+      required: [name, type]
+
+    ShareAuthBody:
+      type: object
+      properties:
+        password: { type: string, minLength: 8 }
+      required: [password]
+
+    ShareUploadBody:
+      type: object
+      properties:
+        name: { type: string, maxLength: 255, description: Must be a valid filename }
+        folder_id: { type: string, format: uuid, nullable: true, description: Only meaningful for bucket-type shares }
+        size: { type: integer, format: int64, minimum: 1 }
+      required: [name, size]
+
+    PublicShareResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        type: { $ref: '#/components/schemas/ShareType' }
+        allow_upload: { type: boolean }
+        max_upload_size: { type: integer, format: int64, nullable: true }
+        max_uploads: { type: integer, nullable: true }
+        current_uploads: { type: integer }
+        expires_at: { type: string, format: date-time, nullable: true }
+        max_views: { type: integer, nullable: true }
+        current_views: { type: integer }
+        files:
+          type: array
+          items: { $ref: '#/components/schemas/File' }
+        folders:
+          type: array
+          items: { $ref: '#/components/schemas/Folder' }
+      required: [id, name, type, allow_upload, current_uploads, current_views, files, folders]
+
+    # -- Invites ---------------------------------------------------------
+    InviteChallengeCreateBody:
+      type: object
+      properties:
+        email: { type: string, format: email, maxLength: 254 }
+      required: [email]
+
+    InviteChallengeValidateBody:
+      type: object
+      properties:
+        code: { type: string, minLength: 6, maxLength: 6, description: 6-character alphanumeric code }
+        new_password: { type: string, minLength: 8, maxLength: 72 }
+      required: [code, new_password]
+
+    # -- Admin -------------------------------------------------------------
+    TimeSeriesPoint:
+      type: object
+      properties:
+        timestamp: { type: string }
+        count: { type: integer, format: int64 }
+      required: [timestamp, count]
+
+    AdminStatsResponse:
+      type: object
+      properties:
+        total_users: { type: integer, format: int64 }
+        total_buckets: { type: integer, format: int64 }
+        total_files: { type: integer, format: int64 }
+        total_folders: { type: integer, format: int64 }
+        total_storage: { type: integer, format: int64, description: Bytes }
+        shared_files_per_hour:
+          type: array
+          items: { $ref: '#/components/schemas/TimeSeriesPoint' }
+      required: [total_users, total_buckets, total_files, total_folders, total_storage, shared_files_per_hour]
+
+    AdminBucketListItem:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        creator:
+          type: object
+          properties:
+            id: { type: string, format: uuid }
+            first_name: { type: string }
+            last_name: { type: string }
+            email: { type: string, format: email }
+          required: [id, first_name, last_name, email]
+        member_count: { type: integer, format: int64 }
+        file_count: { type: integer, format: int64 }
+        size: { type: integer, format: int64, description: Bytes }
+      required: [id, name, created_at, updated_at, creator, member_count, file_count, size]
+
+    PageAdminBucketListItem:
+      type: object
+      description: Not paginated - returns every bucket platform-wide every time.
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/AdminBucketListItem' }
+      required: [data]
+
+    # -- Config ------------------------------------------------------------
+    ConfigJSON:
+      type: object
+      properties:
+        apiUrl: { type: string }
+        environment: { type: string }
+        requiresUploadConfirmation: { type: boolean }
+      required: [apiUrl, environment, requiresUploadConfirmation]
