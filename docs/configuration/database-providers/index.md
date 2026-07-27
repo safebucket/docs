@@ -7,7 +7,7 @@ sidebar_position: 2
 Safebucket supports two database backends: **PostgreSQL** and **SQLite**. Choose
 the one that best fits your deployment needs.
 
-:::tip Which database should I use?
+:::tip[Which database should I use?]
 Use **PostgreSQL** for production
 deployments: it offers full concurrency, connection pooling, and scales with
 your workload. Use **SQLite** for lightweight or development deployments where

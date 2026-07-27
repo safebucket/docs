@@ -64,7 +64,7 @@ Safebucket automatically creates an admin user on startup:
 - **Password**: Configured via `APP__ADMIN_PASSWORD`
 - **Role**: Admin (full system access)
 
-:::warning Security Note
+:::warning[Security Note]
 **Always change the default admin password in production!**
 :::
 
