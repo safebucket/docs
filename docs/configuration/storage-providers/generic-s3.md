@@ -2,7 +2,7 @@
 
 SafeBucket supports S3-compatible storage providers through the generic `s3`
 storage type. This allows you to use any provider that implements the S3 API, as
-long as it supports **presigned POST policies** and **CORS**.
+long as it supports **presigned PUT policies** and **CORS**.
 
 :::info[Dedicated providers are more optimized]
 Dedicated storage types (RustFS,
@@ -16,18 +16,17 @@ that over the generic S3 type.
 
 ## Provider Compatibility
 
-| Provider               | Presigned POST | Status       |
-| ---------------------- | -------------- | ------------ |
-| Hetzner Object Storage | Yes            | Tested       |
-| Storj                  | Yes            | Tested       |
-| Garage                 | Yes            | Tested       |
-| Cloudflare R2          | No             | Incompatible |
-| OVH Object Storage     | No             | Incompatible |
+| Provider                | Presigned PUT | Status |
+|-------------------------|---------------|--------|
+| Hetzner Object Storage  | Yes           | Tested |
+| Storj                   | Yes           | Tested |
+| Garage                  | Yes           | Tested |
+| Cloudflare R2           | Yes           | Tested |
+| Backblaze B2            | Yes           | Tested |
+| OVH Object Storage      | Yes           | Tested |
+| Scaleway Object Storage | Yes           | Tested |
 
 ## [Hetzner Object Storage](https://www.hetzner.com/storage/object-storage)
-
-Hetzner Object Storage is an affordable S3-compatible storage service hosted in
-Europe.
 
 ### Configuration
 
@@ -88,10 +87,6 @@ Replace `AllowedOrigins` with your actual app URL(s).
 
 ## [Storj](https://www.storj.io/)
 
-Storj is a decentralized cloud storage network that offers enhanced privacy,
-security, and global distribution. Files are encrypted, split into pieces, and
-distributed across a global network of nodes.
-
 ### Prerequisites
 
 1. **Storj Account** at https://storj.io
@@ -141,19 +136,13 @@ storage:
 
 ### Regional Considerations
 
-Storj's decentralized network automatically distributes data globally. However,
-you can choose a satellite (gateway region) based on your primary user location:
-
 | Satellite | Endpoint                    | Best For     |
-| --------- | --------------------------- | ------------ |
+|-----------|-----------------------------|--------------|
 | US1       | `gateway.storjshare.io`     | Americas     |
 | EU1       | `gateway.eu1.storjshare.io` | Europe       |
 | AP1       | `gateway.ap1.storjshare.io` | Asia Pacific |
 
 ## [Garage](https://garagehq.deuxfleurs.fr/)
-
-Garage is a lightweight, self-hosted S3-compatible distributed storage system
-designed for self-hosting.
 
 ### Configuration
 
@@ -193,6 +182,206 @@ aws s3api put-bucket-cors \
     "CORSRules": [
       {
         "AllowedOrigins": ["http://localhost:8080"],
+        "AllowedMethods": ["GET", "POST", "PUT", "HEAD"],
+        "AllowedHeaders": ["*"],
+        "ExposeHeaders": ["ETag"],
+        "MaxAgeSeconds": 3600
+      }
+    ]
+  }'
+```
+
+Replace `AllowedOrigins` with your actual app URL(s).
+
+## [Cloudflare R2](https://developers.cloudflare.com/r2/)
+
+### Configuration
+
+```bash
+STORAGE__TYPE=s3
+STORAGE__S3__BUCKET_NAME=safebucket
+STORAGE__S3__ENDPOINT=https://eu.r2.cloudflarestorage.com
+STORAGE__S3__EXTERNAL_ENDPOINT=https://<account_id>.eu.r2.cloudflarestorage.com
+STORAGE__S3__ACCESS_KEY=your-access-key
+STORAGE__S3__SECRET_KEY=your-secret-key
+```
+
+```yaml
+storage:
+  type: s3
+  s3:
+    bucket_name: safebucket
+    endpoint: https://eu.r2.cloudflarestorage.com
+    external_endpoint: https://<account_id>.eu.r2.cloudflarestorage.com
+    access_key: your-access-key
+    secret_key: your-secret-key
+```
+
+### CORS
+
+Set up CORS using the AWS CLI:
+
+```bash
+aws configure --profile r2
+
+aws s3api put-bucket-cors \
+  --profile r2 \
+  --bucket safebucket \
+  --endpoint-url https://<account_id>.eu.r2.cloudflarestorage.com \
+  --cors-configuration '{
+    "CORSRules": [
+      {
+        "AllowedOrigins": ["http://localhost:3000"],
+        "AllowedMethods": ["GET", "POST", "PUT", "HEAD"],
+        "AllowedHeaders": ["*"],
+        "ExposeHeaders": ["ETag"],
+        "MaxAgeSeconds": 3600
+      }
+    ]
+  }'
+```
+
+Replace `AllowedOrigins` with your actual app URL(s).
+
+## [Backblaze B2](https://www.backblaze.com/cloud-storage)
+
+### Configuration
+
+```bash
+STORAGE__TYPE=s3
+STORAGE__S3__BUCKET_NAME=safebucket
+STORAGE__S3__ENDPOINT=s3.eu-central-003.backblazeb2.com
+STORAGE__S3__EXTERNAL_ENDPOINT=https://s3.eu-central-003.backblazeb2.com
+STORAGE__S3__ACCESS_KEY=your-access-key
+STORAGE__S3__SECRET_KEY=your-secret-key
+```
+
+```yaml
+storage:
+  type: s3
+  s3:
+    bucket_name: safebucket
+    endpoint: s3.eu-central-003.backblazeb2.com
+    external_endpoint: https://s3.eu-central-003.backblazeb2.com
+    access_key: your-access-key
+    secret_key: your-secret-key
+```
+
+### CORS
+
+Set up CORS using the AWS CLI:
+
+```bash
+aws configure --profile b2
+
+aws s3api put-bucket-cors \
+  --profile b2 \
+  --bucket safebucket \
+  --endpoint-url https://s3.eu-central-003.backblazeb2.com \
+  --cors-configuration '{
+    "CORSRules": [
+      {
+        "AllowedOrigins": ["http://localhost:3000"],
+        "AllowedMethods": ["GET", "POST", "PUT", "HEAD"],
+        "AllowedHeaders": ["*"],
+        "ExposeHeaders": ["ETag"],
+        "MaxAgeSeconds": 3600
+      }
+    ]
+  }'
+```
+
+Replace `AllowedOrigins` with your actual app URL(s).
+
+## [OVH Object Storage](https://www.ovhcloud.com/en/public-cloud/object-storage/)
+
+### Configuration
+
+```bash
+STORAGE__TYPE=s3
+STORAGE__S3__BUCKET_NAME=safebucket
+STORAGE__S3__ENDPOINT=s3.sbg.io.cloud.ovh.net
+STORAGE__S3__EXTERNAL_ENDPOINT=https://s3.sbg.io.cloud.ovh.net
+STORAGE__S3__ACCESS_KEY=your-access-key
+STORAGE__S3__SECRET_KEY=your-secret-key
+```
+
+```yaml
+storage:
+  type: s3
+  s3:
+    bucket_name: safebucket
+    endpoint: s3.sbg.io.cloud.ovh.net
+    external_endpoint: https://s3.sbg.io.cloud.ovh.net
+    access_key: your-access-key
+    secret_key: your-secret-key
+```
+
+### CORS
+
+Set up CORS using the AWS CLI:
+
+```bash
+aws configure --profile ovh
+
+aws s3api put-bucket-cors \
+  --profile ovh \
+  --bucket safebucket \
+  --endpoint-url https://s3.sbg.io.cloud.ovh.net \
+  --cors-configuration '{
+    "CORSRules": [
+      {
+        "AllowedOrigins": ["http://localhost:3000"],
+        "AllowedMethods": ["GET", "POST", "PUT", "HEAD"],
+        "AllowedHeaders": ["*"],
+        "ExposeHeaders": ["ETag"],
+        "MaxAgeSeconds": 3600
+      }
+    ]
+  }'
+```
+
+Replace `AllowedOrigins` with your actual app URL(s).
+
+## [Scaleway Object Storage](https://www.scaleway.com/en/object-storage/)
+
+### Configuration
+
+```bash
+STORAGE__TYPE=s3
+STORAGE__S3__BUCKET_NAME=safebucket
+STORAGE__S3__ENDPOINT=s3.fr-par.scw.cloud
+STORAGE__S3__EXTERNAL_ENDPOINT=https://s3.fr-par.scw.cloud
+STORAGE__S3__ACCESS_KEY=your-access-key
+STORAGE__S3__SECRET_KEY=your-secret-key
+```
+
+```yaml
+storage:
+  type: s3
+  s3:
+    bucket_name: safebucket
+    endpoint: s3.fr-par.scw.cloud
+    external_endpoint: https://s3.fr-par.scw.cloud
+    access_key: your-access-key
+    secret_key: your-secret-key
+```
+
+### CORS
+
+Set up CORS using the AWS CLI:
+
+```bash
+aws configure --profile scaleway
+
+aws s3api put-bucket-cors \
+  --profile scaleway \
+  --bucket safebucket \
+  --endpoint-url https://s3.fr-par.scw.cloud \
+  --cors-configuration '{
+    "CORSRules": [
+      {
+        "AllowedOrigins": ["http://localhost:3000"],
         "AllowedMethods": ["GET", "POST", "PUT", "HEAD"],
         "AllowedHeaders": ["*"],
         "ExposeHeaders": ["ETag"],
