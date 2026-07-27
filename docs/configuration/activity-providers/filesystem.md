@@ -27,7 +27,7 @@ activity:
 | `ACTIVITY__TYPE`                  | Activity provider type               | -       | ✅       |
 | `ACTIVITY__FILESYSTEM__DIRECTORY` | Directory for storing activity index | -       | ✅       |
 
-:::info Automatic schema migration
+:::info[Automatic schema migration]
 The Bleve index schema is managed
 automatically. Schema migrations are handled transparently when upgrading
 Safebucket: no manual intervention is required.

@@ -42,7 +42,7 @@ See the
 [ADC documentation](https://cloud.google.com/docs/authentication/application-default-credentials)
 for all supported methods.
 
-:::info Subscription naming
+:::info[Subscription naming]
 Subscriptions are created using the pattern
 `{topic_name}{suffix}`. With the default suffix, a topic named
 `safebucket-notifications` gets subscription `safebucket-notifications-sub`.

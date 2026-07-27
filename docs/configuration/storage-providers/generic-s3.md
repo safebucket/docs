@@ -4,7 +4,7 @@ SafeBucket supports S3-compatible storage providers through the generic `s3`
 storage type. This allows you to use any provider that implements the S3 API, as
 long as it supports **presigned POST policies** and **CORS**.
 
-:::info Dedicated providers are more optimized
+:::info[Dedicated providers are more optimized]
 Dedicated storage types (RustFS,
 MinIO, AWS S3, GCP) are **event-driven**, they receive real-time notifications
 when files are uploaded or deleted. The generic S3 type relies on other
@@ -149,32 +149,6 @@ you can choose a satellite (gateway region) based on your primary user location:
 | US1       | `gateway.storjshare.io`     | Americas     |
 | EU1       | `gateway.eu1.storjshare.io` | Europe       |
 | AP1       | `gateway.ap1.storjshare.io` | Asia Pacific |
-
-### CORS
-
-Set up CORS using the AWS CLI:
-
-```bash
-aws configure --profile storj
-
-aws s3api put-bucket-cors \
-  --profile storj \
-  --bucket safebucket \
-  --endpoint-url https://gateway.storjshare.io \
-  --cors-configuration '{
-    "CORSRules": [
-      {
-        "AllowedOrigins": ["http://localhost:3000"],
-        "AllowedMethods": ["GET", "POST", "PUT", "HEAD"],
-        "AllowedHeaders": ["*"],
-        "ExposeHeaders": ["ETag"],
-        "MaxAgeSeconds": 3600
-      }
-    ]
-  }'
-```
-
-Replace `AllowedOrigins` with your actual app URL(s).
 
 ## [Garage](https://garagehq.deuxfleurs.fr/)
 
