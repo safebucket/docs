@@ -13,6 +13,7 @@ file operations, and storage events.
   retention and explicit acknowledgment.
 - [**Google Cloud Pub/Sub**](./gcp-pubsub): GCP-native messaging service.
 - [**AWS SQS**](./aws-sqs): AWS Simple Queue Service.
+- [**Azure Storage Queues**](./azure): Azure-native messaging service.
 - [**Memory**](./memory): In-process event queue using Go channels.
   Single-instance only.
 
@@ -58,6 +59,6 @@ events:
 
 The `bucket_events` queue receives events emitted by the
 storage provider (uploads, deletions). Only dedicated storage providers (RustFS,
-MinIO, AWS S3, GCP, Generic S3) emit these events. The queue name is still
+MinIO, AWS S3, GCP, Azure, Generic S3) emit these events. The queue name is still
 required in configuration regardless of the storage provider used.
 :::
