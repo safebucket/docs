@@ -51,6 +51,7 @@ const sidebars: SidebarsConfig = {
           items: [
             'configuration/storage-providers/aws-s3',
             'configuration/storage-providers/google-cloud-storage',
+            'configuration/storage-providers/azure',
             'configuration/storage-providers/minio',
             'configuration/storage-providers/rustfs',
             'configuration/storage-providers/generic-s3',
@@ -83,6 +84,7 @@ const sidebars: SidebarsConfig = {
             'configuration/event-providers/jetstream',
             'configuration/event-providers/gcp-pubsub',
             'configuration/event-providers/aws-sqs',
+            'configuration/event-providers/azure',
             'configuration/event-providers/memory',
           ],
         },

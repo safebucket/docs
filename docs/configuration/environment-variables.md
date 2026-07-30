@@ -150,9 +150,9 @@ page.
 
 ## Storage Configuration
 
-| Variable        | Description                                                   | Default | Required |
-| --------------- | ------------------------------------------------------------- | ------- | -------- |
-| `STORAGE__TYPE` | Storage provider type (`rustfs`, `minio`, `aws`, `gcp`, `s3`) | -       | ✅       |
+| Variable        | Description                                                            | Default | Required |
+| --------------- | ---------------------------------------------------------------------- | ------- | -------- |
+| `STORAGE__TYPE` | Storage provider type (`rustfs`, `minio`, `aws`, `gcp`, `azure`, `s3`) | -       | ✅       |
 
 For detailed storage provider configuration, see the
 [Storage Providers](./storage-providers) page.
@@ -168,9 +168,9 @@ For detailed cache provider configuration, see the
 
 ## Events Configuration
 
-| Variable       | Description                                               | Default | Required |
-| -------------- | --------------------------------------------------------- | ------- | -------- |
-| `EVENTS__TYPE` | Event provider type (`jetstream`, `gcp`, `aws`, `memory`) | -       | ✅       |
+| Variable       | Description                                                        | Default | Required |
+| -------------- | ------------------------------------------------------------------ | ------- | -------- |
+| `EVENTS__TYPE` | Event provider type (`jetstream`, `gcp`, `aws`, `azure`, `memory`) | -       | ✅       |
 
 For detailed event provider configuration, see the
 [Event Providers](./event-providers) page.
