@@ -73,6 +73,47 @@ events:
     subscription_name: safebucket-notifications-sub
 ```
 
+## CORS
+
+```json
+[
+  {
+    "origin": ["http://localhost:3000"],
+    "method": ["GET", "HEAD", "PUT", "DELETE"],
+    "responseHeader": [
+      "Content-Type",
+      "x-goog-content-length-range",
+      "x-goog-meta-bucket-id",
+      "x-goog-meta-file-id",
+      "x-goog-meta-user-id",
+      "x-goog-meta-share-id",
+      "ETag"
+    ],
+    "maxAgeSeconds": 3600
+  }
+]
+```
+
+Apply it to the bucket:
+
+```bash
+gcloud storage buckets update gs://safebucket-gcp --cors-file=cors.json
+
+# Verify
+gcloud storage buckets describe gs://safebucket-gcp --format="default(cors_config)"
+```
+
+Replace `origin` with your actual app URL(s).
+
+:::note
+
+Unlike S3, `responseHeader` does not accept a `*` wildcard, so every custom
+header the browser sends must be listed explicitly. The `x-goog-meta-*` entries
+carry upload metadata and `x-goog-content-length-range` enforces the upload
+size; both are sent by the browser and must be allowed.
+
+:::
+
 ## GCS Event Notifications Setup
 
 1. **Create Pub/Sub Topic and Subscription**:
