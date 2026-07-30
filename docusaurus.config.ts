@@ -121,6 +121,12 @@ const config: Config = {
       style: 'dark',
       copyright: `Copyright © ${new Date().getFullYear()} Safebucket. Built with Docusaurus.`,
     },
+    algolia: {
+      appId: process.env.ALGOLIA_APP_ID ?? '',
+      apiKey: process.env.ALGOLIA_API_KEY ?? '',
+      indexName: 'Safebucket Documentation',
+      contextualSearch: true,
+    },
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
