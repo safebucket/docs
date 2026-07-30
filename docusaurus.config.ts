@@ -122,8 +122,8 @@ const config: Config = {
       copyright: `Copyright © ${new Date().getFullYear()} Safebucket. Built with Docusaurus.`,
     },
     algolia: {
-      appId: process.env.ALGOLIA_APP_ID ?? '',
-      apiKey: process.env.ALGOLIA_API_KEY ?? '',
+      appId: process.env.ALGOLIA_APP_ID || 'PLACEHOLDER_APP_ID',
+      apiKey: process.env.ALGOLIA_API_KEY || 'PLACEHOLDER_SEARCH_API_KEY',
       indexName: 'Safebucket Documentation',
       contextualSearch: true,
     },
