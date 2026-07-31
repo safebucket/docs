@@ -28,7 +28,7 @@
     "prism-react-renderer": "^2.3.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "sass": "^1.101.7"
+    "sass": "^1.102.0"
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.10.2",
