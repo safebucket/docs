@@ -57,6 +57,7 @@ consistent.
 | `APP__MAX_UPLOAD_SIZE`                     | Maximum file upload size in bytes                       | `53687091200` (50 GB) | ❌       | `≥ 1`                                              |
 | `APP__AUTHENTICATED_REQUESTS_PER_MINUTE`   | Rate limit for authenticated requests (per user)        | `200`                 | ❌       | `≥ 1`                                              |
 | `APP__UNAUTHENTICATED_REQUESTS_PER_MINUTE` | Rate limit for unauthenticated requests (per IP)        | `20`                  | ❌       | `≥ 1`                                              |
+| `APP__ALLOW_REDIRECT_DOWNLOAD`             | Redirect share links to a presigned download URL        | `true`                | ❌       | `true`, `false`                                    |
 
 ### Profile
 
