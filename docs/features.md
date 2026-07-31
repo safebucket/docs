@@ -56,6 +56,36 @@ uploads back from external users.
 
 ![Quick share dialog options](./../static/features/quick_share_dialog_options.png)
 
+### Command-line Downloads
+
+Quick share links can be consumed directly from the command line with `curl`.
+
+The download endpoints redirect to a presigned URL that carries the original
+filename in its `Content-Disposition` header, so `-OJL` saves the file under its
+real name without you having to specify it.
+
+```bash
+# Single-file share
+curl -OJL https://safebucket.example.com/api/v1/shares/<share-id>/download
+
+# A specific file inside a folder or bucket share
+curl -OJL https://safebucket.example.com/api/v1/shares/<share-id>/files/<file-id>/download
+```
+
+For a password-protected share, authenticate once to obtain a cookie, then reuse
+it on the download request:
+
+```bash
+curl -c cookies.txt -X POST https://safebucket.example.com/api/v1/shares/<share-id>/auth \
+  -H "Content-Type: application/json" -d '{"password":"your-password"}'
+
+curl -OJL -b cookies.txt https://safebucket.example.com/api/v1/shares/<share-id>/download
+```
+
+Redirect downloads are controlled by the `APP__ALLOW_REDIRECT_DOWNLOAD` setting
+(enabled by default). When disabled, these endpoints return HTTP 403. See
+[Environment Variables](./configuration/environment-variables).
+
 ### File Expiration
 
 Optional per-file expiration dates set at upload time.
