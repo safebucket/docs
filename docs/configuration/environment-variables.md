@@ -57,6 +57,7 @@ consistent.
 | `APP__MAX_UPLOAD_SIZE`                     | Maximum file upload size in bytes                       | `53687091200` (50 GB) | ❌       | `≥ 1`                                              |
 | `APP__AUTHENTICATED_REQUESTS_PER_MINUTE`   | Rate limit for authenticated requests (per user)        | `200`                 | ❌       | `≥ 1`                                              |
 | `APP__UNAUTHENTICATED_REQUESTS_PER_MINUTE` | Rate limit for unauthenticated requests (per IP)        | `20`                  | ❌       | `≥ 1`                                              |
+| `APP__ALLOW_REDIRECT_DOWNLOAD`             | Redirect share links to a presigned download URL        | `true`                | ❌       | `true`, `false`                                    |
 
 ### Profile
 
@@ -150,9 +151,9 @@ page.
 
 ## Storage Configuration
 
-| Variable        | Description                                                   | Default | Required |
-| --------------- | ------------------------------------------------------------- | ------- | -------- |
-| `STORAGE__TYPE` | Storage provider type (`rustfs`, `minio`, `aws`, `gcp`, `s3`) | -       | ✅       |
+| Variable        | Description                                                            | Default | Required |
+| --------------- | ---------------------------------------------------------------------- | ------- | -------- |
+| `STORAGE__TYPE` | Storage provider type (`rustfs`, `minio`, `aws`, `gcp`, `azure`, `s3`) | -       | ✅       |
 
 For detailed storage provider configuration, see the
 [Storage Providers](./storage-providers) page.
@@ -168,9 +169,9 @@ For detailed cache provider configuration, see the
 
 ## Events Configuration
 
-| Variable       | Description                                               | Default | Required |
-| -------------- | --------------------------------------------------------- | ------- | -------- |
-| `EVENTS__TYPE` | Event provider type (`jetstream`, `gcp`, `aws`, `memory`) | -       | ✅       |
+| Variable       | Description                                                        | Default | Required |
+| -------------- | ------------------------------------------------------------------ | ------- | -------- |
+| `EVENTS__TYPE` | Event provider type (`jetstream`, `gcp`, `aws`, `azure`, `memory`) | -       | ✅       |
 
 For detailed event provider configuration, see the
 [Event Providers](./event-providers) page.

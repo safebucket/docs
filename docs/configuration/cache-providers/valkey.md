@@ -12,6 +12,7 @@ fully interchangeable.
 ```bash
 CACHE__TYPE=valkey
 CACHE__VALKEY__HOSTS=localhost:6379
+CACHE__VALKEY__USERNAME=
 CACHE__VALKEY__PASSWORD=changeme
 CACHE__VALKEY__TLS_ENABLED=false
 CACHE__VALKEY__TLS_SERVER_NAME=
@@ -25,15 +26,17 @@ cache:
   valkey:
     hosts:
       - localhost:6379
+    username: ''
     password: changeme
     tls_enabled: false
     tls_server_name: ''
 ```
 
-| Variable                         | Description                                        | Default | Required |
-| -------------------------------- | -------------------------------------------------- | ------- | -------- |
-| `CACHE__TYPE`                    | Cache provider type                                | -       | ✅       |
-| `CACHE__VALKEY__HOSTS`           | Comma-separated list of Valkey host:port addresses | -       | ✅       |
-| `CACHE__VALKEY__PASSWORD`        | Valkey password                                    | -       | ❌       |
-| `CACHE__VALKEY__TLS_ENABLED`     | Enable TLS for the Valkey connection               | `false` | ❌       |
-| `CACHE__VALKEY__TLS_SERVER_NAME` | TLS server name for certificate verification       | -       | ❌       |
+| Variable                         | Description                                        | Default   | Required |
+| -------------------------------- | -------------------------------------------------- | --------- | -------- |
+| `CACHE__TYPE`                    | Cache provider type                                | -         | ✅       |
+| `CACHE__VALKEY__HOSTS`           | Comma-separated list of Valkey host:port addresses | -         | ✅       |
+| `CACHE__VALKEY__USERNAME`        | Valkey username                                    | `default` | ❌       |
+| `CACHE__VALKEY__PASSWORD`        | Valkey password                                    | -         | ❌       |
+| `CACHE__VALKEY__TLS_ENABLED`     | Enable TLS for the Valkey connection               | `false`   | ❌       |
+| `CACHE__VALKEY__TLS_SERVER_NAME` | TLS server name for certificate verification       | -         | ❌       |
