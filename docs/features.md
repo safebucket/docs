@@ -56,7 +56,7 @@ uploads back from external users.
 
 ![Quick share dialog options](./../static/features/quick_share_dialog_options.png)
 
-### Command-line Downloads
+### Redirect Downloads
 
 Quick share links can be consumed directly from the command line with `curl`.
 
