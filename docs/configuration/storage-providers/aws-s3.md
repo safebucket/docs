@@ -69,6 +69,7 @@ for all supported variables.
 STORAGE__TYPE=aws
 STORAGE__AWS__BUCKET_NAME=your-safebucket
 STORAGE__AWS__SQS_NAME=safebucket-sqs
+STORAGE__AWS__EXTERNAL_ENDPOINT=https://files.example.com # Optional, CDN or custom domain
 
 # AWS credentials (or use any method from the credential chain above)
 AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
@@ -90,6 +91,7 @@ storage:
   aws:
     bucket_name: your-safebucket
     sqs_name: safebucket-sqs
+    external_endpoint: https://files.example.com # Optional
 
 events:
   type: aws
