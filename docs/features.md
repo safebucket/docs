@@ -130,16 +130,6 @@ Access control operates at two levels.
 All file access is bucket-scoped. Permissions are enforced at API middleware
 level on every request.
 
-### User Invitations
-
-Invite external users to buckets via email.
-
-- Challenge-based acceptance flow
-- Attempt limiting and lockout to prevent brute force
-- Email notifications on invitation
-
-![Bucket settings and member management](./../static/features/bucket_settings.png)
-
 ### Activity Tracking
 
 Real-time activity logging for all user actions.
@@ -162,6 +152,28 @@ Email notifications for file activity within buckets.
 - Buffered delivery to avoid spam during bulk operations
 
 ![Notification preferences per bucket](./../static/features/file_activity_notifications.png)
+
+### User Invitations
+
+Invite external users to buckets via email.
+
+- Challenge-based acceptance flow
+- Attempt limiting and lockout to prevent brute force
+- Email notifications on invitation
+
+![Bucket member management](./../static/features/bucket_members.png)
+
+### Share links
+
+Manage your bucket share links.
+
+![Bucket share links](./../static/features/bucket_share_links.png)
+
+### Settings
+
+Manage the bucket settings.
+
+![Bucket settings](./../static/features/bucket_settings.png)
 
 ## Authentication
 
