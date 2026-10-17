@@ -58,6 +58,19 @@ consistent.
 | `APP__AUTHENTICATED_REQUESTS_PER_MINUTE`   | Rate limit for authenticated requests (per user)        | `200`                 | ❌       | `≥ 1`                                              |
 | `APP__UNAUTHENTICATED_REQUESTS_PER_MINUTE` | Rate limit for unauthenticated requests (per IP)        | `20`                  | ❌       | `≥ 1`                                              |
 | `APP__ALLOW_REDIRECT_DOWNLOAD`             | Redirect share links to a presigned download URL        | `true`                | ❌       | `true`, `false`                                    |
+| `APP__ALLOW_CUSTOM_SHARE_IDS`              | Allow users to pick a custom ID for share links         | `true`                | ❌       | `true`, `false`                                    |
+| `APP__REQUEST_TIMEOUT_SECONDS`             | Maximum duration of an API request in seconds           | `5`                   | ❌       | `1-120`                                            |
+
+### Custom Share Links
+
+When `APP__ALLOW_CUSTOM_SHARE_IDS` is enabled, users can replace the generated
+share ID with their own, for example `/shares/q3-report` instead of
+`/shares/3f2a9c1e-...`. Custom IDs must be 3 to 255 characters long, contain
+only letters, digits, `-` and `_`, and be unique across the platform. A share
+with a custom ID is only reachable through that ID, not its UUID.
+
+When disabled, creating a share with a custom ID returns HTTP 403. Existing
+custom links keep working.
 
 ### Profile
 
@@ -83,7 +96,7 @@ page.
 | Variable                   | Description                                                          | Default | Required |
 | -------------------------- | -------------------------------------------------------------------- | ------- | -------- |
 | `APP__ALLOWED_ORIGINS`     | Comma-separated allowed origins                                      | -       | ✅       |
-| `APP__TRUSTED_PROXIES`     | Comma-separated trusted proxy IPs (CIDR notation, e.g. `10.0.0.0/8`) | -       | ✅       |
+| `APP__TRUSTED_PROXIES`     | Comma-separated trusted proxy IPs (CIDR notation, e.g. `10.0.0.0/8`) | -       | ❌       |
 | `APP__COOKIE_SECURE_FORCE` | Force the `Secure` flag on auth cookies even when served over HTTP   | `false` | ❌       |
 
 **Example:**
@@ -101,10 +114,9 @@ APP__TRUSTED_PROXIES=127.0.0.1,::1
 
 ### Static Files
 
-| Variable                       | Description                | Default    | Required |
-| ------------------------------ | -------------------------- | ---------- | -------- |
-| `APP__STATIC_FILES__ENABLED`   | Enable static file serving | `true`     | ❌       |
-| `APP__STATIC_FILES__DIRECTORY` | Static files directory     | `web/dist` | ❌       |
+| Variable                     | Description                               | Default | Required |
+| ---------------------------- | ----------------------------------------- | ------- | -------- |
+| `APP__STATIC_FILES__ENABLED` | Serve the frontend embedded in the binary | `true`  | ❌       |
 
 ### TLS
 
@@ -258,7 +270,6 @@ APP__ALLOWED_ORIGINS=http://localhost:8080,http://127.0.0.1:8080
 APP__TRUSTED_PROXIES=127.0.0.1,::1
 APP__TRASH_RETENTION_DAYS=7
 APP__STATIC_FILES__ENABLED=true
-APP__STATIC_FILES__DIRECTORY=web/dist
 
 # Database
 DATABASE__TYPE=postgres

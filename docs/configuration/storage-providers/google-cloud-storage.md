@@ -43,6 +43,7 @@ STORAGE__GCP__BUCKET_NAME=safebucket-gcp
 STORAGE__GCP__PROJECT_ID=your-project-id
 STORAGE__GCP__TOPIC_NAME=safebucket-bucket-events
 STORAGE__GCP__SUBSCRIPTION_NAME=safebucket-bucket-events-sub
+STORAGE__GCP__EXTERNAL_ENDPOINT=https://files.example.com # Optional, CDN or custom domain
 
 # GCP credentials (or use any ADC method above)
 GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json
@@ -64,6 +65,7 @@ storage:
     project_id: your-project-id
     topic_name: safebucket-bucket-events
     subscription_name: safebucket-bucket-events-sub
+    external_endpoint: https://files.example.com # Optional
 
 events:
   type: gcp
